@@ -1,21 +1,17 @@
 package main
 
 import (
-	"flag"
-	// "fmt"
 	"github.com/karhuteam/karhu/controllers"
+	_ "github.com/karhuteam/karhu/models" // For mgo
 	"github.com/karhuteam/karhu/web"
+	"github.com/wayt/goenv"
 )
-
-var bind = flag.String("bind", ":8080", "Kahru bind address")
 
 func main() {
 
-	flag.Parse()
-
 	s := web.NewServer()
-
 	controllers.NewHomeController(s)
+	controllers.NewAPIController(s)
 
-	s.Run(*bind) // listen and serve
+	s.Run(goenv.GetDefault("LISTEN_ADDR", ":8080")) // listen and serve
 }
