@@ -16,6 +16,7 @@ func NewAPIController(s *web.Server) *APIController {
 
 	api.NewProjectController(apiGroup)
 	api.NewBuildController(apiGroup)
+	api.NewScriptController(apiGroup)
 
 	return ctl
 }

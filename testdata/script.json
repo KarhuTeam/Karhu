@@ -1,0 +1,4 @@
+{
+    "name": "deployment",
+    "content": "echo \"hello World\"\nping -c 4 8.8.8.8"
+}
