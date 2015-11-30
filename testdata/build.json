@@ -1,0 +1,11 @@
+{
+    "version": "0.0.1",
+    "commit_hash": "86127cba0f659f825323dc4799267653551cc887",
+    "commit_url": "https://github.com/KarhuTeam/Karhu/commits/86127cba0f659f825323dc4799267653551cc887",
+    "tags":["debug","test","alpha"],
+    "vars": {
+        "PROJECT_ID": "gce-project-id",
+        "ZONE": "europe-west1-d",
+        "CLUSTER_NAME": "test-cluster-1"
+    }
+}
