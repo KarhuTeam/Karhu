@@ -15,13 +15,48 @@ func NewScriptController(s *gin.RouterGroup) *ScriptController {
 
 	ctl := &ScriptController{}
 
-	s.POST("/projects/:id/scripts", ctl.postScript)
-	s.PUT("/projects/:id/scripts/:script_id", ctl.putScript)
-	s.GET("/projects/:id/scripts", ctl.getScriptList)
-	s.GET("/projects/:id/scripts/:script_id", ctl.getScript)
-	s.DELETE("/projects/:id/scripts/:script_id", ctl.deleteScript)
+	s.POST("/apps/:id/env/:env/scripts", ctl.postScript)
+	s.PUT("/apps/:id/env/:env/scripts/:script_id", ctl.putScript)
+	s.GET("/apps/:id/env/:env/scripts", ctl.getScriptList)
+	s.GET("/apps/:id/env/:env/scripts/:script_id", ctl.getScript)
+	s.DELETE("/apps/:id/env/:env/scripts/:script_id", ctl.deleteScript)
 
 	return ctl
+}
+
+func (sc *ScriptController) getAppEnv(c *gin.Context) (*models.Application, *models.Environment, error) {
+
+	id := c.Param("id")
+
+	app, err := models.ApplicationMapper.FetchOne(id)
+	if err != nil {
+		panic(err)
+	}
+
+	if app == nil {
+		return nil, nil, goerrors.New(goerrors.Error{
+			Label: "invalid_application",
+			Field: "id",
+			Text:  "Invalid application ID in URL",
+		})
+	}
+
+	envId := c.Param("env")
+
+	env, err := models.EnvironmentMapper.FetchOne(app, envId)
+	if err != nil {
+		panic(err)
+	}
+
+	if env == nil {
+		return nil, nil, goerrors.New(goerrors.Error{
+			Label: "invalid_environment",
+			Field: "id",
+			Text:  "Invalid environment ID in URL",
+		})
+	}
+
+	return app, env, nil
 }
 
 func (sc *ScriptController) postScript(c *gin.Context) {
@@ -37,23 +72,13 @@ func (sc *ScriptController) postScript(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
-
-	project, err := models.ProjectMapper.FetchOne(id)
+	_, env, err := sc.getAppEnv(c)
 	if err != nil {
-		panic(err)
-	}
-
-	if project == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
-			Label: "invalid_project",
-			Field: "id",
-			Text:  "Invalid project ID in URL",
-		}))
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
-	script, err := models.ScriptMapper.FetchOneByName(project, form.Name)
+	script, err := models.ScriptMapper.FetchOneByName(env, form.Name)
 	if err != nil {
 		panic(err)
 	}
@@ -62,12 +87,12 @@ func (sc *ScriptController) postScript(c *gin.Context) {
 		c.JSON(http.StatusConflict, goerrors.New(goerrors.Error{
 			Label: "invalid_name",
 			Field: "name",
-			Text:  "Duplicate script name for this project",
+			Text:  "Duplicate script name for this environment",
 		}))
 		return
 	}
 
-	script = models.ScriptMapper.Create(project, &form)
+	script = models.ScriptMapper.Create(env, &form)
 
 	if err := models.ScriptMapper.Save(script); err != nil {
 		panic(err)
@@ -89,25 +114,15 @@ func (sc *ScriptController) putScript(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
-
-	project, err := models.ProjectMapper.FetchOne(id)
+	_, env, err := sc.getAppEnv(c)
 	if err != nil {
-		panic(err)
-	}
-
-	if project == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
-			Label: "invalid_project",
-			Field: "id",
-			Text:  "Invalid project ID in URL",
-		}))
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
 	scriptId := c.Param("script_id")
 
-	script, err := models.ScriptMapper.FetchOne(project, scriptId)
+	script, err := models.ScriptMapper.FetchOne(env, scriptId)
 	if err != nil {
 		panic(err)
 	}
@@ -132,23 +147,13 @@ func (sc *ScriptController) putScript(c *gin.Context) {
 
 func (sc *ScriptController) getScriptList(c *gin.Context) {
 
-	id := c.Param("id")
-
-	project, err := models.ProjectMapper.FetchOne(id)
+	_, env, err := sc.getAppEnv(c)
 	if err != nil {
-		panic(err)
-	}
-
-	if project == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
-			Label: "invalid_project",
-			Field: "id",
-			Text:  "Invalid project ID in URL",
-		}))
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
-	scripts, err := models.ScriptMapper.FetchAll(project)
+	scripts, err := models.ScriptMapper.FetchAll(env)
 	if err != nil {
 		panic(err)
 	}
@@ -158,19 +163,9 @@ func (sc *ScriptController) getScriptList(c *gin.Context) {
 
 func (sc *ScriptController) getScript(c *gin.Context) {
 
-	id := c.Param("id")
-
-	project, err := models.ProjectMapper.FetchOne(id)
+	_, env, err := sc.getAppEnv(c)
 	if err != nil {
-		panic(err)
-	}
-
-	if project == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
-			Label: "invalid_project",
-			Field: "id",
-			Text:  "Invalid project ID in URL",
-		}))
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
@@ -183,7 +178,7 @@ func (sc *ScriptController) getScript(c *gin.Context) {
 		scriptId = strings.TrimSuffix(scriptId, ".sh")
 	}
 
-	script, err := models.ScriptMapper.FetchOne(project, scriptId)
+	script, err := models.ScriptMapper.FetchOne(env, scriptId)
 	if err != nil {
 		panic(err)
 	}
@@ -209,25 +204,15 @@ func (sc *ScriptController) getScript(c *gin.Context) {
 
 func (sc *ScriptController) deleteScript(c *gin.Context) {
 
-	id := c.Param("id")
-
-	project, err := models.ProjectMapper.FetchOne(id)
+	_, env, err := sc.getAppEnv(c)
 	if err != nil {
-		panic(err)
-	}
-
-	if project == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
-			Label: "invalid_project",
-			Field: "id",
-			Text:  "Invalid project ID in URL",
-		}))
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
 	scriptId := c.Param("script_id")
 
-	script, err := models.ScriptMapper.FetchOne(project, scriptId)
+	script, err := models.ScriptMapper.FetchOne(env, scriptId)
 	if err != nil {
 		panic(err)
 	}

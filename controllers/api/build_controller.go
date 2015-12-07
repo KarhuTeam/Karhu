@@ -14,10 +14,45 @@ func NewBuildController(s *gin.RouterGroup) *BuildController {
 
 	ctl := &BuildController{}
 
-	s.POST("/projects/:id/builds", ctl.postBuild)
-	s.GET("/projects/:id/builds", ctl.getBuildList)
+	s.POST("/apps/:id/env/:env/builds", ctl.postBuild)
+	s.GET("/apps/:id/env/:env/builds", ctl.getBuildList)
 
 	return ctl
+}
+
+func (pc *BuildController) getAppEnv(c *gin.Context) (*models.Application, *models.Environment, error) {
+
+	id := c.Param("id")
+
+	app, err := models.ApplicationMapper.FetchOne(id)
+	if err != nil {
+		panic(err)
+	}
+
+	if app == nil {
+		return nil, nil, goerrors.New(goerrors.Error{
+			Label: "invalid_application",
+			Field: "id",
+			Text:  "Invalid application ID in URL",
+		})
+	}
+
+	envId := c.Param("env")
+
+	env, err := models.EnvironmentMapper.FetchOne(app, envId)
+	if err != nil {
+		panic(err)
+	}
+
+	if env == nil {
+		return nil, nil, goerrors.New(goerrors.Error{
+			Label: "invalid_environment",
+			Field: "id",
+			Text:  "Invalid environment ID in URL",
+		})
+	}
+
+	return app, env, nil
 }
 
 func (pc *BuildController) postBuild(c *gin.Context) {
@@ -33,23 +68,13 @@ func (pc *BuildController) postBuild(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
-
-	project, err := models.ProjectMapper.FetchOne(id)
+	_, env, err := pc.getAppEnv(c)
 	if err != nil {
-		panic(err)
-	}
-
-	if project == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
-			Label: "invalid_project",
-			Field: "id",
-			Text:  "Invalid project ID in URL",
-		}))
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
-	build := models.BuildMapper.Create(project, &form)
+	build := models.BuildMapper.Create(env, &form)
 
 	if err := models.BuildMapper.Save(build); err != nil {
 		panic(err)
@@ -60,23 +85,13 @@ func (pc *BuildController) postBuild(c *gin.Context) {
 
 func (pc *BuildController) getBuildList(c *gin.Context) {
 
-	id := c.Param("id")
-
-	project, err := models.ProjectMapper.FetchOne(id)
+	_, env, err := pc.getAppEnv(c)
 	if err != nil {
-		panic(err)
-	}
-
-	if project == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
-			Label: "invalid_project",
-			Field: "id",
-			Text:  "Invalid project ID in URL",
-		}))
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
-	builds, err := models.BuildMapper.FetchAll(project)
+	builds, err := models.BuildMapper.FetchAll(env)
 	if err != nil {
 		panic(err)
 	}

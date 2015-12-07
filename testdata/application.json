@@ -1,0 +1,8 @@
+{
+    "name":"CoreAPI",
+    "description":"Main API",
+    "tags":["api"],
+    "vars":{
+        "FOO":"bar"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "name":"prod",
+    "description":"DO NOT TOUCH THIS",
+    "tags":["prod","DONOTTOUCH"],
+    "vars":{
+        "PROJECT_ID":"gce-prod-project-id",
+        "ZONE":"europe-west1-d"
+    }
+}

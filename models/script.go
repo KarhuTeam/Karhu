@@ -11,9 +11,9 @@ func init() {
 	col := C(scriptCollection)
 	defer col.Database.Session.Close()
 
-	// Project Id Index
+	// App Index
 	col.EnsureIndex(mgo.Index{
-		Key:        []string{"project_id"},
+		Key:        []string{"application_id"},
 		Unique:     false,
 		DropDups:   false,
 		Background: true, // See notes.
@@ -22,8 +22,8 @@ func init() {
 
 	// Name Index
 	col.EnsureIndex(mgo.Index{
-		Key:        []string{"name"},
-		Unique:     false,
+		Key:        []string{"environment_id", "name"},
+		Unique:     true,
 		DropDups:   false,
 		Background: true, // See notes.
 		Sparse:     true,
@@ -37,12 +37,13 @@ var ScriptMapper = &scriptMapper{}
 const scriptCollection = "script"
 
 type Script struct {
-	Id        bson.ObjectId `json:"id" bson:"_id"`
-	ProjectId bson.ObjectId `json:"project_id" bson:"project_id"`
-	Name      string        `json:"name" bson:"name"`
-	Content   string        `json:"content" bson:"content"`
-	CreatedAt time.Time     `json:"created_at" bson:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at" bson:"updated_at"`
+	Id            bson.ObjectId `json:"id" bson:"_id"`
+	ApplicationId bson.ObjectId `json:"application_id" bson:"application_id"`
+	EnvironmentId bson.ObjectId `json:"environment_id" bson:"environment_id"`
+	Name          string        `json:"name" bson:"name"`
+	Content       string        `json:"content" bson:"content"`
+	CreatedAt     time.Time     `json:"created_at" bson:"created_at"`
+	UpdatedAt     time.Time     `json:"updated_at" bson:"updated_at"`
 }
 
 func (s *Script) Update(f *ScriptUpdateForm) {
@@ -72,15 +73,15 @@ func (f ScriptUpdateForm) Validate() error {
 	return govalidator.Validate(&f)
 }
 
-func (sm *scriptMapper) Create(p *Project, f *ScriptCreateForm) *Script {
+func (sm *scriptMapper) Create(e *Environment, f *ScriptCreateForm) *Script {
 
 	return &Script{
-		Id:        bson.NewObjectId(),
-		ProjectId: p.Id,
-		Name:      f.Name,
-		Content:   f.Content,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Id:            bson.NewObjectId(),
+		EnvironmentId: e.Id,
+		Name:          f.Name,
+		Content:       f.Content,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
 }
 
@@ -110,30 +111,30 @@ func (sm *scriptMapper) Delete(s *Script) error {
 	return col.RemoveId(s.Id)
 }
 
-func (sm *scriptMapper) FetchAll(p *Project) (Scripts, error) {
+func (sm *scriptMapper) FetchAll(e *Environment) (Scripts, error) {
 
 	col := C(scriptCollection)
 	defer col.Database.Session.Close()
 
 	var scripts Scripts
-	if err := col.Find(bson.M{"project_id": p.Id}).All(&scripts); err != nil {
+	if err := col.Find(bson.M{"environment_id": e.Id}).All(&scripts); err != nil {
 		return nil, err
 	}
 
 	return scripts, nil
 }
 
-func (sm *scriptMapper) FetchOne(p *Project, id string) (*Script, error) {
+func (sm *scriptMapper) FetchOne(e *Environment, id string) (*Script, error) {
 
 	if !bson.IsObjectIdHex(id) {
-		return sm.FetchOneByName(p, id)
+		return sm.FetchOneByName(e, id)
 	}
 
 	col := C(scriptCollection)
 	defer col.Database.Session.Close()
 
 	script := new(Script)
-	if err := col.Find(bson.M{"_id": bson.ObjectIdHex(id), "project_id": p.Id}).One(script); err != nil {
+	if err := col.Find(bson.M{"_id": bson.ObjectIdHex(id), "environment_id": e.Id}).One(script); err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, nil
 		}
@@ -143,13 +144,13 @@ func (sm *scriptMapper) FetchOne(p *Project, id string) (*Script, error) {
 	return script, nil
 }
 
-func (sm *scriptMapper) FetchOneByName(p *Project, name string) (*Script, error) {
+func (sm *scriptMapper) FetchOneByName(e *Environment, name string) (*Script, error) {
 
 	col := C(scriptCollection)
 	defer col.Database.Session.Close()
 
 	script := new(Script)
-	if err := col.Find(bson.M{"name": name, "project_id": p.Id}).One(script); err != nil {
+	if err := col.Find(bson.M{"name": name, "environment_id": e.Id}).One(script); err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, nil
 		}
