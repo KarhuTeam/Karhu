@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/wayt/goenv"
+	"github.com/gotoolz/env"
 	"gopkg.in/mgo.v2"
 	"log"
 )
@@ -25,8 +25,8 @@ func C(name string) *mgo.Collection {
 
 func init() {
 
-	hosts := goenv.GetDefault("MGO_HOSTS", "127.0.0.1")
-	db := goenv.GetDefault("MGO_DB", "karhu")
+	hosts := env.GetDefault("MGO_HOSTS", "127.0.0.1")
+	db := env.GetDefault("MGO_DB", "karhu")
 
 	log.Println("Connecting to mgo:", hosts)
 	session, err := mgo.Dial(hosts)
