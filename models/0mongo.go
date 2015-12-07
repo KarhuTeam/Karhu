@@ -1,3 +1,5 @@
+// This file is named 0mongo.go to have its init() run before the others
+// It's kind of sad, but will be ok until we have a new solution
 package models
 
 import (
