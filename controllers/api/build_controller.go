@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/models"
-	"github.com/wayt/goerrors"
 	"net/http"
 )
 
@@ -30,7 +30,7 @@ func (pc *BuildController) getAppEnv(c *gin.Context) (*models.Application, *mode
 	}
 
 	if app == nil {
-		return nil, nil, goerrors.New(goerrors.Error{
+		return nil, nil, errors.New(errors.Error{
 			Label: "invalid_application",
 			Field: "id",
 			Text:  "Invalid application ID in URL",
@@ -45,7 +45,7 @@ func (pc *BuildController) getAppEnv(c *gin.Context) (*models.Application, *mode
 	}
 
 	if env == nil {
-		return nil, nil, goerrors.New(goerrors.Error{
+		return nil, nil, errors.New(errors.Error{
 			Label: "invalid_environment",
 			Field: "id",
 			Text:  "Invalid environment ID in URL",

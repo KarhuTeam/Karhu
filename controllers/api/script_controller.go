@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/karhuteam/karhu/models"
-	"github.com/wayt/goerrors"
+	"github.com/gotoolz/errors"
 	"net/http"
 	"strings"
 )
@@ -34,7 +34,7 @@ func (sc *ScriptController) getAppEnv(c *gin.Context) (*models.Application, *mod
 	}
 
 	if app == nil {
-		return nil, nil, goerrors.New(goerrors.Error{
+		return nil, nil, errors.New(errors.Error{
 			Label: "invalid_application",
 			Field: "id",
 			Text:  "Invalid application ID in URL",
@@ -49,7 +49,7 @@ func (sc *ScriptController) getAppEnv(c *gin.Context) (*models.Application, *mod
 	}
 
 	if env == nil {
-		return nil, nil, goerrors.New(goerrors.Error{
+		return nil, nil, errors.New(errors.Error{
 			Label: "invalid_environment",
 			Field: "id",
 			Text:  "Invalid environment ID in URL",
@@ -84,7 +84,7 @@ func (sc *ScriptController) postScript(c *gin.Context) {
 	}
 
 	if script != nil {
-		c.JSON(http.StatusConflict, goerrors.New(goerrors.Error{
+		c.JSON(http.StatusConflict, errors.New(errors.Error{
 			Label: "invalid_name",
 			Field: "name",
 			Text:  "Duplicate script name for this environment",
@@ -128,7 +128,7 @@ func (sc *ScriptController) putScript(c *gin.Context) {
 	}
 
 	if script == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
+		c.JSON(http.StatusNotFound, errors.New(errors.Error{
 			Label: "invalid_script",
 			Field: "script_id",
 			Text:  "Invalid script ID in URL",
@@ -184,7 +184,7 @@ func (sc *ScriptController) getScript(c *gin.Context) {
 	}
 
 	if script == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
+		c.JSON(http.StatusNotFound, errors.New(errors.Error{
 			Label: "invalid_script",
 			Field: "script_id",
 			Text:  "Invalid script ID in URL",
@@ -218,7 +218,7 @@ func (sc *ScriptController) deleteScript(c *gin.Context) {
 	}
 
 	if script == nil {
-		c.JSON(http.StatusNotFound, goerrors.New(goerrors.Error{
+		c.JSON(http.StatusNotFound, errors.New(errors.Error{
 			Label: "invalid_script",
 			Field: "script_id",
 			Text:  "Invalid script ID in URL",

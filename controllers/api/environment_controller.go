@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/karhuteam/karhu/models"
-	"github.com/wayt/goerrors"
+	"github.com/gotoolz/errors"
 	"log"
 	"net/http"
 )
@@ -34,7 +34,7 @@ func (ec *EnviromnentController) getApp(c *gin.Context) (*models.Application, er
 	}
 
 	if app == nil {
-		return nil, goerrors.New(goerrors.Error{
+		return nil, errors.New(errors.Error{
 			Label: "invalid_application",
 			Field: "id",
 			Text:  "Invalid application ID in URL",
