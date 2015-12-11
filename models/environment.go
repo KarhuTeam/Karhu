@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/wayt/govalidator"
+	"github.com/gotoolz/validator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
@@ -68,7 +68,7 @@ type EnvironmentCreateForm struct {
 
 // Validator for environment creation
 func (f EnvironmentCreateForm) Validate() error {
-	return govalidator.Validate(&f)
+	return validator.Validate(&f)
 }
 
 // Environment update form
@@ -81,7 +81,7 @@ type EnvironmentUpdateForm struct {
 
 // Validator for environment update
 func (f EnvironmentUpdateForm) Validate() error {
-	return govalidator.Validate(&f)
+	return validator.Validate(&f)
 }
 
 func (pm *environmentMapper) Create(a *Application, f *EnvironmentCreateForm) *Environment {

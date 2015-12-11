@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/wayt/govalidator"
+	"github.com/gotoolz/validator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
@@ -43,7 +43,7 @@ type ApplicationCreateForm struct {
 
 // Validator for application creation
 func (f ApplicationCreateForm) Validate() error {
-	return govalidator.Validate(&f)
+	return validator.Validate(&f)
 }
 
 // Application update form
@@ -56,7 +56,7 @@ type ApplicationUpdateForm struct {
 
 // Validator for application update
 func (f ApplicationUpdateForm) Validate() error {
-	return govalidator.Validate(&f)
+	return validator.Validate(&f)
 }
 
 func (pm *applicationMapper) Create(f *ApplicationCreateForm) *Application {

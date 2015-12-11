@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/wayt/govalidator"
+	"github.com/gotoolz/validator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
@@ -61,7 +61,7 @@ type BuildCreateForm struct {
 
 // Validator for build creation
 func (f BuildCreateForm) Validate() error {
-	return govalidator.Validate(&f)
+	return validator.Validate(&f)
 }
 
 func (bm *buildMapper) Create(e *Environment, f *BuildCreateForm) *Build {

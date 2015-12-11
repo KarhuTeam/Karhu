@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/wayt/govalidator"
+	"github.com/gotoolz/validator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
@@ -60,7 +60,7 @@ type ScriptCreateForm struct {
 
 // Validator for script creation
 func (f ScriptCreateForm) Validate() error {
-	return govalidator.Validate(&f)
+	return validator.Validate(&f)
 }
 
 // Script update form
@@ -70,7 +70,7 @@ type ScriptUpdateForm struct {
 
 // Validator for script update
 func (f ScriptUpdateForm) Validate() error {
-	return govalidator.Validate(&f)
+	return validator.Validate(&f)
 }
 
 func (sm *scriptMapper) Create(e *Environment, f *ScriptCreateForm) *Script {
