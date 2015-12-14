@@ -1,0 +1,19 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: $dark-gray;
+    font-size: 12px;
+}
+
+a {
+    text-decoration: none;
+    color: $blue;
+}
+
+ul {
+    list-style: none;
+}
+
+
+.right {
+    float: right;
+}

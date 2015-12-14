@@ -1,0 +1,23 @@
+.box {
+    padding: 10px;
+    color: $light-gray;
+    background: rgba(255,255,255,0.05);
+    margin: 10px;
+    &-title {
+        color: #fff;
+        font-size: 18px;
+        border-bottom: 3px solid $blue;
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+
+    &-text {
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+
+    &-list > li {
+        border-bottom: 1px solid #333;
+        padding: 10px;
+    }
+}

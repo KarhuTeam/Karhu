@@ -1,0 +1,31 @@
+.navbar {
+    position: relative;
+
+    &-btn {
+        background: rgba(255,255,255,0.1);
+        float: right;
+        display: block;
+        margin: 2px;
+        height: $header-height - 4px;
+        width: $header-height - 4px;
+        line-height: $header-height - 4px;
+        text-align:center;
+    }
+
+    & > li {
+        & > a {
+            display:block;
+            background: $light-gray;
+            border-bottom: 1px solid #dbdbdb;
+            border-left: 1px solid #dbdbdb;
+            border-right: 1px solid #dbdbdb;
+            padding: 10px;
+
+            transition: all 0.2s;
+
+            &:hover {
+                border-left: 10px solid $blue;
+            }
+        }
+    }
+}
