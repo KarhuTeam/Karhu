@@ -1,0 +1,22 @@
+/* Form */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+
+    label {
+        line-height: 30px;
+    }
+
+    .form-control {
+        flex-grow: 1;
+    }
+
+    @media screen and (min-width: $medium) {
+        flex-direction:row;
+
+        label {
+            width: 140px;
+        }
+    }
+}

@@ -35,10 +35,10 @@ type Applications []*Application
 
 // Application creation form
 type ApplicationCreateForm struct {
-	Name        string                 `json:"name" valid:"ascii,required"`
-	Description string                 `json:"description" valid:"ascii"`
-	Tags        []string               `json:"tags" valid:"-"`
-	Vars        map[string]interface{} `json:"vars" valid:"-"`
+	Name        string                 `form:"name" json:"name" valid:"ascii,required"`
+	Description string                 `form:"description" json:"description" valid:"ascii"`
+	Tags        []string               `form:"tags" json:"tags" valid:"-"`
+	Vars        map[string]interface{} `form:"vars" json:"vars" valid:"-"`
 }
 
 // Validator for application creation

@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+    <title>Karhu</title>
+    <meta charset="utf8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,700" />
+    <link rel="stylesheet" href="/static/css/app.min.css" />
+    <script type="text/javascript" src="/static/js/app.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header">
+            <h1 class="header-title">Karhu</h1>
+            <a class="navbar-btn" href=""></a>
+            <ul class="navbar">
+                <li><a class="navbar-item" href="">Applications</a></li>
+                <li><a class="navbar-item" href="">Infrastructure</a></li>
+                <li><a class="navbar-item" href="">Monitoring</a></li>
+                <li><a class="navbar-item" href="">Logs</a></li>
+                <li><a class="navbar-item" href="">Alerts</a></li>
+            </ul>
+        </div>
+        <div class="breadcrumb">
+            <a href="/">All applications</a> &gt; Add an application
+        </div>
+    </header>
+    <main>
+        <div class="box">
+            <h2 class="box-title">Add an application</h2>
+            <form method="POST" action="">
+                <p class="form-group">
+                    <label for="app-name">Name :</label>
+                    <input class="form-control" id="app-name" name="name" type="text" placeholder="Name..." />
+                </p>
+                <p class="form-group">
+                    <label for="app-description">Description :</label>
+                    <textarea class="form-control" id="app-description" name="description" placeholder="Description..."></textarea>
+                </p>
+                <p class="form-group">
+                    <label for="app-description">Tags :</label>
+                    <input class="form-control" id="app-tags" name="tags" type="text" placeholder="Tag1, tag2, tag3..." />
+                </p>
+                <p class="form-group">
+                    <label for="app-description">Vars :</label>
+                    <input class="form-control" id="app-tags" name="tags" type="text" placeholder="Vars..." />
+                </p>
+                <p class="text-center">
+                    <button class="btn" type="submit">Add application</button>
+                </p>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

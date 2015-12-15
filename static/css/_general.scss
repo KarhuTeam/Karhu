@@ -7,12 +7,31 @@ body {
 a {
     text-decoration: none;
     color: $blue;
+
+    &:hover {
+        color: $dark-blue;
+    }
 }
 
 ul {
     list-style: none;
 }
 
+input[type=text], textarea {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    border: 0;
+    background-color: $gray;
+    color: $light-gray;
+    padding: 8px;
+    border-radius: 3px;
+}
+
+
+/* Basics */
+.text-center {
+    text-align:center;
+}
 
 .right {
     float: right;

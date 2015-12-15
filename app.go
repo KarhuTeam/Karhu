@@ -10,7 +10,7 @@ import (
 func main() {
 
 	s := web.NewServer()
-	controllers.NewHomeController(s)
+	controllers.NewFrontController(s)
 	controllers.NewAPIController(s)
 
 	s.Run(env.GetDefault("LISTEN_ADDR", ":8080")) // listen and serve
