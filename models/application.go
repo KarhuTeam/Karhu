@@ -1,6 +1,8 @@
 package models
 
 import (
+	goerrors "errors"
+	"github.com/gotoolz/errors"
 	"github.com/gotoolz/validator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -14,13 +16,13 @@ var ApplicationMapper = &applicationMapper{}
 const applicationCollection = "application"
 
 type Application struct {
-	Id          bson.ObjectId          `json:"id" bson:"_id"`
-	Name        string                 `json:"name" bson:"name"`
-	Description string                 `json:"description" bson:"description"`
-	Tags        []string               `json:"tags" bson:"tags"` // Tags are used for application search
-	Vars        map[string]interface{} `json:"vars" bson:"vars"` // Vars are set in env when deploying a application
-	CreatedAt   time.Time              `json:"created_at" bson:"created_at"`
-	UpdatedAt   time.Time              `json:"updated_at" bson:"updated_at"`
+	Id          bson.ObjectId     `json:"id" bson:"_id"`
+	Name        string            `json:"name" bson:"name"`
+	Description string            `json:"description" bson:"description"`
+	Tags        []string          `json:"tags" bson:"tags"` // Tags are used for application search
+	Vars        map[string]string `json:"vars" bson:"vars"` // Vars are set in env when deploying a application
+	CreatedAt   time.Time         `json:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time         `json:"updated_at" bson:"updated_at"`
 }
 
 func (p *Application) Update(f *ApplicationUpdateForm) {
@@ -35,23 +37,25 @@ type Applications []*Application
 
 // Application creation form
 type ApplicationCreateForm struct {
-	Name        string                 `form:"name" json:"name" valid:"ascii,required"`
-	Description string                 `form:"description" json:"description" valid:"ascii"`
-	Tags        []string               `form:"tags" json:"tags" valid:"-"`
-	Vars        map[string]interface{} `form:"vars" json:"vars" valid:"-"`
+	Name        string            `form:"name" json:"name" valid:"ascii,required"`
+	Description string            `form:"description" json:"description" valid:"ascii"`
+	Tags        []string          `form:"tags[]" json:"tags" valid:"-"`
+	Vars        map[string]string `form:"-" json:"vars" valid:"-"`
+	VarKeys     []string          `form:"varKeys[]" json:"-" valid:"-"`
+	VarValues   []string          `form:"varValues[]" json:"-" valid:"-"`
 }
 
 // Validator for application creation
-func (f ApplicationCreateForm) Validate() error {
+func (f ApplicationCreateForm) Validate() *errors.Errors {
 	return validator.Validate(&f)
 }
 
 // Application update form
 type ApplicationUpdateForm struct {
-	Name        string                 `json:"name" valid:"ascii,required"`
-	Description string                 `json:"description" valid:"ascii"`
-	Tags        []string               `json:"tags" valid:"-"`
-	Vars        map[string]interface{} `json:"vars" valid:"-"`
+	Name        string            `json:"name" valid:"ascii,required"`
+	Description string            `json:"description" valid:"ascii"`
+	Tags        []string          `json:"tags" valid:"-"`
+	Vars        map[string]string `json:"vars" valid:"-"`
 }
 
 // Validator for application update
@@ -60,6 +64,13 @@ func (f ApplicationUpdateForm) Validate() error {
 }
 
 func (pm *applicationMapper) Create(f *ApplicationCreateForm) *Application {
+
+	if f.Vars == nil {
+		f.Vars = make(map[string]string)
+	}
+	for i := 0; i < len(f.VarKeys); i++ {
+		f.Vars[f.VarKeys[i]] = f.VarValues[i]
+	}
 
 	return &Application{
 		Id:          bson.NewObjectId(),
@@ -112,6 +123,10 @@ func (pm *applicationMapper) FetchAll() (Applications, error) {
 }
 
 func (pm *applicationMapper) FetchOne(id string) (*Application, error) {
+
+	if !bson.IsObjectIdHex(id) {
+		return nil, goerrors.New("Invalid id")
+	}
 
 	col := C(applicationCollection)
 	defer col.Database.Session.Close()

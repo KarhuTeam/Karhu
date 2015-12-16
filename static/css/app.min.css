@@ -132,4 +132,11 @@ input[type=text], textarea {
       .form-group label {
         width: 140px; } }
 
+.alert {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 3px; }
+  .alert-danger {
+    background: #833030; }
+
 /*# sourceMappingURL=app.min.css.map */

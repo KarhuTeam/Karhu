@@ -29,21 +29,17 @@
         <div class="box">
             <a class="btn" href="/application/add">New Application</a>
         </div>
-        <div class="box-col">
-            {{ range .applications }}
-            <div class="box">
-                <h2 class="box-title">{{ .Name }}<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
-                <p class="box-text">{{ .Description }}</p>
-                <p class="box-text">{{ .Tags }}</p>
-                <p class="box-text">{{ .Vars }}</p>
-                <ul class="box-list">
-                    <li>CoreAPI - Alpha <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-                    <li>CoreAPI - Beta <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-                    <li>CoreAPI - Prod <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-                    <li><a href="">+ Add an environment</a></li>
-                </ul>
-            </div>
-            {{ end }}
+        <div class="box">
+            <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}">Edit</a></h2>
+            <p class="box-text">{{ .application.Description }}</p>
+            <p class="box-text">{{ .application.Tags }}</p>
+            <p class="box-text">{{ .application.Vars }}</p>
+            <ul class="box-list">
+                <li>CoreAPI - Alpha <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
+                <li>CoreAPI - Beta <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
+                <li>CoreAPI - Prod <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
+                <li><a href="">+ Add an environment</a></li>
+            </ul>
         </div>
     </main>
 </body>

@@ -1,0 +1,9 @@
+.alert {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 3px;
+
+    &-danger {
+        background: #833030;
+    }
+}
