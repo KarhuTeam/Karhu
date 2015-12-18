@@ -22,24 +22,50 @@
             </ul>
         </div>
         <div class="breadcrumb">
-            All applications
+            <a href="/">All applications</a> &gt; {{ .application.Name }}
         </div>
     </header>
     <main>
         <div class="box">
-            <a class="btn" href="/application/add">New Application</a>
+            <a class="btn" href="">Edit</a> <a class="btn btn-danger" href="">Delete</a>
         </div>
         <div class="box">
             <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}">Edit</a></h2>
             <p class="box-text">{{ .application.Description }}</p>
             <p class="box-text">{{ .application.Tags }}</p>
             <p class="box-text">{{ .application.Vars }}</p>
-            <ul class="box-list">
-                <li>CoreAPI - Alpha <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-                <li>CoreAPI - Beta <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-                <li>CoreAPI - Prod <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-                <li><a href="">+ Add an environment</a></li>
-            </ul>
+        </div>
+        <div class="box-col">
+            <div class="box">
+                <h2 class="box-title">CoreAPI - Alpha<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+                <ul class="box-list">
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                </ul>
+            </div>
+            <div class="box">
+                <h2 class="box-title">CoreAPI - Beta<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+                <ul class="box-list">
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                </ul>
+            </div>
+            <div class="box">
+                <h2 class="box-title">CoreAPI - Prod<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+                <ul class="box-list">
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+                </ul>
+            </div>
         </div>
     </main>
 </body>

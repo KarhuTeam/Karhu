@@ -116,6 +116,8 @@ input[type=text], textarea {
   .btn:hover {
     background-color: #183b5f;
     color: #fff; }
+  .btn-danger {
+    background: #833030; }
 
 /* Form */
 .form-group {
