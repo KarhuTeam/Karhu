@@ -131,11 +131,7 @@ input[type=text], textarea {
     .form-group .form-control button {
       display: inline-block;
       background-color: #cdd0d2;
-      color: #121212;
-      border: 0;
-      border-radius: 3px;
-      padding: 5px;
-      font-weight: bold; }
+      color: #121212; }
   @media screen and (min-width: 500px) {
     .form-group {
       flex-direction: row; }
@@ -149,4 +145,4 @@ input[type=text], textarea {
   .alert-danger {
     background: #833030; }
 
-/*# sourceMappingURL=app.min.css.map */
+/*# sourceMappingURL=app.css.map */

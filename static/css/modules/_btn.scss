@@ -16,3 +16,16 @@
         background: $red;
     }
 }
+
+
+@mixin form-buttons {
+  button {
+    display: inline-block;
+    background-color: $light-gray;
+    color: $dark-gray;
+    border: 0;
+    border-radius: 3px;
+    padding: 5px;
+    font-weight: bold;
+  }
+}

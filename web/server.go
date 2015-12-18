@@ -12,7 +12,7 @@ func NewServer() *Server {
 
 	s := &Server{gin.Default()}
 
-	s.LoadHTMLGlob("views/*/*")
+	s.LoadHTMLGlob("views/**")
 
 	s.Static("/static", "static")
 

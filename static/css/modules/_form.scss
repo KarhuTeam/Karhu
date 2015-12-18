@@ -9,9 +9,13 @@
     }
 
     .form-control {
-        flex-grow: 1;
+      @include form-buttons;
+      flex-grow: 1;
     }
 
+    .add-var-button {
+
+    }
     @media screen and (min-width: $medium) {
         flex-direction:row;
 

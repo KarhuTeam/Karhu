@@ -28,7 +28,7 @@ func NewApplicationController(s *web.Server) *ApplicationController {
  */
 func (ctl *ApplicationController) getAddApplicationAction(c *gin.Context) {
 
-	c.HTML(http.StatusOK, "add.html", nil)
+	c.HTML(http.StatusOK, "application/add.html", nil)
 }
 
 func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
@@ -41,7 +41,7 @@ func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
 
 	if err := form.Validate(); err != nil {
 		fmt.Println(err.Errors)
-		c.HTML(http.StatusOK, "add.html", map[string]interface{}{
+		c.HTML(http.StatusOK, "application/add.html", map[string]interface{}{
 			"errors": err.Errors,
 			"form":   form,
 		})
@@ -64,7 +64,7 @@ func (ctl *ApplicationController) getApplicationsAction(c *gin.Context) {
 
 	applications, _ := models.ApplicationMapper.FetchAll()
 
-	c.HTML(http.StatusOK, "list.html", map[string]interface{}{
+	c.HTML(http.StatusOK, "application/list.html", map[string]interface{}{
 		"applications": applications,
 	})
 }
@@ -78,20 +78,20 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 
 	application, err := models.ApplicationMapper.FetchOne(id)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "500.html", map[string]interface{}{
+		c.HTML(http.StatusInternalServerError, "error/500.html", map[string]interface{}{
 			"error": err,
 		})
 		return
 	}
 
 	if application == nil {
-		c.HTML(http.StatusNotFound, "404.html", map[string]interface{}{
+		c.HTML(http.StatusNotFound, "error/404.html", map[string]interface{}{
 			"text": "Application not found",
 		})
 		return
 	}
 
-	c.HTML(http.StatusOK, "show.html", map[string]interface{}{
+	c.HTML(http.StatusOK, "application/show.html", map[string]interface{}{
 		"application": application,
 	})
 }

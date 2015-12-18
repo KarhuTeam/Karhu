@@ -1,72 +1,49 @@
-<!doctype html>
-<html>
-<head>
-    <title>Karhu</title>
-    <meta charset="utf8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,700" />
-    <link rel="stylesheet" href="/static/css/app.min.css" />
-    <script type="text/javascript" src="/static/js/app.js"></script>
-</head>
-<body>
-    <header>
-        <div class="header">
-            <h1 class="header-title">Karhu</h1>
-            <a class="navbar-btn" href=""></a>
-            <ul class="navbar">
-                <li><a class="navbar-item" href="">Applications</a></li>
-                <li><a class="navbar-item" href="">Infrastructure</a></li>
-                <li><a class="navbar-item" href="">Monitoring</a></li>
-                <li><a class="navbar-item" href="">Logs</a></li>
-                <li><a class="navbar-item" href="">Alerts</a></li>
-            </ul>
-        </div>
-        <div class="breadcrumb">
-            <a href="/">All applications</a> &gt; {{ .application.Name }}
-        </div>
-    </header>
-    <main>
-        <div class="box">
-            <a class="btn" href="">Edit</a> <a class="btn btn-danger" href="">Delete</a>
-        </div>
-        <div class="box">
-            <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}">Edit</a></h2>
-            <p class="box-text">{{ .application.Description }}</p>
-            <p class="box-text">{{ .application.Tags }}</p>
-            <p class="box-text">{{ .application.Vars }}</p>
-        </div>
-        <div class="box-col">
-            <div class="box">
-                <h2 class="box-title">CoreAPI - Alpha<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
-                <ul class="box-list">
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                </ul>
-            </div>
-            <div class="box">
-                <h2 class="box-title">CoreAPI - Beta<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
-                <ul class="box-list">
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                </ul>
-            </div>
-            <div class="box">
-                <h2 class="box-title">CoreAPI - Prod<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
-                <ul class="box-list">
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                    <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-                </ul>
-            </div>
-        </div>
-    </main>
-</body>
-</html>
+{{template "header"}}
+  <div class="breadcrumb">
+    <a href="/">All applications</a> &gt; {{ .application.Name }}
+  </div>
+</header>
+<main>
+  <div class="box">
+    <a class="btn" href="">Edit</a> <a class="btn btn-danger" href="">Delete</a>
+  </div>
+  <div class="box">
+    <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}">Edit</a></h2>
+    <p class="box-text">{{ .application.Description }}</p>
+    <p class="box-text">{{ .application.Tags }}</p>
+    <p class="box-text">{{ .application.Vars }}</p>
+  </div>
+  <div class="box-col">
+    <div class="box">
+      <h2 class="box-title">CoreAPI - Alpha<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+      <ul class="box-list">
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2 class="box-title">CoreAPI - Beta<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+      <ul class="box-list">
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2 class="box-title">CoreAPI - Prod<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+      <ul class="box-list">
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+      </ul>
+    </div>
+  </div>
+</main>
+{{template "footer"}}
