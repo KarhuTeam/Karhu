@@ -18,6 +18,8 @@ func NewAPIController(s *web.Server) *APIController {
 	api.NewEnvironmentController(apiGroup)
 	api.NewBuildController(apiGroup)
 	api.NewScriptController(apiGroup)
+	api.NewSshController(apiGroup)
+	api.NewNodeController(apiGroup)
 
 	return ctl
 }
