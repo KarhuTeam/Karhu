@@ -13,6 +13,7 @@ func NewFrontController(s *web.Server) *FrontController {
 	ctl := &FrontController{}
 
 	front.NewApplicationController(s)
+	front.NewNodeController(s)
 
 	return ctl
 }

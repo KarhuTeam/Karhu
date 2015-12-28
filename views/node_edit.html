@@ -1,0 +1,39 @@
+{{template "header"}}
+  <div class="breadcrumb">
+    <a href="/nodes">All nodes</a> &gt; Edit a node
+  </div>
+</header>
+<main>
+  <div class="box">
+    <h2 class="box-title">Edit a node</h2>
+    {{ if .errors }}
+    <div class="alert alert-danger">
+      {{ range .errors }}
+      {{ .Field }} : {{ .Text }}<br/>
+      {{ end }}
+    </div>
+    {{ end }}
+    <form method="POST" action="">
+      <div class="form-group">
+        <label for="node-description">Description :</label>
+        <textarea class="form-control" id="node-description" name="description" placeholder="Description...">{{ .node.Description }}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Tags :</label>
+        <div class="form-control form-tag">
+          <!-- TODO: Add .form.Tags value -->
+          <div class="tag-unit-container">
+            <input class="form-control" name="tags[]" type="text" placeholder="Tag1..." />
+          </div>
+          <div class="tag-unit-container">
+            <input class="form-control" name="tags[]" type="text" placeholder="Tag2..." />
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <button class="btn" type="submit">Edit</button>
+      </div>
+    </form>
+  </div>
+</main>
+{{template "footer"}}

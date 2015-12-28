@@ -1,6 +1,7 @@
 package models
 
 import (
+	goerrors "errors"
 	"github.com/gotoolz/errors"
 	"github.com/gotoolz/validator"
 	"github.com/karhuteam/karhu/ressources/ssh"
@@ -38,6 +39,11 @@ type NodeCreateForm struct {
 	IP          string   `form:"ip" json:"ip" valid:"ip,required"`
 	SshPort     string   `form:"ssh_port" json:"ssh_port" valid:"int"`
 	SshUser     string   `form:"ssh_user" json:"ssh_user" valid:"ascii"`
+	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
+}
+
+type NodeUpdateForm struct {
+	Description string   `form:"description" json:"description" valid:"-"`
 	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
 }
 
@@ -120,6 +126,26 @@ func (pm *nodeMapper) FetchOne(hostname string) (*Node, error) {
 
 	node := new(Node)
 	if err := col.Find(bson.M{"hostname": hostname}).One(node); err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return node, nil
+}
+
+func (pm *nodeMapper) FetchOneById(id string) (*Node, error) {
+
+	if !bson.IsObjectIdHex(id) {
+		return nil, goerrors.New("Invalid id")
+	}
+
+	col := C(nodeCollection)
+	defer col.Database.Session.Close()
+
+	node := new(Node)
+	if err := col.FindId(bson.ObjectIdHex(id)).One(node); err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, nil
 		}

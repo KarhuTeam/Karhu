@@ -1,0 +1,17 @@
+{{template "header"}}
+  <div class="breadcrumb">
+    All nodes
+  </div>
+</header>
+<main>
+  <div class="box-col">
+    {{ range .nodes }}
+    <div class="box">
+      <h2 class="box-title">{{ .Hostname }}<a class="right" href="/node/edit/{{ .Id.Hex }}">Edit</a></h2>
+      <p class="box-text">{{ .Description }}</p>
+      <p class="box-text">{{ .Tags }}</p>
+    </div>
+    {{ end }}
+  </div>
+</main>
+{{template "footer"}}
