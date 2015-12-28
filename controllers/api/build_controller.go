@@ -14,13 +14,13 @@ func NewBuildController(s *gin.RouterGroup) *BuildController {
 
 	ctl := &BuildController{}
 
-	s.POST("/apps/:id/env/:env/builds", ctl.postBuild)
-	s.GET("/apps/:id/env/:env/builds", ctl.getBuildList)
+	s.POST("/apps/:id/builds", ctl.postBuild)
+	s.GET("/apps/:id/builds", ctl.getBuildList)
 
 	return ctl
 }
 
-func (pc *BuildController) getAppEnv(c *gin.Context) (*models.Application, *models.Environment, error) {
+func (pc *BuildController) getApp(c *gin.Context) (*models.Application, error) {
 
 	id := c.Param("id")
 
@@ -30,51 +30,43 @@ func (pc *BuildController) getAppEnv(c *gin.Context) (*models.Application, *mode
 	}
 
 	if app == nil {
-		return nil, nil, errors.New(errors.Error{
+		return nil, errors.New(errors.Error{
 			Label: "invalid_application",
 			Field: "id",
 			Text:  "Invalid application ID in URL",
 		})
 	}
 
-	envId := c.Param("env")
-
-	env, err := models.EnvironmentMapper.FetchOne(app, envId)
-	if err != nil {
-		panic(err)
-	}
-
-	if env == nil {
-		return nil, nil, errors.New(errors.Error{
-			Label: "invalid_environment",
-			Field: "id",
-			Text:  "Invalid environment ID in URL",
-		})
-	}
-
-	return app, env, nil
+	return app, nil
 }
 
 func (pc *BuildController) postBuild(c *gin.Context) {
 
-	var form models.BuildCreateForm
-	if err := c.Bind(&form); err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	if err := form.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
-
-	_, env, err := pc.getAppEnv(c)
+	app, err := pc.getApp(c)
 	if err != nil {
 		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
-	build := models.BuildMapper.Create(env, &form)
+	commitHash := c.DefaultPostForm("commit_hash", "")
+
+	build := models.BuildMapper.Create(app, commitHash)
+
+	file, _, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.New(errors.Error{
+			Label: "invalid_file",
+			Field: "file",
+			Text:  "Missing zip file",
+		}))
+		return
+	}
+	defer file.Close()
+
+	if err := build.AttachFile(file); err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
 
 	if err := models.BuildMapper.Save(build); err != nil {
 		panic(err)
@@ -85,13 +77,13 @@ func (pc *BuildController) postBuild(c *gin.Context) {
 
 func (pc *BuildController) getBuildList(c *gin.Context) {
 
-	_, env, err := pc.getAppEnv(c)
+	app, err := pc.getApp(c)
 	if err != nil {
 		c.JSON(http.StatusNotFound, err)
 		return
 	}
 
-	builds, err := models.BuildMapper.FetchAll(env)
+	builds, err := models.BuildMapper.FetchAll(app)
 	if err != nil {
 		panic(err)
 	}

@@ -1,9 +1,14 @@
 package models
 
 import (
-	"github.com/gotoolz/validator"
+	"github.com/gotoolz/errors"
+	// "github.com/gotoolz/validator"
+	"github.com/karhuteam/karhu/ressources/file"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
 	"time"
 )
 
@@ -25,55 +30,61 @@ func init() {
 		Background: true, // See notes.
 		Sparse:     true,
 	})
-
-	// Env Index
-	col.EnsureIndex(mgo.Index{
-		Key:        []string{"environment_id"},
-		Unique:     false,
-		DropDups:   false,
-		Background: true, // See notes.
-		Sparse:     true,
-	})
 }
 
 type Build struct {
-	Id            bson.ObjectId          `json:"id" bson:"_id"`
-	ApplicationId bson.ObjectId          `json:"application_id" bson:"application_id"`
-	EnvironmentId bson.ObjectId          `json:"environment_id" bson:"environment_id"`
-	Version       string                 `json:"version" bson:"version"`
-	CommitHash    string                 `json:"commit_hash" bson:"commit_id"`
-	CommitUrl     string                 `json:"commit_url" bson:"commit_url"`
-	Tags          []string               `json:"tags" bson:"tags"`
-	Vars          map[string]interface{} `json:"vars" bson:"vars"`
-	CreatedAt     time.Time              `json:"created_at" bson:"created_at"`
+	Id            bson.ObjectId `json:"id" bson:"_id"`
+	ApplicationId bson.ObjectId `json:"application_id" bson:"application_id"`
+	CommitHash    string        `json:"commit_hash" bson:"commit_id"`
+	FilePath      string        `json:"file_path" bson:"file_path"`
+	CreatedAt     time.Time     `json:"created_at" bson:"created_at"`
 }
 
 type Builds []*Build
 
-// Build creation form
-type BuildCreateForm struct {
-	Version    string                 `json:"version" valid:"ascii,required"`
-	CommitHash string                 `json:"commit_hash" valid:"hexadecimal,required"`
-	CommitUrl  string                 `json:"commit_url" valid:"url,required"`
-	Tags       []string               `json:"tags" valid:"-"`
-	Vars       map[string]interface{} `json:"vars" valid:"-"`
+func (b *Build) AttachFile(f multipart.File) error {
+
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		return errors.New(errors.Error{
+			Label: "internal_error",
+			Field: "file",
+			Text:  err.Error(),
+		})
+	}
+
+	if contentType := http.DetectContentType(data); contentType != "application/zip" {
+		return errors.New(errors.Error{
+			Label: "internal_error",
+			Field: "file",
+			Text:  "Bad content-type, want application/zip have " + contentType,
+		})
+	}
+
+	b.FilePath, err = file.Store("builds", b.Id.Hex()+".zip", data)
+	return err
 }
 
-// Validator for build creation
-func (f BuildCreateForm) Validate() error {
-	return validator.Validate(&f)
-}
+// // Build creation form
+// type BuildCreateForm struct {
+// 	Version    string                 `json:"version" valid:"ascii,required"`
+// 	CommitHash string                 `json:"commit_hash" valid:"hexadecimal,required"`
+// 	CommitUrl  string                 `json:"commit_url" valid:"url,required"`
+// 	Tags       []string               `json:"tags" valid:"-"`
+// 	Vars       map[string]interface{} `json:"vars" valid:"-"`
+// }
+//
+// // Validator for build creation
+// func (f BuildCreateForm) Validate() error {
+// 	return validator.Validate(&f)
+// }
 
-func (bm *buildMapper) Create(e *Environment, f *BuildCreateForm) *Build {
+func (bm *buildMapper) Create(app *Application, commitHash string) *Build {
 
 	return &Build{
 		Id:            bson.NewObjectId(),
-		EnvironmentId: e.Id,
-		Version:       f.Version,
-		CommitHash:    f.CommitHash,
-		CommitUrl:     f.CommitUrl,
-		Tags:          f.Tags,
-		Vars:          f.Vars,
+		ApplicationId: app.Id,
+		CommitHash:    commitHash,
 		CreatedAt:     time.Now(),
 	}
 }
@@ -104,13 +115,13 @@ func (bm *buildMapper) Delete(b *Build) error {
 	return col.RemoveId(b.Id)
 }
 
-func (bm *buildMapper) FetchAll(e *Environment) (Builds, error) {
+func (bm *buildMapper) FetchAll(app *Application) (Builds, error) {
 
 	col := C(buildCollection)
 	defer col.Database.Session.Close()
 
 	var builds Builds
-	if err := col.Find(bson.M{"environment_id": e.Id}).Sort("-created_at").All(&builds); err != nil {
+	if err := col.Find(bson.M{"application_id": app.Id}).Sort("-created_at").All(&builds); err != nil {
 		return nil, err
 	}
 

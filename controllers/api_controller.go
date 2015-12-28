@@ -15,9 +15,9 @@ func NewAPIController(s *web.Server) *APIController {
 	apiGroup := s.Group("/api")
 
 	api.NewApplicationController(apiGroup)
-	api.NewEnvironmentController(apiGroup)
+	// api.NewEnvironmentController(apiGroup)
 	api.NewBuildController(apiGroup)
-	api.NewScriptController(apiGroup)
+	// api.NewScriptController(apiGroup)
 	api.NewSshController(apiGroup)
 	api.NewNodeController(apiGroup)
 
