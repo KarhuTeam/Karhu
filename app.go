@@ -6,9 +6,13 @@ import (
 	_ "github.com/karhuteam/karhu/models"         // For mgo
 	_ "github.com/karhuteam/karhu/ressources/ssh" // For ssh key-pair
 	"github.com/karhuteam/karhu/web"
+	"math/rand"
+	"time"
 )
 
 func main() {
+
+	rand.Seed(time.Now().UnixNano())
 
 	s := web.NewServer()
 	controllers.NewFrontController(s)

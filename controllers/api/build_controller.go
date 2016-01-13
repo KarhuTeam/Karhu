@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/models"
+	"github.com/karhuteam/karhu/ressources/ansible"
 	"net/http"
 )
 
@@ -16,6 +17,7 @@ func NewBuildController(s *gin.RouterGroup) *BuildController {
 
 	s.POST("/apps/:id/builds", ctl.postBuild)
 	s.GET("/apps/:id/builds", ctl.getBuildList)
+	s.POST("/apps/:id/builds/:build_id/deploy", ctl.postBuildDeploy)
 
 	return ctl
 }
@@ -64,7 +66,11 @@ func (pc *BuildController) postBuild(c *gin.Context) {
 	defer file.Close()
 
 	if err := build.AttachFile(file); err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, errors.New(errors.Error{
+			Label: "invalid_file",
+			Field: "file",
+			Text:  err.Error(),
+		}))
 		return
 	}
 
@@ -89,4 +95,38 @@ func (pc *BuildController) getBuildList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, builds)
+}
+
+func (pc *BuildController) postBuildDeploy(c *gin.Context) {
+
+	buildId := c.Param("build_id")
+
+	app, err := pc.getApp(c)
+	if err != nil {
+		c.JSON(http.StatusNotFound, err)
+		return
+	}
+
+	build, err := models.BuildMapper.FetchOne(app, buildId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, err)
+		return
+	}
+
+	if build == nil {
+		c.JSON(http.StatusNotFound, errors.New(errors.Error{
+			Label: "invalid_build",
+			Field: "build_id",
+			Text:  "Invalid build ID in URL",
+		}))
+		return
+	}
+
+	depl := models.DeploymentMapper.Create(app, build)
+
+	if err := ansible.Run(depl); err != nil {
+		panic(err)
+	}
+
+	c.JSON(http.StatusOK, depl)
 }

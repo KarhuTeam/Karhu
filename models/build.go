@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/gotoolz/errors"
 	// "github.com/gotoolz/validator"
+	"github.com/karhuteam/karhu/ressources/application"
 	"github.com/karhuteam/karhu/ressources/file"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -42,6 +43,23 @@ type Build struct {
 
 type Builds []*Build
 
+func (b *Build) GetIdent() (*application.Identifier, error) {
+
+	// Fetch zip
+	data, err := file.Get(b.FilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse karhu file
+	ident, err := application.Read(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return ident, nil
+}
+
 func (b *Build) AttachFile(f multipart.File) error {
 
 	data, err := ioutil.ReadAll(f)
@@ -61,8 +79,16 @@ func (b *Build) AttachFile(f multipart.File) error {
 		})
 	}
 
-	b.FilePath, err = file.Store("builds", b.Id.Hex()+".zip", data)
-	return err
+	if b.FilePath, err = file.Store("builds", b.Id.Hex()+".zip", data); err != nil {
+		return err
+	}
+
+	// Check ident
+	if _, err := b.GetIdent(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // // Build creation form
@@ -126,4 +152,26 @@ func (bm *buildMapper) FetchAll(app *Application) (Builds, error) {
 	}
 
 	return builds, nil
+}
+
+func (bm *buildMapper) FetchOne(app *Application, buildId string) (*Build, error) {
+
+	if !bson.IsObjectIdHex(buildId) {
+
+		return nil, errors.New(errors.Error{
+			Label: "invalid_build_id",
+			Field: "build_id",
+			Text:  "Invalid build id hex",
+		})
+	}
+
+	col := C(buildCollection)
+	defer col.Database.Session.Close()
+
+	build := new(Build)
+	if err := col.Find(bson.M{"application_id": app.Id, "_id": bson.ObjectIdHex(buildId)}).Sort("-created_at").One(build); err != nil {
+		return nil, err
+	}
+
+	return build, nil
 }

@@ -1,0 +1,7 @@
+---
+
+- name: systemctl daemon-reload
+  shell: /bin/systemctl daemon-reload
+
+- name: restart service
+  service: name={{ name }} state=restarted

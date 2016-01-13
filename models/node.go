@@ -159,3 +159,20 @@ func (pm *nodeMapper) CheckSsh(n *Node) error {
 
 	return ssh.CheckSsh(n.SshUser, n.IP, n.SshPort)
 }
+
+func (nm *nodeMapper) FetchAllForApp(app *Application) (Nodes, error) {
+
+	if len(app.Tags) == 0 {
+		return nil, goerrors.New("No tags on app")
+	}
+
+	col := C(nodeCollection)
+	defer col.Database.Session.Close()
+
+	var nodes Nodes
+	if err := col.Find(bson.M{"tags": bson.M{"$all": app.Tags}}).All(&nodes); err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
+}

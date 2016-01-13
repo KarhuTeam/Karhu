@@ -46,3 +46,8 @@ func (d *fsDriver) store(dir string, name string, data []byte) (string, error) {
 
 	return targetFile, nil
 }
+
+func (d *fsDriver) get(path string) ([]byte, error) {
+
+	return ioutil.ReadFile(path)
+}

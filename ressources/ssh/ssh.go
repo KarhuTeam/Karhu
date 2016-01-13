@@ -15,7 +15,7 @@ func CheckSsh(user, ip string, port int) error {
 		return err
 	}
 
-	privateKey := privateKeyPath()
+	privateKey := PrivateKeyPath()
 
 	command := fmt.Sprintf("%s -o BatchMode=yes -o ConnectTimeout=5 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s -p %d %s@%s exit", sshPath, privateKey, port, user, ip)
 

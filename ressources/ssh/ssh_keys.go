@@ -26,10 +26,18 @@ func init() {
 }
 
 func keyDir() string {
-	return path.Clean(fmt.Sprintf("%s/%s", env.GetDefault("DATA_DIR", "./data"), SSH_KEYS_DIR))
+
+	dir := env.GetDefault("DATA_DIR", "data")
+
+	if !path.IsAbs(dir) {
+		cwd, _ := os.Getwd()
+		dir = path.Join(cwd, dir)
+	}
+
+	return path.Clean(fmt.Sprintf("%s/%s", dir, SSH_KEYS_DIR))
 }
 
-func privateKeyPath() string {
+func PrivateKeyPath() string {
 	return path.Clean(fmt.Sprintf("%s/%s", keyDir(), SSH_KEY_NAME))
 }
 
@@ -44,7 +52,7 @@ func AuthorizedKeysPath() string {
 func generateSSHKeyPair() error {
 
 	targetDir := keyDir()
-	targetFile := privateKeyPath()
+	targetFile := PrivateKeyPath()
 
 	// Check if key already exist
 	if _, err := os.Stat(targetFile); !os.IsNotExist(err) {

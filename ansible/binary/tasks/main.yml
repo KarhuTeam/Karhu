@@ -1,0 +1,27 @@
+---
+
+- name: Setup User Group
+  group: name={{ runtime_user }} system=yes
+
+- name: Setup User
+  user: name={{ runtime_user }} group={{ runtime_user }} system=yes
+
+- name: Setup WorkDir
+  file: path={{ item }} state=directory owner={{ runtime_user }} group={{ runtime_user }}
+  with_items:
+  - "{{ runtime_workdir }}"
+  - "{{ runtime_workdir }}/bin"
+
+- name: Setup Files
+  copy: src={{ item.src }} dest={{ item.dest }} owner={{ runtime_user }} group={{ runtime_user }} mode={{ item.mode }}
+  with_items: "{{ runtime_files }}"
+  notify: restart service
+
+- name: Setup systemctl script
+  template: src=binary.service dest=/lib/systemd/system/{{ name }}.service
+  notify: systemctl daemon-reload
+
+## TODO config stuff
+
+- name: Enable & Start Service
+  service: name={{ name }} state=started enabled=yes

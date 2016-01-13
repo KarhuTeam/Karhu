@@ -1,0 +1,22 @@
+##
+# KARHU AUTO GENERATED FILE
+# SHOULD NO BE MODIFIED ON SERVERS
+# WILL BE OVERRIDE AT EACH DEPLOYMENTS
+# LOVE <3
+##
+
+[Unit]
+Description={{ name }} - auto generate systemctl service file
+
+[Service]
+#EnvironmentFile=
+WorkingDirectory={{ runtime_workdir }}
+User={{ runtime_user }}
+Group={{ runtime_user }}
+
+ExecStart={{ runtime_workdir }}/bin/{{ runtime_bin }}
+
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
