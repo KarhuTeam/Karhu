@@ -15,16 +15,61 @@ func NewApplicationController(s *web.Server) *ApplicationController {
 
 	ctl := &ApplicationController{}
 
+	// 1 - Applications list
 	s.GET("/", ctl.getApplicationsAction)
+	// 2 - Show an application
 	s.GET("/application/show/:id", ctl.getApplicationAction)
+	// 3 - Add an application
 	s.GET("/application/add", ctl.getAddApplicationAction)
 	s.POST("/application/add", ctl.postAddApplicationAction)
+	// 4 - Edit an application
+	s.GET("/application/edit/:id", ctl.getEditApplicationAction)
+	s.POST("/application/edit/:id", ctl.postEditApplicationAction)
 
 	return ctl
 }
 
 /**
- * Add Application
+ * 1 - Applications list
+ */
+func (ctl *ApplicationController) getApplicationsAction(c *gin.Context) {
+
+	applications, _ := models.ApplicationMapper.FetchAll()
+
+	c.HTML(http.StatusOK, "application_list.html", map[string]interface{}{
+		"applications": applications,
+	})
+}
+
+/**
+ * 2 - Show an application
+ */
+func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
+
+	id := c.Param("id")
+
+	application, err := models.ApplicationMapper.FetchOne(id)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
+
+	if application == nil {
+		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
+			"text": "Application not found",
+		})
+		return
+	}
+
+	c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
+		"application": application,
+	})
+}
+
+/**
+ * 3 - Add an application
  */
 func (ctl *ApplicationController) getAddApplicationAction(c *gin.Context) {
 
@@ -58,40 +103,85 @@ func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
 }
 
 /**
- * Get2 Applications
+ * 4 - Edit an application
  */
-func (ctl *ApplicationController) getApplicationsAction(c *gin.Context) {
-
-	applications, _ := models.ApplicationMapper.FetchAll()
-
-	c.HTML(http.StatusOK, "application_list.html", map[string]interface{}{
-		"applications": applications,
-	})
-}
-
-/**
- * Get Application
- */
-func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
-
-	id := c.Param("id")
+func (ctl *ApplicationController) getApplication(c *gin.Context, id string) *models.Application {
 
 	application, err := models.ApplicationMapper.FetchOne(id)
+
+	// Error 500
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
 			"error": err,
 		})
+		return nil
+	}
+
+	// Error 404
+	if application == nil {
+		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
+			"title": "Application not found",
+			"text":  "Application not found... It's not my fault",
+		})
+		return nil
+	}
+
+	return application
+}
+
+func (ctl *ApplicationController) getEditApplicationAction(c *gin.Context) {
+
+	id := c.Param("id")
+
+	// Get the application
+	application := ctl.getApplication(c, id)
+	if application == nil {
 		return
 	}
 
+	// Hydrate the form
+	var form models.ApplicationUpdateForm
+	form.Hydrate(application)
+
+	c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
+		"form": form,
+	})
+}
+
+func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
+
+	id := c.Param("id")
+
+	// Get the application
+	application := ctl.getApplication(c, id)
 	if application == nil {
-		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
-			"text": "Application not found",
+		return
+	}
+
+	// Hydrate the form with the request values
+	var form models.ApplicationUpdateForm
+	if err := c.Bind(&form); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	// Check the form values
+	if err := form.Validate(); err != nil {
+		fmt.Println(err.Errors)
+		c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
+			"errors": err.Errors,
+			"form":   form,
 		})
 		return
 	}
 
-	c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
-		"application": application,
-	})
+	// Update the application
+	application.Update(&form)
+
+	// Save the application
+	if err := models.ApplicationMapper.Update(application); err != nil {
+		panic(err)
+	}
+
+	c.Redirect(http.StatusMovedPermanently, "/application/show/"+application.Id.Hex())
 }

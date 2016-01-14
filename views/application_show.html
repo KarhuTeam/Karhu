@@ -5,7 +5,7 @@
 </header>
 <main>
   <div class="box">
-    <a class="btn" href="">Edit</a> <a class="btn btn-danger" href="">Delete</a>
+    <a class="btn" href="/application/edit/{{ .application.Id.Hex }}">Edit</a> <a class="btn btn-danger" href="">Delete</a>
   </div>
   <div class="box">
     <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}">Edit</a></h2>
