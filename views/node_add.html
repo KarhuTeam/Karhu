@@ -1,0 +1,46 @@
+{{template "header"}}
+  <div class="breadcrumb">
+    <a href="/nodes">All nodes</a> &gt; Add a node
+  </div>
+</header>
+<main>
+  <div class="box">
+    <h2 class="box-title">Add a node</h2>
+    <form id="add_node" method="" action="">
+      <div class="form-group">
+        <label for="karhu_url">Karhu URL :</label>
+        <input class="form-control" type="text" id="karhu_url" name="karhu_url" placeholder="http://your-karhu.com" value="{{ .PublicHost }}"/>
+      </div>
+      <div class="form-group">
+        <label for="ssh_port">SSH port :</label>
+        <input class="form-control" type="text" id="ssh_port" name="ssh_port" placeholder="22" value="{{ .SshPort }}"/>
+      </div>
+      <div class="form-group">
+        <label for="ssh_user">SSH user (must be root or sudo) :</label>
+        <input class="form-control" type="text" id="ssh_user" name="ssh_user" placeholder="root" value="{{ .SshUser }}"/>
+      </div>
+      <br />
+      <br />
+      Execute this on your server:
+      <pre id="register_cmd">curl {{ .PublicHost }}/api/nodes/register.sh?ssh_user={{ .SshUser }}&ssh_port={{ .SshPort }} | bash</pre>
+      <br />
+      <br />
+      <div class="text-center">
+        <a href="/nodes" class="btn">OK</a>
+      </div>
+    </form>
+  </div>
+</main>
+<script>
+var inputs = document.getElementById("add_node").getElementsByTagName("input");
+for (i = 0; i < inputs.length; i++) {
+    inputs[i].oninput = function() {
+        karhuUrl = document.getElementById("karhu_url").value;
+        sshUser = document.getElementById("ssh_user").value;
+        sshPort = document.getElementById("ssh_port").value;
+
+        document.getElementById("register_cmd").innerHTML = "curl " + karhuUrl + "/api/nodes/register.sh?ssh_user="+sshUser+"&ssh_port="+sshPort + " | bash";
+    };
+}
+</script>
+{{template "footer"}}

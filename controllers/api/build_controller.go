@@ -5,6 +5,7 @@ import (
 	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/models"
 	"github.com/karhuteam/karhu/ressources/ansible"
+	"log"
 	"net/http"
 )
 
@@ -124,9 +125,38 @@ func (pc *BuildController) postBuildDeploy(c *gin.Context) {
 
 	depl := models.DeploymentMapper.Create(app, build)
 
-	if err := ansible.Run(depl); err != nil {
+	if err := models.DeploymentMapper.Save(depl); err != nil {
 		panic(err)
 	}
+
+	go func() {
+
+		// catch panic
+		defer func() {
+			if err := recover(); err != nil {
+				log.Println("ansible:", err)
+
+				depl.Status = models.STATUS_ERROR
+				if err := models.DeploymentMapper.Update(depl); err != nil {
+					log.Println(err)
+				}
+			}
+		}()
+
+		depl.Status = models.STATUS_RUNNING
+		if err := models.DeploymentMapper.Update(depl); err != nil {
+			return
+		}
+
+		if err := ansible.Run(depl); err != nil {
+			panic(err)
+		}
+
+		depl.Status = models.STATUS_DONE
+		if err := models.DeploymentMapper.Update(depl); err != nil {
+			return
+		}
+	}()
 
 	c.JSON(http.StatusOK, depl)
 }

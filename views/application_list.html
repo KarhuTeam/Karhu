@@ -12,13 +12,10 @@
     <div class="box">
       <h2 class="box-title">{{ .Name }}<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
       <p class="box-text">{{ .Description }}</p>
-      <p class="box-text">{{ .Tags }}</p>
-      <p class="box-text">{{ .Vars }}</p>
+      <p class="box-text">Tags : {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
       <ul class="box-list">
-        <li>CoreAPI - Alpha <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-        <li>CoreAPI - Beta <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-        <li>CoreAPI - Prod <span class="right">c0cb8a1d - <a href="">Edit</a></span></li>
-        <li><a href="">+ Add an environment</a></li>
+        <li>Last build #c0cb8a1d <span class="right"><a href="">Show</a> - <a href="">Replay</a></span></li>
+        <li><a href="">Show more deployment</a></li>
       </ul>
     </div>
     {{ end }}

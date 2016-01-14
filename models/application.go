@@ -30,19 +30,15 @@ func (p *Application) Update(f *ApplicationUpdateForm) {
 	p.Name = f.Name
 	p.Description = f.Description
 	p.Tags = f.Tags
-	p.Vars = f.Vars
 }
 
 type Applications []*Application
 
 // Application creation form
 type ApplicationCreateForm struct {
-	Name        string            `form:"name" json:"name" valid:"ascii,required"`
-	Description string            `form:"description" json:"description" valid:"ascii"`
-	Tags        []string          `form:"tags[]" json:"tags" valid:"-"`
-	Vars        map[string]string `form:"-" json:"vars" valid:"-"`
-	VarKeys     []string          `form:"varKeys[]" json:"-" valid:"-"`
-	VarValues   []string          `form:"varValues[]" json:"-" valid:"-"`
+	Name        string   `form:"name" json:"name" valid:"ascii,required"`
+	Description string   `form:"description" json:"description" valid:"ascii"`
+	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
 }
 
 // Validator for application creation
@@ -52,32 +48,29 @@ func (f ApplicationCreateForm) Validate() *errors.Errors {
 
 // Application update form
 type ApplicationUpdateForm struct {
-	Name        string            `json:"name" valid:"ascii,required"`
-	Description string            `json:"description" valid:"ascii"`
-	Tags        []string          `json:"tags" valid:"-"`
-	Vars        map[string]string `json:"vars" valid:"-"`
+	Name        string   `form:"name" json:"name" valid:"ascii,required"`
+	Description string   `form:"description" json:"description" valid:"ascii"`
+	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
+}
+
+func (f *ApplicationUpdateForm) Hydrate(a *Application) {
+	f.Name = a.Name
+	f.Description = a.Description
+	f.Tags = a.Tags
 }
 
 // Validator for application update
-func (f ApplicationUpdateForm) Validate() error {
+func (f ApplicationUpdateForm) Validate() *errors.Errors {
 	return validator.Validate(&f)
 }
 
 func (pm *applicationMapper) Create(f *ApplicationCreateForm) *Application {
-
-	if f.Vars == nil {
-		f.Vars = make(map[string]string)
-	}
-	for i := 0; i < len(f.VarKeys); i++ {
-		f.Vars[f.VarKeys[i]] = f.VarValues[i]
-	}
 
 	return &Application{
 		Id:          bson.NewObjectId(),
 		Name:        f.Name,
 		Description: f.Description,
 		Tags:        f.Tags,
-		Vars:        f.Vars,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
