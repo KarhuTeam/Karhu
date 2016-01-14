@@ -280,7 +280,7 @@ func copyRoles(tmpPath string, roles []string) error {
 
 func runPlaybook(tmpPath string) error {
 
-	command := fmt.Sprintf("ansible-playbook -i %s %s", HOSTS_FILENAME, PLAYBOOK_FILENAME)
+	command := fmt.Sprintf("ansible-playbook -i %s %s &> %s/karhu.log", HOSTS_FILENAME, PLAYBOOK_FILENAME, tmpPath)
 	log.Println("ressources/ansible: runPlaybook:", command)
 	cmd := exec.Command("sh", "-c", fmt.Sprintf("cd %s && %s", tmpPath, command))
 	cmd.Stdout = os.Stdout
