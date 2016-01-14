@@ -2,6 +2,7 @@ package front
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gotoolz/env"
 	"github.com/karhuteam/karhu/models"
 	"github.com/karhuteam/karhu/web"
 	"net/http"
@@ -17,8 +18,18 @@ func NewNodeController(s *web.Server) *NodeController {
 	s.GET("/nodes", ctl.getNodesAction)
 	s.GET("/node/edit/:id", ctl.getNodeAction)
 	s.POST("/node/edit/:id", ctl.postNodeAction)
+	s.GET("/node/add", ctl.getNodeAddAction)
 
 	return ctl
+}
+
+func (pc *NodeController) getNodeAddAction(c *gin.Context) {
+
+	c.HTML(http.StatusOK, "node_add.html", map[string]interface{}{
+		"PublicHost": c.DefaultQuery("karhu_url", env.Get("PUBLIC_HOST")),
+		"SshUser":    c.DefaultQuery("ssh_user", "root"),
+		"SshPort":    c.DefaultQuery("ssh_port", "22"),
+	})
 }
 
 func (pc *NodeController) getNodesAction(c *gin.Context) {
