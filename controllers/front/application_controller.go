@@ -25,8 +25,34 @@ func NewApplicationController(s *web.Server) *ApplicationController {
 	// 4 - Edit an application
 	s.GET("/application/edit/:id", ctl.getEditApplicationAction)
 	s.POST("/application/edit/:id", ctl.postEditApplicationAction)
+	// 5 - Delete an application
+	s.GET("/application/delete/:id", ctl.getDeleteApplicationAction)
 
 	return ctl
+}
+
+func (ctl *ApplicationController) getApplication(c *gin.Context, id string) *models.Application {
+
+	application, err := models.ApplicationMapper.FetchOne(id)
+
+	// Error 500
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return nil
+	}
+
+	// Error 404
+	if application == nil {
+		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
+			"title": "Application not found",
+			"text":  "Application not found... It's not my fault",
+		})
+		return nil
+	}
+
+	return application
 }
 
 /**
@@ -48,18 +74,9 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 
 	id := c.Param("id")
 
-	application, err := models.ApplicationMapper.FetchOne(id)
-	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
-			"error": err,
-		})
-		return
-	}
-
+	// Get the application
+	application := ctl.getApplication(c, id)
 	if application == nil {
-		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
-			"text": "Application not found",
-		})
 		return
 	}
 
@@ -105,29 +122,6 @@ func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
 /**
  * 4 - Edit an application
  */
-func (ctl *ApplicationController) getApplication(c *gin.Context, id string) *models.Application {
-
-	application, err := models.ApplicationMapper.FetchOne(id)
-
-	// Error 500
-	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
-			"error": err,
-		})
-		return nil
-	}
-
-	// Error 404
-	if application == nil {
-		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
-			"title": "Application not found",
-			"text":  "Application not found... It's not my fault",
-		})
-		return nil
-	}
-
-	return application
-}
 
 func (ctl *ApplicationController) getEditApplicationAction(c *gin.Context) {
 
@@ -184,4 +178,24 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusMovedPermanently, "/application/show/"+application.Id.Hex())
+}
+
+/**
+ * 5 - Delete an application
+ */
+
+func (ctl *ApplicationController) getDeleteApplicationAction(c *gin.Context) {
+
+	id := c.Param("id")
+
+	// Get the application
+	application := ctl.getApplication(c, id)
+	if application == nil {
+		return
+	}
+
+	// Delete the application
+	models.ApplicationMapper.Delete(application)
+
+	c.Redirect(http.StatusMovedPermanently, "/")
 }
