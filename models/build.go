@@ -170,6 +170,9 @@ func (bm *buildMapper) FetchOne(app *Application, buildId string) (*Build, error
 
 	build := new(Build)
 	if err := col.Find(bson.M{"application_id": app.Id, "_id": bson.ObjectIdHex(buildId)}).Sort("-created_at").One(build); err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 

@@ -87,6 +87,9 @@ func (dm *deploymentMapper) FetchOne(app *Application, deployId string) (*Deploy
 
 	deploy := new(Deployment)
 	if err := col.Find(bson.M{"application_id": app.Id, "_id": bson.ObjectIdHex(deployId)}).One(deploy); err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 
