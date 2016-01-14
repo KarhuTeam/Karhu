@@ -21,7 +21,6 @@
       <div class="form-group">
         <label>Tags :</label>
         <div class="form-control form-tag">
-          <!-- TODO: Add .form.Tags value -->
           <div class="tag-unit-container">
             <input class="form-control tags-add-input" type="text" placeholder="Add a tag and add it with enter" />
           </div>
@@ -29,6 +28,9 @@
             Add
           </button>
           <div class="tags-container">
+              {{range $tag := .node.Tags}}
+                <div><input type="text" name="tags[]" readonly="" value="{{$tag}}" /><button>Remove</button></div>
+              {{end}}
           </div>
         </div>
       </div>

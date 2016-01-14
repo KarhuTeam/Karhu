@@ -19,6 +19,11 @@
 
 		tagsContainer = tagsContainer[0];
 
+		var tags = tagsContainer.getElementsByTagName('div')
+		for (var i = 0; i < tags.length; i++) {
+			tags[i].getElementsByTagName('button')[0].onclick = removeTag;
+		}
+
 		var i = 0;
 		var tagsInput = document.getElementsByClassName('tags-add-input')[0];
 
@@ -29,7 +34,7 @@
 			}
 		};
 
-		document.getElementsByClassName('tags-add-button')[0].onclick = function() {
+		document.getElementsByClassName('tags-add-button')[0].onclick = function(event) {
 			event.preventDefault();
 			return addTags(tagsInput.value);
 		}
@@ -47,10 +52,10 @@
 			var input = document.createElement('input');
 			var removeButton = document.createElement('button');
 
-			input.value = value;
-			input.name = 'tags[]';
-			input.type = 'text';
-			input.readonly = true;
+			input.setAttribute('value', value);
+			input.setAttribute('name', 'tags[]');
+			input.setAttribute('type', 'text');
+			input.setAttribute('readonly', '');
 
 			removeButton.innerHTML = 'Remove';
 			removeButton.onclick = removeTag;
@@ -60,7 +65,7 @@
 			return div;
 		}
 
-		function removeTag() {
+		function removeTag(event) {
 			event.preventDefault();
 			var p = this.parentNode;
 			p.parentNode.removeChild(p);
