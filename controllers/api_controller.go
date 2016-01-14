@@ -21,6 +21,7 @@ func NewAPIController(s *web.Server) *APIController {
 	api.NewSshController(apiGroup)
 	api.NewNodeController(apiGroup)
 	api.NewDeploymentController(apiGroup)
+	api.NewConfigController(apiGroup)
 
 	return ctl
 }

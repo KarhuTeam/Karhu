@@ -1,6 +1,7 @@
 package ansible
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"github.com/gotoolz/env"
 	"github.com/karhuteam/karhu/models"
@@ -47,6 +48,7 @@ runtime_workdir: {{ .Ident.Runtime.Workdir }}
 runtime_files:
   - { src: '{{ .TmpPath }}/karhu/{{ .Ident.Runtime.Bin }}', dest: '{{ .Ident.Runtime.Workdir }}/bin/{{ .Ident.Runtime.Bin }}', mode: '0755' }
 {{ range $index, $str := .Ident.Runtime.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.Ident.Runtime.Static.Src $index }}', dest: '{{ $.Ident.Runtime.Workdir }}/{{ $.Ident.Runtime.Static.Dest $index}}', mode: '{{ $.Ident.Runtime.Static.Mode $index }}' }{{ end }}
+{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ $.Ident.Runtime.Workdir }}/{{ .Dest }}', mode: '{{ .Mode }}' }{{ end }}
 `)
 
 var configFileTemplate, _ = template.New(CONFIG_FILENAME).Parse(`[defaults]
@@ -146,7 +148,7 @@ func Run(depl *models.Deployment) error {
 		return err
 	}
 
-	if err := buildVars(tmpPath, ident); err != nil {
+	if err := buildVars(tmpPath, ident, depl.Application); err != nil {
 		return err
 	}
 
@@ -201,7 +203,7 @@ func buildPlaybook(tmpPath string, ident *application.Identifier) ([]string, err
 	})
 }
 
-func buildVars(tmpPath string, ident *application.Identifier) error {
+func buildVars(tmpPath string, ident *application.Identifier, app *models.Application) error {
 
 	w, err := os.OpenFile(path.Join(tmpPath, VARS_FILENAME), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
@@ -209,9 +211,15 @@ func buildVars(tmpPath string, ident *application.Identifier) error {
 	}
 	defer w.Close()
 
+	configs, err := extractConfigs(tmpPath, app)
+	if err != nil {
+		return err
+	}
+
 	return varsFileTemplate.Execute(w, map[string]interface{}{
 		"TmpPath": tmpPath,
 		"Ident":   ident,
+		"Configs": configs,
 	})
 }
 
@@ -254,6 +262,50 @@ func extractArchive(tmpPath string, build *models.Build) error {
 	}
 
 	return nil
+}
+
+type ConfigFile struct {
+	Src  string
+	Dest string
+	Mode string
+}
+
+// Copy application configs
+func extractConfigs(tmpPath string, app *models.Application) ([]ConfigFile, error) {
+
+	// Get all configs
+	configs, err := models.ConfigMapper.FetchAllEnabled(app)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(configs) == 0 {
+		return nil, nil
+	}
+
+	// create dest directory
+	destDir := path.Join(tmpPath, "configs")
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return nil, err
+	}
+
+	var configFiles []ConfigFile
+
+	for _, config := range configs {
+
+		src := path.Join(destDir, fmt.Sprintf("%x", sha1.Sum([]byte(config.Path))))
+		if err := ioutil.WriteFile(src, []byte(config.Content), 0644); err != nil {
+			return nil, err
+		}
+
+		configFiles = append(configFiles, ConfigFile{
+			Src:  src,         // Absolute path to src file
+			Dest: config.Path, // relativ path
+			Mode: "0644",
+		})
+	}
+
+	return configFiles, nil
 }
 
 // Copy required roles
