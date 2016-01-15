@@ -47,8 +47,10 @@ runtime_bin: {{ .Ident.Runtime.Bin }}
 runtime_workdir: {{ .Ident.Runtime.Workdir }}
 runtime_files:
   - { src: '{{ .TmpPath }}/karhu/{{ .Ident.Runtime.Bin }}', dest: '{{ .Ident.Runtime.Workdir }}/bin/{{ .Ident.Runtime.Bin }}', mode: '0755' }
-{{ range $index, $str := .Ident.Runtime.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.Ident.Runtime.Static.Src $index }}', dest: '{{ $.Ident.Runtime.Workdir }}/{{ $.Ident.Runtime.Static.Dest $index}}', mode: '{{ $.Ident.Runtime.Static.Mode $index }}' }{{ end }}
-{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ $.Ident.Runtime.Workdir }}/{{ .Dest }}', mode: '{{ .Mode }}' }{{ end }}
+{{ range $index, $str := .Ident.Runtime.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.Ident.Runtime.Static.Src $index }}', dest: '{{ $.Ident.Runtime.Workdir }}/{{ $.Ident.Runtime.Static.Dest $index}}', mode: '{{ $.Ident.Runtime.Static.Mode $index }}' }
+{{ end }}
+{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', mode: '{{ .Mode }}' }
+{{ end }}
 `)
 
 var configFileTemplate, _ = template.New(CONFIG_FILENAME).Parse(`[defaults]
@@ -212,7 +214,7 @@ func buildVars(tmpPath string, ident *application.Identifier, app *models.Applic
 	}
 	defer w.Close()
 
-	configs, err := extractConfigs(tmpPath, app)
+	configs, err := extractConfigs(tmpPath, ident, app)
 	if err != nil {
 		return err
 	}
@@ -272,7 +274,7 @@ type ConfigFile struct {
 }
 
 // Copy application configs
-func extractConfigs(tmpPath string, app *models.Application) ([]ConfigFile, error) {
+func extractConfigs(tmpPath string, ident *application.Identifier, app *models.Application) ([]ConfigFile, error) {
 
 	// Get all configs
 	configs, err := models.ConfigMapper.FetchAllEnabled(app)
@@ -300,8 +302,8 @@ func extractConfigs(tmpPath string, app *models.Application) ([]ConfigFile, erro
 		}
 
 		configFiles = append(configFiles, ConfigFile{
-			Src:  src,         // Absolute path to src file
-			Dest: config.Path, // relativ path
+			Src:  src,                                           // Absolute path to src file
+			Dest: path.Join(ident.Runtime.Workdir, config.Path), // absolute path
 			Mode: "0644",
 		})
 	}
