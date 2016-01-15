@@ -24,7 +24,7 @@
         <input class="form-control" type="text" id="ssh_user" name="ssh_user" placeholder="root" value="{{ .SshUser }}"/>
       </div>
       <h3 class="box-subtitle">Execute this on your server:</h3>
-      <pre id="register_cmd">curl {{ .PublicHost }}/api/nodes/register.sh?ssh_user={{ .SshUser }}&ssh_port={{ .SshPort }} | bash</pre>
+      <pre id="register_cmd">curl "{{ .PublicHost }}/api/nodes/register.sh?ssh_user={{ .SshUser }}&ssh_port={{ .SshPort }}" | bash</pre>
       <div class="text-center">
         <a href="/nodes" class="btn">OK</a>
       </div>
@@ -39,7 +39,7 @@ for (i = 0; i < inputs.length; i++) {
         sshUser = document.getElementById("ssh_user").value;
         sshPort = document.getElementById("ssh_port").value;
 
-        document.getElementById("register_cmd").innerHTML = "curl " + karhuUrl + "/api/nodes/register.sh?ssh_user="+sshUser+"&ssh_port="+sshPort + " | bash";
+        document.getElementById("register_cmd").innerHTML = "curl \"" + karhuUrl + "/api/nodes/register.sh?ssh_user="+sshUser+"&ssh_port="+sshPort + "\" | bash";
     };
 }
 </script>

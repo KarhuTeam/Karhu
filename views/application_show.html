@@ -16,33 +16,19 @@
   </div>
   <div class="box-col">
     <div class="box">
-      <h2 class="box-title">CoreAPI - Alpha<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+      <h2 class="box-title">Deployments</h2>
       <ul class="box-list">
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+        {{ range $deployment := .deployments }}
+          <li>Deploy #{{$deployment.Id.Hex}} <span class="right"><a href="/api/apps/{{$.application.Id.Hex}}/builds/{{$deployment.BuildId.Hex}}/deploy">Redeploy build #{{$deployment.BuildId.Hex}}</a></span></li>
+        {{ end }}
       </ul>
     </div>
     <div class="box">
-      <h2 class="box-title">CoreAPI - Beta<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+      <h2 class="box-title">Builds</h2>
       <ul class="box-list">
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-      </ul>
-    </div>
-    <div class="box">
-      <h2 class="box-title">CoreAPI - Prod<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
-      <ul class="box-list">
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
-        <li>Commit c0cb8a1d <span class="right"><a href="">Deploy</a></span></li>
+          {{ range $build := .builds }}
+            <li>Build #{{$build.Id.Hex}}  <span class="right"><form action="/api/apps/{{$.application.Id.Hex}}/builds/{{$build.Id.Hex}}/deploy" method="POST"><button type="submit">Deploy</button></span></li>
+          {{ end }}
       </ul>
     </div>
   </div>
