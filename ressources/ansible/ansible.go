@@ -135,6 +135,7 @@ func Run(depl *models.Deployment) error {
 		return err
 	}
 	log.Println("ressources/ansible: Run: tmpPath:", tmpPath)
+	depl.TmpPath = tmpPath
 	// defer os.RemoveAll(tmpPath)
 
 	// build hosts

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/models"
 	"net/http"
@@ -10,12 +11,18 @@ import (
 type DeploymentController struct {
 }
 
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
 func NewDeploymentController(s *gin.RouterGroup) *DeploymentController {
 
 	ctl := &DeploymentController{}
 
 	s.GET("/apps/:id/deploy/:deploy_id", ctl.getDeployment)
 	s.GET("/apps/:id/deploy", ctl.getDeploymentList)
+	s.GET("/ws/apps/:id/deploy/:deploy_id", ctl.getDeploymentWebSocket)
 
 	return ctl
 }
@@ -76,4 +83,42 @@ func (dc *DeploymentController) getDeploymentList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, deploys)
+}
+
+func (dc *DeploymentController) getDeploymentWebSocket(c *gin.Context) {
+
+	app, err := dc.getApp(c)
+	if err != nil {
+		c.JSON(http.StatusNotFound, err)
+		return
+	}
+
+	deployId := c.Param("deploy_id")
+
+	depl, err := models.DeploymentMapper.FetchOne(app, deployId)
+	if err != nil {
+		panic(err)
+	}
+
+	if depl == nil {
+		c.JSON(http.StatusNotFound, depl)
+		return
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		messageType, p, err := conn.ReadMessage()
+		if err != nil {
+			panic(err)
+		}
+		if err = conn.WriteMessage(messageType, p); err != nil {
+			panic(err)
+		}
+	}
+
+	c.JSON(http.StatusOK, depl)
 }
