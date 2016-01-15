@@ -27,6 +27,12 @@ input[type=text], textarea {
   padding: 8px;
   border-radius: 3px; }
 
+pre {
+  padding: 20px;
+  background: #444;
+  margin: 10px 0;
+  color: #fff; }
+
 /* Basics */
 .text-center {
   text-align: center; }
@@ -72,11 +78,14 @@ input[type=text], textarea {
 
 /* Breadcrumb */
 .breadcrumb {
-  background-color: #cdd0d2;
+  background-color: #444;
   height: 40px;
   line-height: 40px;
   font-size: 12px;
-  padding-left: 10px; }
+  padding-left: 10px;
+  color: #fff; }
+  .breadcrumb a {
+    color: #b8d3ed; }
 
 .box {
   padding: 10px;
@@ -128,25 +137,40 @@ input[type=text], textarea {
     line-height: 30px; }
   .form-group .form-control {
     flex-grow: 1; }
-    .form-group .form-control button {
-      display: inline-block;
-      background-color: #cdd0d2;
-      color: #121212;
-      border: 0;
-      border-radius: 3px;
-      padding: 5px;
-      font-weight: bold; }
   @media screen and (min-width: 500px) {
     .form-group {
       flex-direction: row; }
       .form-group label {
         width: 140px; } }
 
+.form-tag-item input {
+  border-radius: 3px 0 0 3px;
+  background: #577c9f; }
+.form-tag-item button {
+  padding: 8px 5px 7px;
+  border-radius: 0 3px 3px 0;
+  border: 0;
+  background: rgba(87, 124, 159, 0.8);
+  margin: 0 4px 4px 0;
+  color: #fff; }
+
 .alert {
   margin-bottom: 10px;
   padding: 8px;
   border-radius: 3px; }
+  .alert-title {
+    font-size: 16px;
+    margin-bottom: 5px; }
   .alert-danger {
     background: #833030; }
+  .alert-info {
+    background: #5f6f7e; }
+
+.label {
+  display: inline-block;
+  background: rgba(87, 124, 159, 0.8);
+  padding: 4px;
+  border-radius: 3px;
+  color: #fff; }
 
 /*# sourceMappingURL=app.min.css.map */

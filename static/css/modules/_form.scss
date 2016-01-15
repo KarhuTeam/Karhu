@@ -9,18 +9,30 @@
     }
 
     .form-control {
-      @include form-buttons;
       flex-grow: 1;
-    }
-
-    .add-var-button {
-
     }
     @media screen and (min-width: $medium) {
         flex-direction:row;
 
         label {
             width: 140px;
+        }
+    }
+}
+
+.form-tag {
+    &-item {
+        input {
+            border-radius: 3px 0 0 3px;
+            background: $light-blue;
+        }
+        button {
+            padding: 8px 5px 7px;
+            border-radius: 0 3px 3px 0;
+            border: 0;
+            background: rgba($light-blue, 0.8);
+            margin: 0 4px 4px 0;
+            color: #fff;
         }
     }
 }

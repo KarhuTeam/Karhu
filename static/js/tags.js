@@ -12,20 +12,20 @@
 		** 	<button class="tags-add-button"> -- If you also want an 'add' button (Cf Khaled)
 		*/
 
-		var tagsContainer = document.getElementsByClassName('tags-container');
+		var tagsContainer = document.getElementsByClassName('form-tag-list');
 
 		if (tagsContainer.length === 0)
 			return ;
 
 		tagsContainer = tagsContainer[0];
 
-		var tags = tagsContainer.getElementsByTagName('div')
+		var tags = tagsContainer.getElementsByClassName('form-tag-item')
 		for (var i = 0; i < tags.length; i++) {
 			tags[i].getElementsByTagName('button')[0].onclick = removeTag;
 		}
 
 		var i = 0;
-		var tagsInput = document.getElementsByClassName('tags-add-input')[0];
+		var tagsInput = document.getElementsByClassName('form-tag-add')[0];
 
 		tagsInput.onkeypress = function(event) {
 			if (event.which === 13 || event.keyCode === 13) {
@@ -34,35 +34,32 @@
 			}
 		};
 
-		document.getElementsByClassName('tags-add-button')[0].onclick = function(event) {
-			event.preventDefault();
-			return addTags(tagsInput.value);
-		}
-
 		function addTags(value) {
 			var value = tagsInput.value;
 			if (value === undefined || value.length === 0)
 				return ;
-			tagsContainer.appendChild(new buildElem(value));
+			tagsContainer.insertBefore(new buildElem(value), tagsInput);
 			tagsInput.value = '';
 		}
 
 		function buildElem(value) {
-			var div = document.createElement('div');
+			var span = document.createElement('span');
 			var input = document.createElement('input');
 			var removeButton = document.createElement('button');
+
+			span.classList.add('form-tag-item');
 
 			input.setAttribute('value', value);
 			input.setAttribute('name', 'tags[]');
 			input.setAttribute('type', 'text');
 			input.setAttribute('readonly', '');
 
-			removeButton.innerHTML = 'Remove';
+			removeButton.innerHTML = 'x';
 			removeButton.onclick = removeTag;
 
-			div.appendChild(input);
-			div.appendChild(removeButton);
-			return div;
+			span.appendChild(input);
+			span.appendChild(removeButton);
+			return span;
 		}
 
 		function removeTag(event) {

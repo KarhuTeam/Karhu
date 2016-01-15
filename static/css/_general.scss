@@ -27,6 +27,13 @@ input[type=text], textarea {
     border-radius: 3px;
 }
 
+pre {
+    padding: 20px;
+    background: $gray;
+    margin: 10px 0;
+    color: #fff;
+}
+
 
 /* Basics */
 .text-center {

@@ -25,15 +25,11 @@
       <div class="form-group">
         <label for="app-tags">Tags :</label>
         <div class="form-control form-tag">
-          <div class="tag-unit-container">
-            <input class="form-control tags-add-input" type="text" placeholder="Add a tag and add it with enter" />
-          </div>
-          <button class="tags-add-button">Add</button>
-          <div class="tags-container">
-              {{range $tag := .form.Tags}}
-                <div><input type="text" name="tags[]" readonly="" value="{{$tag}}" /><button>Remove</button></div>
-              {{end}}
-          </div>
+            <div class="form-control form-tag">
+              <div class="form-tag-list">
+                  {{range $tag := .form.Tags}}<span class="form-tag-item"><input type="text" name="tags[]" readonly="" value="{{$tag}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" type="text" placeholder="Add a tag..." />
+              </div>
+            </div>
         </div>
       </div>
       <div class="text-center">

@@ -1,9 +1,14 @@
 /* Breadcrumb */
 
 .breadcrumb {
-    background-color: $light-gray;
+    background-color: $gray;
     height: $breadcrumb-height;
     line-height:$breadcrumb-height;
     font-size: 12px;
     padding-left: 10px;
+    color: #fff;
+
+    a {
+        color: #b8d3ed;
+    }
 }

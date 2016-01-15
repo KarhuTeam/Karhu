@@ -12,7 +12,7 @@
     <div class="box">
       <h2 class="box-title">{{ .Hostname }}<a class="right" href="/node/edit/{{ .Id.Hex }}">Edit</a></h2>
       <p class="box-text">{{ .Description }}</p>
-      <p class="box-text">{{ .Tags }}</p>
+      <p class="box-text">Tags : {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
     </div>
     {{ end }}
   </div>
