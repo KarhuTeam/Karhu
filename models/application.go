@@ -16,13 +16,12 @@ var ApplicationMapper = &applicationMapper{}
 const applicationCollection = "application"
 
 type Application struct {
-	Id          bson.ObjectId     `json:"id" bson:"_id"`
-	Name        string            `json:"name" bson:"name"`
-	Description string            `json:"description" bson:"description"`
-	Tags        []string          `json:"tags" bson:"tags"` // Tags are used for application search
-	Vars        map[string]string `json:"vars" bson:"vars"` // Vars are set in env when deploying a application
-	CreatedAt   time.Time         `json:"created_at" bson:"created_at"`
-	UpdatedAt   time.Time         `json:"updated_at" bson:"updated_at"`
+	Id          bson.ObjectId `json:"id" bson:"_id"`
+	Name        string        `json:"name" bson:"name"`
+	Description string        `json:"description" bson:"description"`
+	Tags        []string      `json:"tags" bson:"tags"` // Tags are used for application search
+	CreatedAt   time.Time     `json:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at" bson:"updated_at"`
 }
 
 func (p *Application) Update(f *ApplicationUpdateForm) {

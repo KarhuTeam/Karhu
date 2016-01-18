@@ -11,15 +11,14 @@
   <div class="box">
     <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}">Edit</a></h2>
     <p class="box-text">{{ .application.Description }}</p>
-    <p class="box-text">{{ .application.Tags }}</p>
-    <p class="box-text">{{ .application.Vars }}</p>
+    <p class="box-text">Tags : {{range $tag := .application.Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
   </div>
   <div class="box-col">
     <div class="box">
       <h2 class="box-title">Deployments</h2>
       <ul class="box-list">
         {{ range $deployment := .deployments }}
-          <li>Deploy #{{$deployment.Id.Hex}} <span class="right"><a href="/api/apps/{{$.application.Id.Hex}}/builds/{{$deployment.BuildId.Hex}}/deploy">Redeploy build #{{$deployment.BuildId.Hex}}</a></span></li>
+          <li><span class="state state-{{$deployment.Status}}"></span> Deploy #{{$deployment.Id.Hex}} <span class="right"><a href="/api/apps/{{$.application.Id.Hex}}/builds/{{$deployment.BuildId.Hex}}/deploy">Redeploy build #{{$deployment.BuildId.Hex}}</a></span></li>
         {{ end }}
       </ul>
     </div>

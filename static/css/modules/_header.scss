@@ -10,6 +10,14 @@
         line-height: $header-height;
         padding-left: 10px;
         color: #fff;
+
+        & a {
+            color: #fff;
+
+            &:hover {
+                color: #ddd;
+            }
+        }
     }
 
     &.is-open {
