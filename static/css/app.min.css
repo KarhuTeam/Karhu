@@ -127,11 +127,18 @@ pre {
   border: 0;
   text-transform: uppercase;
   border-radius: 3px; }
+  .btn.btn-small {
+    padding: 4px 6px;
+    font-size: 9px; }
   .btn:hover {
     background-color: #183b5f;
     color: #fff; }
   .btn-danger {
     background: #833030; }
+    .btn-danger:hover {
+      background: rgba(131, 48, 48, 0.8); }
+  .btn:hover {
+    cursor: pointer; }
 
 /* Form */
 .form-group {

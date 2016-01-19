@@ -1,0 +1,11 @@
+{{template "header"}}
+  <div class="breadcrumb">
+    <a href="/">All applications</a> &gt; <a href="/application/show/{{ .application.Id.Hex }}">{{ .application.Name }}</a> &gt; Deploy #{{ .deployment.Id.Hex }}
+  </div>
+</header>
+<main>
+  <div class="box">
+      <pre class="stream" data-socket="ws://localhost:8080/ws/application/deployment/{{ .application.Id.Hex }}/{{ .deployment.Id.Hex }}"></pre>
+  </div>
+</main>
+{{template "footer"}}

@@ -27,8 +27,6 @@ func NewApplicationController(s *web.Server) *ApplicationController {
 	s.POST("/application/edit/:id", ctl.postEditApplicationAction)
 	// 5 - Delete an application
 	s.GET("/application/delete/:id", ctl.getDeleteApplicationAction)
-	// 6 - Show an application deployment
-	s.GET("/application/deployment/:id/:id_deployment", ctl.getDeployApplicationAction)
 
 	return ctl
 }
@@ -218,12 +216,4 @@ func (ctl *ApplicationController) getDeleteApplicationAction(c *gin.Context) {
 	models.ApplicationMapper.Delete(application)
 
 	c.Redirect(http.StatusMovedPermanently, "/")
-}
-
-/**
- * 6 - Deploy an application
- */
-func (ctl *ApplicationController) getDeployApplicationAction(c *gin.Context) {
-
-	c.HTML(http.StatusOK, "application_deploy.html", nil)
 }

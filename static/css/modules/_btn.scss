@@ -8,12 +8,24 @@
     text-transform: uppercase;
     border-radius: 3px;
 
+    &.btn-small {
+        padding: 4px 6px;
+        font-size: 9px;
+    }
+
     &:hover {
         background-color: $dark-blue;
         color: #fff;
     }
     &-danger {
         background: $red;
+        &:hover {
+            background: rgba($red, 0.8);
+        }
+    }
+
+    &:hover {
+        cursor:pointer;
     }
 }
 

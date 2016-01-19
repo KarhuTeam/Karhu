@@ -18,7 +18,14 @@
       <h2 class="box-title">Deployments</h2>
       <ul class="box-list">
         {{ range $deployment := .deployments }}
-          <li><span class="state state-{{$deployment.Status}}"></span> Deploy #{{$deployment.Id.Hex}} <span class="right"><a href="/api/apps/{{$.application.Id.Hex}}/builds/{{$deployment.BuildId.Hex}}/deploy">Redeploy build #{{$deployment.BuildId.Hex}}</a></span></li>
+          <li>
+              <span class="state state-{{$deployment.Status}}"></span>
+              Deploy <a href="/application/deployment/{{$.application.Id.Hex}}/{{$deployment.Id.Hex}}">#{{$deployment.Id.Hex}}</a>
+              <span class="right">
+                  <form action="/application/deployment/{{ $.application.Id.Hex }}/{{$deployment.BuildId.Hex}}" method="POST">
+                      <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Redeploy</button>
+                  </form>
+              </span></li>
         {{ end }}
       </ul>
     </div>
@@ -26,7 +33,12 @@
       <h2 class="box-title">Builds</h2>
       <ul class="box-list">
           {{ range $build := .builds }}
-            <li>Build #{{$build.Id.Hex}}  <span class="right"><form action="/api/apps/{{$.application.Id.Hex}}/builds/{{$build.Id.Hex}}/deploy" method="POST"><button type="submit">Deploy</button></span></li>
+            <li>Build #{{$build.Id.Hex}}
+                <span class="right">
+                    <form action="/application/deployment/{{ $.application.Id.Hex }}/{{$build.Id.Hex}}" method="POST">
+                        <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Deploy</button>
+                    </form>
+                </span></li>
           {{ end }}
       </ul>
     </div>
