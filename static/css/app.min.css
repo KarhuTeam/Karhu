@@ -41,6 +41,9 @@ pre {
 .right {
   float: right; }
 
+.select {
+  display: inline-block; }
+
 /* Header */
 .header {
   height: 60px;
@@ -109,6 +112,9 @@ pre {
   .box-list > li {
     border-bottom: 1px solid #333;
     padding: 10px; }
+  .box-subtitle {
+    color: #cdd0d2;
+    font-size: 12px; }
 
 @media screen and (min-width: 850px) {
   .box-col {

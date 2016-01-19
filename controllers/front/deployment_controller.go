@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"time"
 )
 
@@ -175,7 +176,7 @@ func (ctl *DeploymentController) getDeploymentWSAction(c *gin.Context) {
 	}
 	defer sock.Close()
 
-	file, err := os.Open("./test.txt")
+	file, err := os.Open(path.Join(deployment.TmpPath, "karhu.log"))
 	if err != nil {
 		log.Println("ws: ", err)
 	}

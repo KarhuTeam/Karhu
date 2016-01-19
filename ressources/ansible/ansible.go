@@ -24,7 +24,8 @@ const (
 )
 
 var hostFileTemplate, _ = template.New(HOSTS_FILENAME).Parse(`[{{ .Ident.Name }}]
-{{ range .Nodes }}{{ .Hostname }} ansible_ssh_host={{ .IP }} ansible_ssh_port={{ .SshPort }} ansible_ssh_user={{ .SshUser }}{{ end }}
+{{ range .Nodes }}{{ .Hostname }} ansible_ssh_host={{ .IP }} ansible_ssh_port={{ .SshPort }} ansible_ssh_user={{ .SshUser }}
+{{ end }}
 `)
 
 var playbookFileTemplate, _ = template.New(PLAYBOOK_FILENAME).Parse(`---
@@ -136,8 +137,16 @@ func Run(depl *models.Deployment) error {
 	if err != nil {
 		return err
 	}
+
+	if err := ioutil.WriteFile(path.Join(tmpPath, "karhu.log"), []byte(fmt.Sprintf("Deployment %s\n", depl.Id.Hex())), 0644); err != nil {
+		return err
+	}
+
 	log.Println("ressources/ansible: Run: tmpPath:", tmpPath)
 	depl.TmpPath = tmpPath
+	if err := models.DeploymentMapper.Update(depl); err != nil {
+		return err
+	}
 	// defer os.RemoveAll(tmpPath)
 
 	// build hosts

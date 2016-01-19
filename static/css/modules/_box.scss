@@ -20,6 +20,11 @@
         border-bottom: 1px solid #333;
         padding: 10px;
     }
+
+    &-subtitle {
+        color: $light-gray;
+        font-size: 12px;
+    }
 }
 
 @media screen and (min-width: $large) {
