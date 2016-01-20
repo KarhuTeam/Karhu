@@ -178,7 +178,7 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 	}
 
 	// Check the form values
-	if err := form.Validate(); err != nil {
+	if err := form.Validate(application); err != nil {
 		fmt.Println(err.Errors)
 		c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
 			"errors": err.Errors,

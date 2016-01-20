@@ -73,17 +73,6 @@ func (pc *ApplicationController) getApplication(c *gin.Context) {
 
 func (pc *ApplicationController) putApplication(c *gin.Context) {
 
-	var form models.ApplicationUpdateForm
-	if err := c.Bind(&form); err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	if err := form.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, err)
-		return
-	}
-
 	id := c.Param("id")
 
 	application, err := models.ApplicationMapper.FetchOne(id)
@@ -93,6 +82,17 @@ func (pc *ApplicationController) putApplication(c *gin.Context) {
 
 	if application == nil {
 		c.JSON(http.StatusNotFound, application)
+		return
+	}
+
+	var form models.ApplicationUpdateForm
+	if err := c.Bind(&form); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if err := form.Validate(application); err != nil {
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 

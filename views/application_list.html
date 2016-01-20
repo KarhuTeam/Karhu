@@ -10,7 +10,7 @@
   <div class="box-col">
     {{ range .applications }}
     <div class="box">
-      <h2 class="box-title">{{ .Name }}<a class="right" href="/application/show/{{ .Id.Hex }}">Show</a></h2>
+      <h2 class="box-title">{{ .Name }}<a class="right" href="/application/show/{{ .Name }}">Show</a></h2>
       <p class="box-text">{{ .Description }}</p>
       <p class="box-text">Tags : {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
       <ul class="box-list">
