@@ -302,9 +302,14 @@ func extractConfigs(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app
 			return nil, err
 		}
 
+		destPath := config.Path
+		if destPath[0] != '/' {
+			destPath = path.Join(runtimeCfg.Workdir, config.Path)
+		}
+
 		configFiles = append(configFiles, ConfigFile{
-			Src:  src,                                        // Absolute path to src file
-			Dest: path.Join(runtimeCfg.Workdir, config.Path), // absolute path
+			Src:  src,      // Absolute path to src file
+			Dest: destPath, // absolute path
 			Mode: "0644",
 		})
 	}
