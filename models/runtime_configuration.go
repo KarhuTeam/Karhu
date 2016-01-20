@@ -38,11 +38,12 @@ func (sf StaticFiles) Mode(i int) string {
 }
 
 type RuntimeConfiguration struct {
-	Type    string      `yml:"type" bson:"type"`
-	User    string      `yml:"user" bson:"user"`
-	Bin     string      `yml:"bin" bson:"bin"`
-	Workdir string      `yml:"workdir" bson:"workdir"`
-	Static  StaticFiles `yml:"static" bson:"static"`
+	Type         string      `yml:"type" bson:"type"`
+	User         string      `yml:"user" bson:"user"`
+	Bin          string      `yml:"bin" bson:"bin"`
+	Workdir      string      `yml:"workdir" bson:"workdir"`
+	Static       StaticFiles `yml:"static" bson:"static"`
+	Dependencies []string    `yml:"dependencies" bson:"dependencies"`
 }
 
 func (c *RuntimeConfiguration) isValid() error {
