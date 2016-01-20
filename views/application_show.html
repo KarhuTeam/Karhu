@@ -6,7 +6,6 @@
 <main>
   <div class="box">
     <a class="btn" href="/application/edit/{{ .application.Id.Hex }}">Edit</a>
-    <a class="btn" href="/application/configuration/{{ .application.Id.Hex }}">Add configuration</a>
     <a class="btn btn-danger" data-text="Do you want to remove this application ?" href="/application/delete/{{ .application.Id.Hex }}">Delete</a>
   </div>
   <div class="box">
@@ -44,7 +43,7 @@
       </ul>
     </div>
     <div class="box">
-      <h2 class="box-title">Configs</h2>
+      <h2 class="box-title">Configs<a class="right btn" href="/application/configuration/{{ .application.Name }}">Add configuration</a></h2>
       <ul class="box-list">
           {{ range $config := .configs }}
             <li>
@@ -55,7 +54,7 @@
                 {{ end }}
                 Config {{$config.Path}}
                 <span class="right">
-                    <a href="/application/config/{{ $.application.Name }}/{{ $config.Id.Hex }}">Edit</a>
+                    <a href="/application/configuration/{{ $.application.Name }}/{{ $config.Id.Hex }}">Edit</a>
                 </span>
             </li>
           {{ end }}

@@ -16,15 +16,15 @@
     <form method="POST" action="">
       <div class="form-group">
         <label for="config-path">Path :</label>
-        <input class="form-control" id="config-path" name="path" type="text" placeholder="Path..." {{ if .form }} value="{{.form.Path}}" {{ end }} />
+        <input class="form-control" id="config-path" name="path" type="text" placeholder="Path..." value="{{.form.Path}}" />
       </div>
       <div class="form-group">
         <label for="config-content">Content :</label>
-        <textarea class="form-control" id="config-content" name="content" placeholder="Content...">{{ if .form }}{{.form.Content}}{{ end }}</textarea>
+        <textarea class="form-control" id="config-content" name="content" placeholder="Content...">{{.form.Content}}</textarea>
       </div>
       <div class="form-group">
         <label for="config-enabled">Enabled :</label>
-        <input class="form-control" id="config-enabled" name="enabled" type="checkbox" {{ if not .form or .form.Enabled}}checked="checked"{{ end }} />
+        <input class="form-control" id="config-enabled" name="enabled" type="checkbox" {{ if .form.Enabled }}checked="checked"{{ end }} />
       </div>
       <div class="text-center">
         <button class="btn" type="submit">Add a config</button>

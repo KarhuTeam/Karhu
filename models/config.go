@@ -69,6 +69,12 @@ func (f ConfigUpdateForm) Validate() *errors.Errors {
 	return validator.Validate(&f)
 }
 
+func (f *ConfigUpdateForm) Hydrate(c *Config) {
+	f.Path = c.Path
+	f.Content = c.Content
+	f.Enabled = c.Enabled
+}
+
 func (c *Config) Update(form *ConfigUpdateForm) {
 	c.Path = form.Path
 	c.Content = form.Content
