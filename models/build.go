@@ -2,14 +2,16 @@ package models
 
 import (
 	"github.com/gotoolz/errors"
-	// "github.com/gotoolz/validator"
-	"github.com/karhuteam/karhu/ressources/application"
 	"github.com/karhuteam/karhu/ressources/file"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"path"
 	"time"
 )
 
@@ -34,30 +36,19 @@ func init() {
 }
 
 type Build struct {
-	Id            bson.ObjectId `json:"id" bson:"_id"`
-	ApplicationId bson.ObjectId `json:"application_id" bson:"application_id"`
-	CommitHash    string        `json:"commit_hash" bson:"commit_id"`
-	FilePath      string        `json:"file_path" bson:"file_path"`
-	CreatedAt     time.Time     `json:"created_at" bson:"created_at"`
+	Id            bson.ObjectId         `json:"id" bson:"_id"`
+	ApplicationId bson.ObjectId         `json:"application_id" bson:"application_id"`
+	CommitHash    string                `json:"commit_hash" bson:"commit_id"`
+	FilePath      string                `json:"file_path" bson:"file_path"`
+	CreatedAt     time.Time             `json:"created_at" bson:"created_at"`
+	RuntimeCfg    *RuntimeConfiguration `json:"-" bson:"runtime_cfg"`
 }
 
 type Builds []*Build
 
-func (b *Build) GetIdent() (*application.Identifier, error) {
+func (b *Build) GetApplication() (*Application, error) {
 
-	// Fetch zip
-	data, err := file.Get(b.FilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	// Parse karhu file
-	ident, err := application.Read(data)
-	if err != nil {
-		return nil, err
-	}
-
-	return ident, nil
+	return ApplicationMapper.FetchOne(b.ApplicationId.Hex())
 }
 
 func (b *Build) AttachFile(f multipart.File) error {
@@ -84,9 +75,66 @@ func (b *Build) AttachFile(f multipart.File) error {
 	}
 
 	// Check ident
-	if _, err := b.GetIdent(); err != nil {
+	if err := b.readRuntimeConfig(data); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (b *Build) readRuntimeConfig(data []byte) error {
+
+	// Temp work dir
+	tmpPath, err := ioutil.TempDir("", bson.NewObjectId().Hex())
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpPath)
+
+	// Write zip file
+	zipPath := path.Join(tmpPath, "karhu.zip")
+	if err := ioutil.WriteFile(zipPath, data, 0644); err != nil {
+		return err
+	}
+
+	// Unzip file
+	if err := file.Unzip(zipPath, tmpPath); err != nil {
+		return err
+	}
+
+	// Read karhu file
+	data, err = ioutil.ReadFile(path.Join(tmpPath, KARHU_FILE_NAME))
+	if err != nil {
+		log.Println("models/Build: ReadFile:", err)
+		return err
+	}
+
+	config := new(RuntimeConfiguration)
+	if err := yaml.Unmarshal(data, config); err != nil {
+		log.Println("models/Build: Unmarshal:", err)
+		return err
+	}
+
+	app, err := b.GetApplication()
+	if err != nil {
+		log.Println("models/Build: GetApplication:", err)
+		return err
+	}
+
+	// Setup workdir if needed
+	if config.Workdir == "" {
+		config.Workdir = path.Join(KARHU_DEFAULT_RUNTIME_WORKDIR_BASE, app.Name)
+	}
+
+	if config.User == "" {
+		config.User = KARHU_DEFAULT_RUNTIME_USER
+	}
+
+	if err := config.isValid(); err != nil {
+		return err
+	}
+
+	b.RuntimeCfg = config
 
 	return nil
 }

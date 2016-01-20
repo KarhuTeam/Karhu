@@ -6,7 +6,7 @@
 ##
 
 [Unit]
-Description={{ name }} - auto generate systemctl service file
+Description={{ application_name }} - auto generate systemctl service file
 
 [Service]
 #EnvironmentFile=

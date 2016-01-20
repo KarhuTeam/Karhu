@@ -18,10 +18,10 @@
   notify: restart service
 
 - name: Setup systemctl script
-  template: src=binary.service dest=/lib/systemd/system/{{ name }}.service
+  template: src=binary.service dest=/lib/systemd/system/{{ application_name }}.service
   notify: systemctl daemon-reload
 
 ## TODO config stuff
 
 - name: Enable & Start Service
-  service: name={{ name }} state=started enabled=yes
+  service: name={{ application_name }} state=started enabled=yes

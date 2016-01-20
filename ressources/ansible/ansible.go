@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gotoolz/env"
 	"github.com/karhuteam/karhu/models"
-	"github.com/karhuteam/karhu/ressources/application"
 	"github.com/karhuteam/karhu/ressources/file"
 	"github.com/karhuteam/karhu/ressources/ssh"
 	"io/ioutil"
@@ -23,32 +22,31 @@ const (
 	CONFIG_FILENAME   = "ansible.cfg"
 )
 
-var hostFileTemplate, _ = template.New(HOSTS_FILENAME).Parse(`[{{ .Ident.Name }}]
+var hostFileTemplate, _ = template.New(HOSTS_FILENAME).Parse(`[all]
 {{ range .Nodes }}{{ .Hostname }} ansible_ssh_host={{ .IP }} ansible_ssh_port={{ .SshPort }} ansible_ssh_user={{ .SshUser }}
 {{ end }}
 `)
 
 var playbookFileTemplate, _ = template.New(PLAYBOOK_FILENAME).Parse(`---
 
-- hosts: {{ .Ident.Name }}
+- hosts: all
   sudo: yes
   vars_files:
   - {{ .Vars }}
   roles:
-  - {{ .Ident.Runtime.Type }}
+  - {{ .RuntimeConfig.Type }}
 `)
 
 var varsFileTemplate, _ = template.New(VARS_FILENAME).Parse(`---
 
-name: {{ .Ident.Name }}
-version: {{ .Ident.Version }}
-runtime_type: {{ .Ident.Runtime.Type }}
-runtime_user: {{ .Ident.Runtime.User }}
-runtime_bin: {{ .Ident.Runtime.Bin }}
-runtime_workdir: {{ .Ident.Runtime.Workdir }}
+application_name: {{ .Application.Name }}
+runtime_type: {{ .RuntimeConfig.Type }}
+runtime_user: {{ .RuntimeConfig.User }}
+runtime_bin: {{ .RuntimeConfig.Bin }}
+runtime_workdir: {{ .RuntimeConfig.Workdir }}
 runtime_files:
-  - { src: '{{ .TmpPath }}/karhu/{{ .Ident.Runtime.Bin }}', dest: '{{ .Ident.Runtime.Workdir }}/bin/{{ .Ident.Runtime.Bin }}', mode: '0755' }
-{{ range $index, $str := .Ident.Runtime.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.Ident.Runtime.Static.Src $index }}', dest: '{{ $.Ident.Runtime.Workdir }}/{{ $.Ident.Runtime.Static.Dest $index}}', mode: '{{ $.Ident.Runtime.Static.Mode $index }}' }
+  - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755' }
+{{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}' }
 {{ end }}
 {{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', mode: '{{ .Mode }}' }
 {{ end }}
@@ -118,13 +116,6 @@ ssh_args = -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i {{ .Ss
 
 func Run(depl *models.Deployment) error {
 
-	// Get ident
-	ident, err := depl.Build.GetIdent()
-	if err != nil {
-		log.Println("ressources/ansible: Run: Build.GetIdent:", err)
-		return err
-	}
-
 	// Get Nodes
 	nodes, err := models.NodeMapper.FetchAllForApp(depl.Application)
 	if err != nil {
@@ -150,17 +141,17 @@ func Run(depl *models.Deployment) error {
 	// defer os.RemoveAll(tmpPath)
 
 	// build hosts
-	if err := buildHosts(tmpPath, ident, nodes); err != nil {
+	if err := buildHosts(tmpPath, depl.Build.RuntimeCfg, nodes); err != nil {
 		return err
 	}
 
 	// build playbook
-	roles, err := buildPlaybook(tmpPath, ident)
+	roles, err := buildPlaybook(tmpPath, depl.Build.RuntimeCfg)
 	if err != nil {
 		return err
 	}
 
-	if err := buildVars(tmpPath, ident, depl.Application); err != nil {
+	if err := buildVars(tmpPath, depl.Build.RuntimeCfg, depl.Application); err != nil {
 		return err
 	}
 
@@ -187,7 +178,7 @@ func Run(depl *models.Deployment) error {
 
 }
 
-func buildHosts(tmpPath string, ident *application.Identifier, nodes models.Nodes) error {
+func buildHosts(tmpPath string, runtimeCfg *models.RuntimeConfiguration, nodes models.Nodes) error {
 
 	w, err := os.OpenFile(path.Join(tmpPath, HOSTS_FILENAME), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
@@ -196,12 +187,12 @@ func buildHosts(tmpPath string, ident *application.Identifier, nodes models.Node
 	defer w.Close()
 
 	return hostFileTemplate.Execute(w, map[string]interface{}{
-		"Ident": ident,
-		"Nodes": nodes,
+		"RuntimeConfig": runtimeCfg,
+		"Nodes":         nodes,
 	})
 }
 
-func buildPlaybook(tmpPath string, ident *application.Identifier) ([]string, error) {
+func buildPlaybook(tmpPath string, runtimeCfg *models.RuntimeConfiguration) ([]string, error) {
 
 	w, err := os.OpenFile(path.Join(tmpPath, PLAYBOOK_FILENAME), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
@@ -209,13 +200,13 @@ func buildPlaybook(tmpPath string, ident *application.Identifier) ([]string, err
 	}
 	defer w.Close()
 
-	return []string{ident.Runtime.Type}, playbookFileTemplate.Execute(w, map[string]interface{}{
-		"Ident": ident,
-		"Vars":  VARS_FILENAME,
+	return []string{runtimeCfg.Type}, playbookFileTemplate.Execute(w, map[string]interface{}{
+		"RuntimeConfig": runtimeCfg,
+		"Vars":          VARS_FILENAME,
 	})
 }
 
-func buildVars(tmpPath string, ident *application.Identifier, app *models.Application) error {
+func buildVars(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app *models.Application) error {
 
 	w, err := os.OpenFile(path.Join(tmpPath, VARS_FILENAME), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
@@ -223,15 +214,16 @@ func buildVars(tmpPath string, ident *application.Identifier, app *models.Applic
 	}
 	defer w.Close()
 
-	configs, err := extractConfigs(tmpPath, ident, app)
+	configs, err := extractConfigs(tmpPath, runtimeCfg, app)
 	if err != nil {
 		return err
 	}
 
 	return varsFileTemplate.Execute(w, map[string]interface{}{
-		"TmpPath": tmpPath,
-		"Ident":   ident,
-		"Configs": configs,
+		"TmpPath":       tmpPath,
+		"RuntimeConfig": runtimeCfg,
+		"Application":   app,
+		"Configs":       configs,
 	})
 }
 
@@ -283,7 +275,7 @@ type ConfigFile struct {
 }
 
 // Copy application configs
-func extractConfigs(tmpPath string, ident *application.Identifier, app *models.Application) ([]ConfigFile, error) {
+func extractConfigs(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app *models.Application) ([]ConfigFile, error) {
 
 	// Get all configs
 	configs, err := models.ConfigMapper.FetchAllEnabled(app)
@@ -311,8 +303,8 @@ func extractConfigs(tmpPath string, ident *application.Identifier, app *models.A
 		}
 
 		configFiles = append(configFiles, ConfigFile{
-			Src:  src,                                           // Absolute path to src file
-			Dest: path.Join(ident.Runtime.Workdir, config.Path), // absolute path
+			Src:  src,                                        // Absolute path to src file
+			Dest: path.Join(runtimeCfg.Workdir, config.Path), // absolute path
 			Mode: "0644",
 		})
 	}

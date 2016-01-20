@@ -4,4 +4,4 @@
   shell: /bin/systemctl daemon-reload
 
 - name: restart service
-  service: name={{ name }} state=restarted
+  service: name={{ application_name }} state=restarted
