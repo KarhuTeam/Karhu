@@ -96,10 +96,19 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 		return
 	}
 
+	configs, err := models.ConfigMapper.FetchAll(application)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
+
 	c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
 		"application": application,
 		"builds":      builds,
 		"deployments": deployments,
+		"configs":     configs,
 	})
 }
 

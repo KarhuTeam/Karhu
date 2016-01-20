@@ -21,9 +21,9 @@
         {{ range $deployment := .deployments }}
           <li>
               <span class="state state-{{$deployment.Status}}"></span>
-              Deploy <a href="/application/deployment/{{$.application.Id.Hex}}/{{$deployment.Id.Hex}}">#{{$deployment.Id.Hex}}</a>
+              Deploy <a href="/application/deployment/{{$.application.Name}}/{{$deployment.Id.Hex}}">#{{$deployment.Id.Hex}}</a>
               <span class="right">
-                  <form action="/application/deployment/{{ $.application.Id.Hex }}/{{$deployment.BuildId.Hex}}" method="POST">
+                  <form action="/application/deployment/{{ $.application.Name }}/{{$deployment.BuildId.Hex}}" method="POST">
                       <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Redeploy</button>
                   </form>
               </span></li>
@@ -36,10 +36,28 @@
           {{ range $build := .builds }}
             <li>Build #{{$build.Id.Hex}}
                 <span class="right">
-                    <form action="/application/deployment/{{ $.application.Id.Hex }}/{{$build.Id.Hex}}" method="POST">
+                    <form action="/application/deployment/{{ $.application.Name }}/{{$build.Id.Hex}}" method="POST">
                         <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Deploy</button>
                     </form>
                 </span></li>
+          {{ end }}
+      </ul>
+    </div>
+    <div class="box">
+      <h2 class="box-title">Configs</h2>
+      <ul class="box-list">
+          {{ range $config := .configs }}
+            <li>
+                {{ if $config.Enabled }}
+                    <span class="state state-done"></span>
+                {{ else }}
+                    <span class="state state-running"></span>
+                {{ end }}
+                Config {{$config.Path}}
+                <span class="right">
+                    <a href="/application/config/{{ $.application.Name }}/{{ $config.Id.Hex }}">Edit</a>
+                </span>
+            </li>
           {{ end }}
       </ul>
     </div>
