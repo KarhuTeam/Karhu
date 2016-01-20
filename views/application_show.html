@@ -6,6 +6,7 @@
 <main>
   <div class="box">
     <a class="btn" href="/application/edit/{{ .application.Id.Hex }}">Edit</a>
+    <a class="btn" href="/application/configuration/{{ .application.Id.Hex }}">Add configuration</a>
     <a class="btn btn-danger" data-text="Do you want to remove this application ?" href="/application/delete/{{ .application.Id.Hex }}">Delete</a>
   </div>
   <div class="box">
