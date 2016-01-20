@@ -47,8 +47,7 @@ runtime_workdir: {{ .RuntimeConfig.Workdir }}
 runtime_files:
   - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755' }
 {{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}' }
-{{ end }}
-{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', mode: '{{ .Mode }}' }
+{{ end }}{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', mode: '{{ .Mode }}' }
 {{ end }}
 `)
 
