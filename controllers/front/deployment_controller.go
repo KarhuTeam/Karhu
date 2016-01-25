@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/gotoolz/env"
 	"github.com/karhuteam/karhu/models"
 	"github.com/karhuteam/karhu/web"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"time"
@@ -109,9 +111,12 @@ func (ctl *DeploymentController) getDeploymentAction(c *gin.Context) {
 		return
 	}
 
+	karhuURL, _ := url.Parse(env.GetDefault("PUBLIC_HOST", "http://127.0.0.1:8080"))
+
 	c.HTML(http.StatusOK, "deployment_show.html", map[string]interface{}{
 		"application": application,
 		"deployment":  deployment,
+		"public_host": karhuURL.Host,
 	})
 }
 

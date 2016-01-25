@@ -5,7 +5,7 @@
 </header>
 <main>
   <div class="box">
-      <pre class="stream" data-socket="ws://localhost:8080/ws/application/deployment/{{ .application.Id.Hex }}/{{ .deployment.Id.Hex }}"></pre>
+      <pre class="stream" data-socket="ws://{{ .public_host }}/ws/application/deployment/{{ .application.Id.Hex }}/{{ .deployment.Id.Hex }}"></pre>
   </div>
 </main>
 {{template "footer"}}
