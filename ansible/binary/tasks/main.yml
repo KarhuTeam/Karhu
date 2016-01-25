@@ -14,18 +14,18 @@
 
 - name: Install Dependencies
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=86400
-  with_items: "{{ runtime_dependencies }}"
+  with_items: runtime_dependencies
   when: item != ""
 
 - name: Setup Dest Dirs
   file: path={{ item.destdir }} state=directory
-  with_items: "{{ runtime_files }}"
+  with_items: runtime_files
   when: item.destdir is defined
 
 - name: Setup Files
 #  copy: src={{ item.src }} dest={{ item.dest }} owner={{ runtime_user }} group={{ runtime_user }} mode={{ item.mode }}
   copy: src={{ item.src }} dest={{ item.dest }} mode={{ item.mode }}
-  with_items: "{{ runtime_files }}"
+  with_items: runtime_files
   notify: restart service
 
 ## TODO dependancies reload/restart on file change ? (Nginx ?)
