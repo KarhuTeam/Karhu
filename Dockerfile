@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM ubuntu:latest
 MAINTAINER max@wayt.me
 
 # Golang path
@@ -10,6 +10,10 @@ ENV GOROOT /usr/local/go
 ENV WORKDIR ${GOPATH}/src/github.com/karhuteam/karhu
 ENV PATH ${PATH}:${GOROOT}/bin
 
+# custom ppa for ansible
+RUN apt-get update
+RUN apt-get install -y software-properties-common
+RUN apt-add-repository ppa:ansible/ansible
 
 # Install ansible && deps
 RUN apt-get update && \
