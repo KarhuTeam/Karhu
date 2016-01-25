@@ -64,12 +64,12 @@ runtime_dependencies:{{ range .RuntimeConfig.Dependencies }}
 runtime_files:
   - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755' }
 {{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}' }
-{{ end }}{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', mode: '{{ .Mode }}' }
+{{ end }}{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', destdir: '{{ .DestDir }}', mode: '{{ .Mode }}' }
 {{ end }}
 runtime_services:{{ range $dep := .Services }}{{ range $dep.RuntimeCfg.Dependencies }}
   - {{ . }}{{ end }}{{ end }}
 runtime_services_files:{{ range $cfg := .ServicesConfigs }}
-  - { src: '{{ $cfg.Src }}', dest: '{{ $cfg.Dest }}', mode: '{{ $cfg.Mode }}', service: '{{ $cfg.Service }}' }{{ end }}
+  - { src: '{{ $cfg.Src }}', dest: '{{ $cfg.Dest }}', destdir: '{{ $cfg.DestDir }}', mode: '{{ $cfg.Mode }}', service: '{{ $cfg.Service }}' }{{ end }}
 `); err != nil {
 		panic(err)
 	}
@@ -274,7 +274,6 @@ func buildVars(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app *mod
 
 		services = append(services, build)
 
-		// TODO fix this
 		cfgs, err := extractConfigs(tmpPath, build.RuntimeCfg, dep)
 		if err != nil {
 			return err
@@ -283,8 +282,6 @@ func buildVars(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app *mod
 		for i := range cfgs {
 			cfgs[i].Service = build.RuntimeCfg.Dependencies[0]
 		}
-
-		log.Println("cfgs:", cfgs, len(cfgs))
 
 		servicesConfigs = append(servicesConfigs, cfgs...)
 	}
@@ -344,6 +341,7 @@ type ConfigFile struct {
 	Src     string
 	Dest    string
 	Mode    string
+	DestDir string
 	Service string // Linked service
 }
 
@@ -381,9 +379,10 @@ func extractConfigs(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app
 		}
 
 		configFiles = append(configFiles, ConfigFile{
-			Src:  src,      // Absolute path to src file
-			Dest: destPath, // absolute path
-			Mode: "0644",
+			Src:     src,      // Absolute path to src file
+			Dest:    destPath, // absolute path
+			DestDir: path.Dir(destPath),
+			Mode:    "0644",
 		})
 	}
 

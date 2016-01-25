@@ -5,6 +5,11 @@
   with_items: "{{ runtime_services }}"
   when: item != ""
 
+- name: Setup Dest Dirs
+  file: path={{ item.destdir }} state=directory
+  with_items: "{{ runtime_services_files }}"
+  when: item.destdir is defined
+
 - name: Setup Files
   copy: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode={{ item.mode }}
   with_items: "{{ runtime_services_files }}"
