@@ -1,9 +1,9 @@
 #!/bin/bash
 
-KARHU_DATA_DIR=${DATA_DIR:-/data}
+KARHU_STORAGE_PATH=${STORAGE_PATH:-/data}
 
 echo "Ensure data dir exist"
-mkdir -p $KARHU_DATA_DIR
+mkdir -p $KARHU_STORAGE_PATH
 
 
 echo "DEBUG=${DEBUG:-1}
@@ -13,7 +13,7 @@ MGO_DB=${MGO_DB:-karhu}
 PUBLIC_HOST=${PUBLIC_HOST:-http://127.0.0.1:8080}
 
 STORAGE_DRIVER=${STORAGE_DRIVER:-fs}
-DATA_DIR=$KARHU_DATA_DIR" > .env
+STORAGE_PATH=$KARHU_STORAGE_PATH" > .env
 
 cat .env; echo
 

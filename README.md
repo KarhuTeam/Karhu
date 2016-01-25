@@ -44,4 +44,4 @@ Available env options:
 * `MGO_DB`: mongo database name, default `karhu`
 * `PUBLIC_HOST`: Karhu public host, default `http://127.0.0.1:8080`
 * `STORAGE_DRIVER`: Karhu file storage driver, only `fs` is supported for now, default `fs`
-* `DATA_DIR`: storage directory, default `/data`
+* `STORAGE_PATH`: storage directory, default `/data`

@@ -25,9 +25,11 @@ func init() {
 	generateSSHKeyPair()
 }
 
+// TODO fix by using storage driver
+
 func keyDir() string {
 
-	dir := env.GetDefault("DATA_DIR", "data")
+	dir := env.GetDefault("STORAGE_PATH", "data")
 
 	if !path.IsAbs(dir) {
 		cwd, _ := os.Getwd()
