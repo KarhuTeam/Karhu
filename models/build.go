@@ -41,6 +41,7 @@ type Build struct {
 	CommitHash    string                `json:"commit_hash" bson:"commit_id"`
 	FilePath      string                `json:"file_path" bson:"file_path"`
 	CreatedAt     time.Time             `json:"created_at" bson:"created_at"`
+	UpdatedAt     time.Time             `json:"updated_at" bson:"updated_at"`
 	RuntimeCfg    *RuntimeConfiguration `json:"-" bson:"runtime_cfg"`
 }
 
@@ -163,6 +164,19 @@ func (bm *buildMapper) Create(app *Application, commitHash string) *Build {
 	}
 }
 
+func (bm *buildMapper) CreateService(app *Application, packages []string) *Build {
+
+	return &Build{
+		Id:            bson.NewObjectId(),
+		ApplicationId: app.Id,
+		CreatedAt:     time.Now(),
+		RuntimeCfg: &RuntimeConfiguration{
+			Type:         APPLICATION_TYPE_SERVICE,
+			Dependencies: packages,
+		},
+	}
+}
+
 func (bm *buildMapper) Save(b *Build) error {
 
 	col := C(buildCollection)
@@ -171,15 +185,15 @@ func (bm *buildMapper) Save(b *Build) error {
 	return col.Insert(b)
 }
 
-// func (bm *buildMapper) Update(b *Build) error {
-//
-// 	col := C(buildCollection)
-// 	defer col.Database.Session.Close()
-//
-// 	b.UpdatedAt = time.Now()
-//
-// 	return col.UpdateId(b.Id, b)
-// }
+func (bm *buildMapper) Update(b *Build) error {
+
+	col := C(buildCollection)
+	defer col.Database.Session.Close()
+
+	b.UpdatedAt = time.Now()
+
+	return col.UpdateId(b.Id, b)
+}
 
 func (bm *buildMapper) Delete(b *Build) error {
 
@@ -202,6 +216,19 @@ func (bm *buildMapper) FetchAll(app *Application) (Builds, error) {
 	return builds, nil
 }
 
+func (bm *buildMapper) FetchLast(app *Application) (*Build, error) {
+
+	col := C(buildCollection)
+	defer col.Database.Session.Close()
+
+	build := new(Build)
+	if err := col.Find(bson.M{"application_id": app.Id}).Sort("-created_at").One(build); err != nil {
+		return nil, err
+	}
+
+	return build, nil
+}
+
 func (bm *buildMapper) FetchOne(app *Application, buildId string) (*Build, error) {
 
 	if !bson.IsObjectIdHex(buildId) {
@@ -217,7 +244,7 @@ func (bm *buildMapper) FetchOne(app *Application, buildId string) (*Build, error
 	defer col.Database.Session.Close()
 
 	build := new(Build)
-	if err := col.Find(bson.M{"application_id": app.Id, "_id": bson.ObjectIdHex(buildId)}).Sort("-created_at").One(build); err != nil {
+	if err := col.Find(bson.M{"application_id": app.Id, "_id": bson.ObjectIdHex(buildId)}).One(build); err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, nil
 		}

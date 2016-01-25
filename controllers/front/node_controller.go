@@ -67,7 +67,7 @@ func (pc *NodeController) postNodeAction(c *gin.Context) {
 	node.Description = form.Description
 	models.NodeMapper.Update(node)
 
-	c.Redirect(http.StatusMovedPermanently, "/nodes")
+	c.Redirect(http.StatusFound, "/nodes")
 }
 
 func (pc *NodeController) getNodeAction(c *gin.Context) {

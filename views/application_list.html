@@ -6,13 +6,15 @@
 <main>
   <div class="box">
     <a class="btn" href="/application/add">New Application</a>
+    <a class="btn" href="/application/add?type=service">New Service</a>
   </div>
   <div class="box-col">
     {{ range .applications }}
     <div class="box">
-      <h2 class="box-title">{{ .Name }}<a class="right" href="/application/show/{{ .Name }}">Show</a></h2>
+      <h2 class="box-title"><span class="select">{{ .Name }}</span><a class="right" href="/application/show/{{ .Name }}">Show</a></h2>
       <p class="box-text">{{ .Description }}</p>
-      <p class="box-text">Tags : {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
+      {{ if len .Tags }}<p class="box-text">Tags : {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>{{ end }}
+      {{ if len .Deps }}<p class="box-text">Deps : {{range $dep := .Deps}}<a href="/application/show/{{$dep.Name}}"><span class="label">{{$dep.Name}}</span></a> {{else}} No dep {{end}}</p>{{ end }}
       <ul class="box-list">
         <li>Last deployment #c0cb8a1d <span class="right"><a href="">Show</a> - <a href="">Replay</a></span></li>
         <li><a href="">Show more deployment</a></li>

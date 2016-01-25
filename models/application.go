@@ -15,13 +15,29 @@ type applicationMapper struct{}
 var ApplicationMapper = &applicationMapper{}
 
 const applicationCollection = "application"
+const (
+	APPLICATION_TYPE_APP     string = "app"
+	APPLICATION_TYPE_SERVICE        = "service"
+)
 
 var slugRegexp = regexp.MustCompile(`^[0-9a-z\-]+$`)
+var appTypes = []string{APPLICATION_TYPE_APP, APPLICATION_TYPE_SERVICE}
 
 // Slug name validator
 func init() {
 	govalidator.TagMap["slug"] = govalidator.Validator(func(str string) bool {
 		return slugRegexp.MatchString(str)
+	})
+
+	govalidator.TagMap["app_type"] = govalidator.Validator(func(str string) bool {
+
+		for _, typ := range appTypes {
+			if typ == str {
+				return true
+			}
+		}
+
+		return false
 	})
 
 	col := C(applicationCollection)
@@ -38,12 +54,15 @@ func init() {
 }
 
 type Application struct {
-	Id          bson.ObjectId `json:"id" bson:"_id"`
-	Name        string        `json:"name" bson:"name"` // Slug name
-	Description string        `json:"description" bson:"description"`
-	Tags        []string      `json:"tags" bson:"tags"` // Tags are used for application search
-	CreatedAt   time.Time     `json:"created_at" bson:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at" bson:"updated_at"`
+	Id          bson.ObjectId  `json:"id" bson:"_id"`
+	Name        string         `json:"name" bson:"name"` // Slug name
+	Type        string         `json:"type" bson:"type"`
+	Description string         `json:"description" bson:"description"`
+	Tags        []string       `json:"tags" bson:"tags"` // Tags are used for application search
+	DepsIds     []string       `json:"-" bson:"deps"`
+	Deps        []*Application `json:"deps" bson:"-"`
+	CreatedAt   time.Time      `json:"created_at" bson:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at" bson:"updated_at"`
 }
 
 func (p *Application) Update(f *ApplicationUpdateForm) {
@@ -51,6 +70,19 @@ func (p *Application) Update(f *ApplicationUpdateForm) {
 	p.Name = f.Name
 	p.Description = f.Description
 	p.Tags = f.Tags
+
+	var deps []*Application
+
+	for _, d := range f.Deps {
+		app, err := ApplicationMapper.FetchOne(d)
+		if err != nil {
+			panic(err)
+		}
+
+		deps = append(deps, app)
+	}
+
+	p.Deps = deps
 }
 
 type Applications []*Application
@@ -58,8 +90,13 @@ type Applications []*Application
 // Application creation form
 type ApplicationCreateForm struct {
 	Name        string   `form:"name" json:"name" valid:"slug,required"`
+	Type        string   `form:"type" json:"type" valid:"app_type,required"`
 	Description string   `form:"description" json:"description" valid:"ascii"`
 	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
+	Deps        []string `form:"deps[]" json:"deps" valid:"-"` // Inter app deps
+
+	// Services
+	Packages []string `form:"packages[]" json:"packages" valid:"-"` // for service
 }
 
 // Validator for application creation
@@ -81,6 +118,21 @@ func (f ApplicationCreateForm) Validate() *errors.Errors {
 		})
 	}
 
+	for _, d := range f.Deps {
+		depApp, err := ApplicationMapper.FetchOne(d)
+		if err != nil {
+			panic(err)
+		}
+
+		if depApp == nil {
+			return errors.New(errors.Error{
+				Label: "invalid_dep",
+				Field: "deps",
+				Text:  "Invalid dependence: " + d,
+			})
+		}
+	}
+
 	return nil
 }
 
@@ -89,12 +141,34 @@ type ApplicationUpdateForm struct {
 	Name        string   `form:"name" json:"name" valid:"slug,required"`
 	Description string   `form:"description" json:"description" valid:"ascii"`
 	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
+	Deps        []string `form:"deps[]" json:"deps" valid:"-"` // Inter app deps
+
+	// Services
+	Packages []string `form:"packages[]" json:"packages" valid:"-"` // for service
 }
 
 func (f *ApplicationUpdateForm) Hydrate(a *Application) {
 	f.Name = a.Name
 	f.Description = a.Description
 	f.Tags = a.Tags
+
+	for _, d := range a.Deps {
+		f.Deps = append(f.Deps, d.Name)
+	}
+
+	if a.Type == APPLICATION_TYPE_SERVICE {
+
+		build, err := BuildMapper.FetchLast(a)
+		if err != nil {
+			panic(err)
+		}
+
+		if build == nil {
+			panic("no build for application: " + a.Name)
+		}
+
+		f.Packages = build.RuntimeCfg.Dependencies
+	}
 }
 
 // Validator for application update
@@ -116,19 +190,46 @@ func (f ApplicationUpdateForm) Validate(app *Application) *errors.Errors {
 				Text:  "Duplicate application name: " + f.Name,
 			})
 		}
+	}
 
+	for _, d := range f.Deps {
+		depApp, err := ApplicationMapper.FetchOne(d)
+		if err != nil {
+			panic(err)
+		}
+
+		if depApp == nil {
+			return errors.New(errors.Error{
+				Label: "invalid_dep",
+				Field: "deps",
+				Text:  "Invalid dependence: " + d,
+			})
+		}
 	}
 
 	return nil
 }
 
-func (pm *applicationMapper) Create(f *ApplicationCreateForm) *Application {
+func (am *applicationMapper) Create(f *ApplicationCreateForm) *Application {
+
+	var deps []*Application
+
+	for _, d := range f.Deps {
+		app, err := am.FetchOne(d)
+		if err != nil {
+			panic(err)
+		}
+
+		deps = append(deps, app)
+	}
 
 	return &Application{
 		Id:          bson.NewObjectId(),
 		Name:        f.Name,
+		Type:        f.Type,
 		Description: f.Description,
 		Tags:        f.Tags,
+		Deps:        deps,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -139,6 +240,12 @@ func (pm *applicationMapper) Save(p *Application) error {
 	col := C(applicationCollection)
 	defer col.Database.Session.Close()
 
+	p.DepsIds = nil
+	for _, app := range p.Deps {
+
+		p.DepsIds = append(p.DepsIds, app.Id.Hex())
+	}
+
 	return col.Insert(p)
 }
 
@@ -148,6 +255,12 @@ func (pm *applicationMapper) Update(p *Application) error {
 	defer col.Database.Session.Close()
 
 	p.UpdatedAt = time.Now()
+
+	p.DepsIds = nil
+	for _, app := range p.Deps {
+
+		p.DepsIds = append(p.DepsIds, app.Id.Hex())
+	}
 
 	return col.UpdateId(p.Id, p)
 }
@@ -160,7 +273,7 @@ func (pm *applicationMapper) Delete(p *Application) error {
 	return col.RemoveId(p.Id)
 }
 
-func (pm *applicationMapper) FetchAll() (Applications, error) {
+func (am *applicationMapper) FetchAll() (Applications, error) {
 
 	col := C(applicationCollection)
 	defer col.Database.Session.Close()
@@ -170,10 +283,21 @@ func (pm *applicationMapper) FetchAll() (Applications, error) {
 		return nil, err
 	}
 
+	for _, application := range applications {
+		for _, dep := range application.DepsIds {
+			app, err := am.FetchOne(dep)
+			if err != nil {
+				panic(err)
+			}
+
+			application.Deps = append(application.Deps, app)
+		}
+	}
+
 	return applications, nil
 }
 
-func (pm *applicationMapper) FetchOne(idOrSlug string) (*Application, error) {
+func (am *applicationMapper) FetchOne(idOrSlug string) (*Application, error) {
 
 	col := C(applicationCollection)
 	defer col.Database.Session.Close()
@@ -184,6 +308,15 @@ func (pm *applicationMapper) FetchOne(idOrSlug string) (*Application, error) {
 			return nil, nil
 		}
 		return nil, err
+	}
+
+	for _, dep := range application.DepsIds {
+		app, err := am.FetchOne(dep)
+		if err != nil {
+			panic(err)
+		}
+
+		application.Deps = append(application.Deps, app)
 	}
 
 	return application, nil

@@ -22,22 +22,37 @@ const (
 	CONFIG_FILENAME   = "ansible.cfg"
 )
 
-var hostFileTemplate, _ = template.New(HOSTS_FILENAME).Parse(`[all]
+var (
+	hostFileTemplate     *template.Template
+	playbookFileTemplate *template.Template
+	varsFileTemplate     *template.Template
+	configFileTemplate   *template.Template
+)
+
+func init() {
+
+	var err error
+
+	if hostFileTemplate, err = template.New(HOSTS_FILENAME).Parse(`[all]
 {{ range .Nodes }}{{ .Hostname }} ansible_ssh_host={{ .IP }} ansible_ssh_port={{ .SshPort }} ansible_ssh_user={{ .SshUser }}
 {{ end }}
-`)
+`); err != nil {
+		panic(err)
+	}
 
-var playbookFileTemplate, _ = template.New(PLAYBOOK_FILENAME).Parse(`---
+	if playbookFileTemplate, err = template.New(PLAYBOOK_FILENAME).Parse(`---
 
 - hosts: all
   sudo: yes
   vars_files:
   - {{ .Vars }}
-  roles:
-  - {{ .RuntimeConfig.Type }}
-`)
+  roles:{{ range .Roles }}
+  - {{ . }}{{ end }}
+`); err != nil {
+		panic(err)
+	}
 
-var varsFileTemplate, _ = template.New(VARS_FILENAME).Parse(`---
+	if varsFileTemplate, err = template.New(VARS_FILENAME).Parse(`---
 
 application_name: {{ .Application.Name }}
 runtime_type: {{ .RuntimeConfig.Type }}
@@ -51,9 +66,15 @@ runtime_files:
 {{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}' }
 {{ end }}{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', mode: '{{ .Mode }}' }
 {{ end }}
-`)
+runtime_services:{{ range $dep := .Services }}{{ range $dep.RuntimeCfg.Dependencies }}
+  - {{ . }}{{ end }}{{ end }}
+runtime_services_files:{{ range $cfg := .ServicesConfigs }}
+  - { src: '{{ $cfg.Src }}', dest: '{{ $cfg.Dest }}', mode: '{{ $cfg.Mode }}', service: '{{ $cfg.Service }}' }{{ end }}
+`); err != nil {
+		panic(err)
+	}
 
-var configFileTemplate, _ = template.New(CONFIG_FILENAME).Parse(`[defaults]
+	if configFileTemplate, err = template.New(CONFIG_FILENAME).Parse(`[defaults]
 
 jinja2_extensions = jinja2.ext.loopcontrols
 inventory      = hosts.ini
@@ -113,7 +134,10 @@ retry_files_enabled = False
 
 [ssh_connection]
 ssh_args = -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i {{ .SshKey }}
-`)
+`); err != nil {
+		panic(err)
+	}
+}
 
 func Run(depl *models.Deployment) error {
 
@@ -147,7 +171,7 @@ func Run(depl *models.Deployment) error {
 	}
 
 	// build playbook
-	roles, err := buildPlaybook(tmpPath, depl.Build.RuntimeCfg)
+	roles, err := buildPlaybook(tmpPath, depl.Build.RuntimeCfg, depl.Application)
 	if err != nil {
 		return err
 	}
@@ -193,7 +217,7 @@ func buildHosts(tmpPath string, runtimeCfg *models.RuntimeConfiguration, nodes m
 	})
 }
 
-func buildPlaybook(tmpPath string, runtimeCfg *models.RuntimeConfiguration) ([]string, error) {
+func buildPlaybook(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app *models.Application) ([]string, error) {
 
 	w, err := os.OpenFile(path.Join(tmpPath, PLAYBOOK_FILENAME), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
@@ -201,9 +225,20 @@ func buildPlaybook(tmpPath string, runtimeCfg *models.RuntimeConfiguration) ([]s
 	}
 	defer w.Close()
 
-	return []string{runtimeCfg.Type}, playbookFileTemplate.Execute(w, map[string]interface{}{
+	var roles []string
+	if len(app.Deps) > 0 {
+		roles = append(roles, models.APPLICATION_TYPE_SERVICE)
+	}
+
+	// Because service SHOULD ALWAYS BE FIRST, because of logic
+	roles = append(roles, runtimeCfg.Type)
+
+	log.Println("playbookFileTemplate:", playbookFileTemplate)
+
+	return roles, playbookFileTemplate.Execute(w, map[string]interface{}{
 		"RuntimeConfig": runtimeCfg,
 		"Vars":          VARS_FILENAME,
+		"Roles":         roles,
 	})
 }
 
@@ -220,11 +255,47 @@ func buildVars(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app *mod
 		return err
 	}
 
+	var services []*models.Build
+	var servicesConfigs []ConfigFile
+	for _, dep := range app.Deps {
+		if dep.Type != models.APPLICATION_TYPE_SERVICE {
+			continue
+		}
+
+		build, err := models.BuildMapper.FetchLast(dep)
+		if err != nil {
+			return err
+		}
+
+		if build == nil {
+			log.Println("No last build for app:", app.Name, app.Id.Hex())
+			continue
+		}
+
+		services = append(services, build)
+
+		// TODO fix this
+		cfgs, err := extractConfigs(tmpPath, build.RuntimeCfg, dep)
+		if err != nil {
+			return err
+		}
+
+		for i := range cfgs {
+			cfgs[i].Service = build.RuntimeCfg.Dependencies[0]
+		}
+
+		log.Println("cfgs:", cfgs, len(cfgs))
+
+		servicesConfigs = append(servicesConfigs, cfgs...)
+	}
+
 	return varsFileTemplate.Execute(w, map[string]interface{}{
-		"TmpPath":       tmpPath,
-		"RuntimeConfig": runtimeCfg,
-		"Application":   app,
-		"Configs":       configs,
+		"TmpPath":         tmpPath,
+		"RuntimeConfig":   runtimeCfg,
+		"Application":     app,
+		"Configs":         configs,
+		"Services":        services,
+		"ServicesConfigs": servicesConfigs,
 	})
 }
 
@@ -270,9 +341,10 @@ func extractArchive(tmpPath string, build *models.Build) error {
 }
 
 type ConfigFile struct {
-	Src  string
-	Dest string
-	Mode string
+	Src     string
+	Dest    string
+	Mode    string
+	Service string // Linked service
 }
 
 // Copy application configs

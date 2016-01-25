@@ -17,32 +17,42 @@
 		if (tagsContainer.length === 0)
 			return ;
 
-		tagsContainer = tagsContainer[0];
+		for (var i = 0; i < tagsContainer.length; i++) {
 
-		var tags = tagsContainer.getElementsByClassName('form-tag-item')
-		for (var i = 0; i < tags.length; i++) {
-			tags[i].getElementsByTagName('button')[0].onclick = removeTag;
+			new FormTag(tagsContainer[i]);
 		}
 
-		var i = 0;
-		var tagsInput = document.getElementsByClassName('form-tag-add')[0];
+		function FormTag(element) {
 
-		tagsInput.onkeypress = function(event) {
-			if (event.which === 13 || event.keyCode === 13) {
-				event.preventDefault();
-				return addTags(tagsInput.value);
+			this.tagsContainer = element;
+
+			var tags = this.tagsContainer.getElementsByClassName('form-tag-item')
+			for (var i = 0; i < tags.length; i++) {
+				tags[i].getElementsByTagName('button')[0].onclick = removeTag;
 			}
-		};
 
-		function addTags(value) {
-			var value = tagsInput.value;
-			if (value === undefined || value.length === 0)
-				return ;
-			tagsContainer.insertBefore(new buildElem(value), tagsInput);
-			tagsInput.value = '';
+			this.tagsInput = this.tagsContainer.getElementsByClassName('form-tag-add')[0];
+
+			var self = this;
+			this.tagsInput.onkeypress = function(event) {
+				if (event.which === 13 || event.keyCode === 13) {
+					event.preventDefault();
+					return self.addTags(event);
+				}
+			};
 		}
 
-		function buildElem(value) {
+		FormTag.prototype.addTags = function(event) {
+
+			var value = this.tagsInput.value;
+			if (value === undefined || value.length === 0)
+				return;
+			this.tagsContainer.insertBefore(this.buildElem(value), this.tagsInput);
+			this.tagsInput.value = '';
+		}
+
+		FormTag.prototype.buildElem = function(value) {
+
 			var span = document.createElement('span');
 			var input = document.createElement('input');
 			var removeButton = document.createElement('button');
@@ -50,7 +60,7 @@
 			span.classList.add('form-tag-item');
 
 			input.setAttribute('value', value);
-			input.setAttribute('name', 'tags[]');
+			input.setAttribute('name', this.tagsInput.getAttribute('data-name')+'[]');
 			input.setAttribute('type', 'text');
 			input.setAttribute('readonly', '');
 

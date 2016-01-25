@@ -14,6 +14,7 @@
     </div>
     {{ end }}
     <form method="POST" action="">
+      <input type="hidden" name="type" value="app" />
       <div class="form-group">
         <label for="app-name">Name :</label>
         <input class="form-control" id="app-name" name="name" type="text" placeholder="Name..." {{ if .form }} value="{{.form.Name}}" {{ end }} />
@@ -26,8 +27,18 @@
         <label for="app-tags">Tags :</label>
         <div class="form-control form-tag">
           <div class="form-tag-list">
-              {{range $tag := .form.Tags}}<span class="form-tag-item"><input type="text" name="tags[]" readonly="" value="{{$tag}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" type="text" placeholder="Add a tag..." />
+              {{range $tag := .form.Tags}}<span class="form-tag-item"><input type="text" name="tags[]" readonly="" value="{{$tag}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="tags" type="text" placeholder="Add a tag..." />
           </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="app-deps">Dependencies :</label>
+        <div class="form-control form-tag">
+            <div class="form-control form-tag">
+              <div class="form-tag-list">
+                  {{range $dep := .form.Deps}}<span class="form-tag-item"><input type="text" name="deps[]" readonly="" value="{{$dep}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="deps" type="text" placeholder="Add a dependence..." />
+              </div>
+            </div>
         </div>
       </div>
       <div class="text-center">

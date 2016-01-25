@@ -3,6 +3,7 @@ package front
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/models"
 	"github.com/karhuteam/karhu/web"
 	"net/http"
@@ -88,14 +89,6 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 		return
 	}
 
-	deployments, err := models.DeploymentMapper.FetchAll(application)
-	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
-			"error": err,
-		})
-		return
-	}
-
 	configs, err := models.ConfigMapper.FetchAll(application)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
@@ -104,12 +97,31 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
-		"application": application,
-		"builds":      builds,
-		"deployments": deployments,
-		"configs":     configs,
-	})
+	if application.Type == models.APPLICATION_TYPE_SERVICE {
+
+		c.HTML(http.StatusOK, "service_show.html", map[string]interface{}{
+			"application": application,
+			"configs":     configs,
+			"builds":      builds,
+		})
+
+	} else {
+
+		deployments, err := models.DeploymentMapper.FetchAll(application)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+				"error": err,
+			})
+			return
+		}
+
+		c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
+			"application": application,
+			"builds":      builds,
+			"deployments": deployments,
+			"configs":     configs,
+		})
+	}
 }
 
 /**
@@ -117,7 +129,13 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
  */
 func (ctl *ApplicationController) getAddApplicationAction(c *gin.Context) {
 
-	c.HTML(http.StatusOK, "application_add.html", nil)
+	switch c.DefaultQuery("type", "application") {
+	case models.APPLICATION_TYPE_SERVICE:
+		c.HTML(http.StatusOK, "service_add.html", nil)
+	// case models.APPLICATION_TYPE_APP:
+	default:
+		c.HTML(http.StatusOK, "application_add.html", nil)
+	}
 }
 
 func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
@@ -139,11 +157,33 @@ func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
 
 	application := models.ApplicationMapper.Create(&form)
 
+	if form.Type == models.APPLICATION_TYPE_SERVICE {
+
+		if len(form.Packages) == 0 {
+			c.HTML(http.StatusOK, "service_add.html", map[string]interface{}{
+				"errors": errors.New(errors.Error{
+					Label: "invalid_packages",
+					Field: "packages",
+					Text:  "Invalid packages count, min 1",
+				}).Errors,
+				"form": form,
+			})
+			return
+		}
+
+		build := models.BuildMapper.CreateService(application, form.Packages)
+
+		if err := models.BuildMapper.Save(build); err != nil {
+			panic(err)
+		}
+
+	}
+
 	if err := models.ApplicationMapper.Save(application); err != nil {
 		panic(err)
 	}
 
-	c.Redirect(http.StatusMovedPermanently, "/")
+	c.Redirect(http.StatusFound, "/")
 }
 
 /**
@@ -164,9 +204,17 @@ func (ctl *ApplicationController) getEditApplicationAction(c *gin.Context) {
 	var form models.ApplicationUpdateForm
 	form.Hydrate(application)
 
-	c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
-		"form": form,
-	})
+	switch c.DefaultQuery("type", "application") {
+	case models.APPLICATION_TYPE_SERVICE:
+		c.HTML(http.StatusOK, "service_edit.html", map[string]interface{}{
+			"form": form,
+		})
+	// case models.APPLICATION_TYPE_APP:
+	default:
+		c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
+			"form": form,
+		})
+	}
 }
 
 func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
@@ -199,12 +247,43 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 	// Update the application
 	application.Update(&form)
 
+	if application.Type == models.APPLICATION_TYPE_SERVICE {
+
+		if len(form.Packages) == 0 {
+			c.HTML(http.StatusOK, "service_edit.html", map[string]interface{}{
+				"errors": errors.New(errors.Error{
+					Label: "invalid_packages",
+					Field: "packages",
+					Text:  "Invalid packages count, min 1",
+				}).Errors,
+				"form": form,
+			})
+			return
+		}
+
+		build, err := models.BuildMapper.FetchLast(application)
+		if err != nil {
+			panic(err)
+		}
+
+		if build == nil {
+			panic("No last build for service: " + application.Name)
+		}
+
+		build.RuntimeCfg.Dependencies = form.Packages
+
+		if err := models.BuildMapper.Update(build); err != nil {
+			panic(err)
+		}
+
+	}
+
 	// Save the application
 	if err := models.ApplicationMapper.Update(application); err != nil {
 		panic(err)
 	}
 
-	c.Redirect(http.StatusMovedPermanently, "/application/show/"+application.Id.Hex())
+	c.Redirect(http.StatusFound, "/application/show/"+application.Id.Hex())
 }
 
 /**
@@ -224,5 +303,5 @@ func (ctl *ApplicationController) getDeleteApplicationAction(c *gin.Context) {
 	// Delete the application
 	models.ApplicationMapper.Delete(application)
 
-	c.Redirect(http.StatusMovedPermanently, "/")
+	c.Redirect(http.StatusFound, "/")
 }

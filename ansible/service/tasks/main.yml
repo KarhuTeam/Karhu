@@ -1,0 +1,15 @@
+---
+
+- name: Install Services
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=86400
+  with_items: "{{ runtime_services }}"
+  when: item != ""
+
+- name: Setup Files
+  copy: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode={{ item.mode }}
+  with_items: "{{ runtime_services_files }}"
+  register: runtime_services_files_installed
+
+- name: Restart Needed Services
+  service: name={{ item.item.service }} state=restarted
+  with_items: "{{ runtime_services_files_installed.results }}"

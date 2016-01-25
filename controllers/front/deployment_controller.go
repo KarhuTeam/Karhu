@@ -147,7 +147,7 @@ func (ctl *DeploymentController) postDeploymentAction(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/application/deployment/%s/%s", appId, deployment.Id.Hex()))
+	c.Redirect(http.StatusFound, fmt.Sprintf("/application/deployment/%s/%s", appId, deployment.Id.Hex()))
 }
 
 /**

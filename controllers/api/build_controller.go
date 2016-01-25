@@ -7,6 +7,7 @@ import (
 	"github.com/karhuteam/karhu/ressources/ansible"
 	"log"
 	"net/http"
+	"runtime"
 )
 
 type BuildController struct {
@@ -135,6 +136,10 @@ func (pc *BuildController) postBuildDeploy(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Println("ansible:", err)
+
+				trace := make([]byte, 2048)
+				runtime.Stack(trace, true)
+				log.Println(string(trace))
 
 				depl.Status = models.STATUS_ERROR
 				if err := models.DeploymentMapper.Update(depl); err != nil {

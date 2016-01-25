@@ -1,0 +1,37 @@
+{{template "header"}}
+  <div class="breadcrumb">
+    <a href="/">All applications</a> &gt; {{ .application.Name }}
+  </div>
+</header>
+<main>
+  <div class="box">
+    <a class="btn" href="/application/edit/{{ .application.Id.Hex }}?type={{ .application.Type }}">Edit</a>
+    <a class="btn btn-danger" data-text="Do you want to remove this application ?" href="/application/delete/{{ .application.Id.Hex }}">Delete</a>
+  </div>
+  <div class="box">
+    <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}?type={{ .application.Type }}">Edit</a></h2>
+    <p class="box-text">{{ .application.Description }}</p>
+    <p class="box-text">Packages : {{ with $build := index .builds 0 }}{{range $pkg := $build.RuntimeCfg.Dependencies}}<span class="label">{{$pkg}}</span> {{else}} No package {{end}}{{end}}</p>
+  </div>
+  <div class="box-col">
+    <div class="box">
+      <h2 class="box-title">Configs<a class="right btn" href="/application/configuration/{{ .application.Name }}">Add configuration</a></h2>
+      <ul class="box-list">
+          {{ range $config := .configs }}
+            <li>
+                {{ if $config.Enabled }}
+                    <span class="state state-done"></span>
+                {{ else }}
+                    <span class="state state-running"></span>
+                {{ end }}
+                Config {{$config.Path}}
+                <span class="right">
+                    <a href="/application/configuration/{{ $.application.Name }}/{{ $config.Id.Hex }}">Edit</a>
+                </span>
+            </li>
+          {{ end }}
+      </ul>
+    </div>
+  </div>
+</main>
+{{template "footer"}}
