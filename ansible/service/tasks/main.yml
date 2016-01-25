@@ -17,5 +17,5 @@
   register: runtime_services_files_installed
 
 - name: Restart Needed Services
-  service: name={{ item.service }} state=restarted
+  service: name={{ item.item.service }} state=restarted
   with_items: runtime_services_files_installed.results
