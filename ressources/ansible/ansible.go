@@ -62,14 +62,14 @@ runtime_workdir: {{ .RuntimeConfig.Workdir }}
 runtime_dependencies:{{ range .RuntimeConfig.Dependencies }}
   - {{ . }}{{ end }}
 runtime_files:
-  - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755', user: '{{ .RuntimeConfig.User }}' }
-{{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}', user: '{{ $.RuntimeConfig.User }}' }
-{{ end }}{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', destdir: '{{ .DestDir }}', mode: '{{ .Mode }}', user: 'root' }
+  - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755', user: '{{ .RuntimeConfig.User }}', notify: { service: '{{ .Application.Name }}', state: 'restarted' } }
+{{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}', user: '{{ $.RuntimeConfig.User }}', notify: { service: '{{ $.Application.Name }}', state: 'restarted' } }
+{{ end }}{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', destdir: '{{ .DestDir }}', mode: '{{ .Mode }}', user: 'root', notify: { service: '{{ .Notify.Service }}', state: '{{ .Notify.State }}' } }
 {{ end }}
 runtime_services:{{ range $dep := .Services }}{{ range $dep.RuntimeCfg.Dependencies }}
   - {{ . }}{{ end }}{{ end }}
 runtime_services_files:{{ range $cfg := .ServicesConfigs }}
-  - { src: '{{ $cfg.Src }}', dest: '{{ $cfg.Dest }}', destdir: '{{ $cfg.DestDir }}', mode: '{{ $cfg.Mode }}', service: '{{ $cfg.Service }}' }{{ end }}
+  - { src: '{{ $cfg.Src }}', dest: '{{ $cfg.Dest }}', destdir: '{{ $cfg.DestDir }}', mode: '{{ $cfg.Mode }}', notify: { service: '{{ .Notify.Service }}', state: '{{ .Notify.State }}' } }{{ end }}
 `); err != nil {
 		panic(err)
 	}
@@ -233,8 +233,6 @@ func buildPlaybook(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app 
 	// Because service SHOULD ALWAYS BE FIRST, because of logic
 	roles = append(roles, runtimeCfg.Type)
 
-	log.Println("playbookFileTemplate:", playbookFileTemplate)
-
 	return roles, playbookFileTemplate.Execute(w, map[string]interface{}{
 		"RuntimeConfig": runtimeCfg,
 		"Vars":          VARS_FILENAME,
@@ -277,10 +275,6 @@ func buildVars(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app *mod
 		cfgs, err := extractConfigs(tmpPath, build.RuntimeCfg, dep)
 		if err != nil {
 			return err
-		}
-
-		for i := range cfgs {
-			cfgs[i].Service = build.RuntimeCfg.Dependencies[0]
 		}
 
 		servicesConfigs = append(servicesConfigs, cfgs...)
@@ -342,7 +336,7 @@ type ConfigFile struct {
 	Dest    string
 	Mode    string
 	DestDir string
-	Service string // Linked service
+	Notify  models.ConfigNotify // Linked service
 }
 
 // Copy application configs
@@ -383,6 +377,7 @@ func extractConfigs(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app
 			Dest:    destPath, // absolute path
 			DestDir: path.Dir(destPath),
 			Mode:    "0644",
+			Notify:  config.Notify,
 		})
 	}
 

@@ -17,5 +17,6 @@
   register: runtime_services_files_installed
 
 - name: Restart Needed Services
-  service: name={{ item.item.service }} state=restarted
+  service: name={{ item.item.notify.service }} state={{ item.item.notify.state }}
   with_items: runtime_services_files_installed.results
+  when: (item.changed) and (item.item.notify.service != '')

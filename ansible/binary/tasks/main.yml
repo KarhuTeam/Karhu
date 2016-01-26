@@ -26,9 +26,7 @@
 #  copy: src={{ item.src }} dest={{ item.dest }} owner={{ runtime_user }} group={{ runtime_user }} mode={{ item.mode }}
   copy: src={{ item.src }} dest={{ item.dest }} owner={{ item.user }} group={{ item.user }} mode={{ item.mode }}
   with_items: runtime_files
-  notify: restart service
-
-## TODO dependancies reload/restart on file change ? (Nginx ?)
+  register: runtime_files_installed
 
 - name: Setup systemctl script
   template: src=binary.service dest=/lib/systemd/system/{{ application_name }}.service
@@ -36,3 +34,8 @@
 
 - name: Enable & Start Service
   service: name={{ application_name }} state=started enabled=yes
+
+- name: Restart Needed Services
+  service: name={{ item.item.notify.service }} state={{ item.item.notify.state }}
+  with_items: runtime_files_installed.results
+  when: (item.changed) and (item.item.notify.service != '')

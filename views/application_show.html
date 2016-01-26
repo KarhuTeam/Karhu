@@ -53,7 +53,10 @@
                 {{ else }}
                     <span class="state state-running"></span>
                 {{ end }}
-                Config {{$config.Path}}
+                Config <span class="select">{{$config.Path}}</span>
+                {{ if len $config.Notify.Service }}
+                    - <span class="label">{{ $config.Notify.Service }} {{ $config.Notify.State }}</span>
+                {{ end }}
                 <span class="right">
                     <a href="/application/configuration/{{ $.application.Name }}/{{ $config.Id.Hex }}">Edit</a>
                 </span>

@@ -120,8 +120,13 @@ func (ctl *ConfigurationController) getAddConfigurationAction(c *gin.Context) {
 		return
 	}
 
+	var form models.ConfigCreateForm
+	form.Notify = "restart:" + application.Name
+	form.Enabled = true
+
 	c.HTML(http.StatusOK, "configuration_add.html", map[string]interface{}{
 		"application": application,
+		"form":        form,
 	})
 }
 
