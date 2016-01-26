@@ -35,4 +35,6 @@ RUN go get -v && \
 # Default data path volume
 VOLUME /data
 
+EXPOSE 8080
+
 ENTRYPOINT ["./docker-entrypoint.sh"]
