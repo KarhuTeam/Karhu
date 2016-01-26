@@ -112,11 +112,16 @@ func (ctl *DeploymentController) getDeploymentAction(c *gin.Context) {
 	}
 
 	karhuURL, _ := url.Parse(env.GetDefault("PUBLIC_HOST", "http://127.0.0.1:8080"))
+	webSocketProto := "ws"
+	if karhuURL.Scheme == "https" {
+		webSocketProto = "wss"
+	}
 
 	c.HTML(http.StatusOK, "deployment_show.html", map[string]interface{}{
-		"application": application,
-		"deployment":  deployment,
-		"public_host": karhuURL.Host,
+		"application":     application,
+		"deployment":      deployment,
+		"public_host":     karhuURL.Host,
+		"websocket_proto": webSocketProto,
 	})
 }
 
