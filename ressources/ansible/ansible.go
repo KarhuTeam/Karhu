@@ -59,8 +59,8 @@ runtime_type: {{ .RuntimeConfig.Type }}
 runtime_user: {{ .RuntimeConfig.User }}
 runtime_bin: {{ .RuntimeConfig.Bin }}
 runtime_workdir: {{ .RuntimeConfig.Workdir }}
-runtime_dependencies:{{ range .RuntimeConfig.Dependencies }}
-  - {{ . }}{{ end }}
+{{ if len .RuntimeConfig.Dependencies }}runtime_dependencies:{{ range .RuntimeConfig.Dependencies }}
+  - {{ . }}{{ end }}{{ end }}
 runtime_files: {{ if eq .RuntimeConfig.Type "binary" }}
   - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755', user: '{{ .RuntimeConfig.User }}', notify: { service: '{{ .Application.Name }}', state: 'restarted' } }{{ end }}
 {{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}', user: '{{ $.RuntimeConfig.User }}', notify: { service: '{{ if eq $.RuntimeConfig.Type "binary" }}{{ $.Application.Name }}{{ end }}', state: 'restarted' } }
