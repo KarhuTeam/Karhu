@@ -62,8 +62,8 @@ runtime_workdir: {{ .RuntimeConfig.Workdir }}
 runtime_dependencies:{{ range .RuntimeConfig.Dependencies }}
   - {{ . }}{{ end }}
 runtime_files:
-  - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755', user: '{{ .RuntimeCfg.User }}' }
-{{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}', user: '{{ $.RuntimeCfg.User }}' }
+  - { src: '{{ .TmpPath }}/karhu/{{ .RuntimeConfig.Bin }}', dest: '{{ .RuntimeConfig.Workdir }}/bin/{{ .RuntimeConfig.Bin }}', mode: '0755', user: '{{ .RuntimeConfig.User }}' }
+{{ range $index, $str := .RuntimeConfig.Static }}  - { src: '{{ $.TmpPath }}/karhu/{{ $.RuntimeConfig.Static.Src $index }}', dest: '{{ $.RuntimeConfig.Workdir }}/{{ $.RuntimeConfig.Static.Dest $index}}', mode: '{{ $.RuntimeConfig.Static.Mode $index }}', user: '{{ $.RuntimeConfig.User }}' }
 {{ end }}{{ range .Configs }}  - { src: '{{ .Src }}', dest: '{{ .Dest }}', destdir: '{{ .DestDir }}', mode: '{{ .Mode }}', user: 'root' }
 {{ end }}
 runtime_services:{{ range $dep := .Services }}{{ range $dep.RuntimeCfg.Dependencies }}
