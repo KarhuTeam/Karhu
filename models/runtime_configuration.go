@@ -53,6 +53,10 @@ func (c *RuntimeConfiguration) isValid() error {
 		if c.Bin == "" {
 			return errors.New("Invalid app runtime bin value")
 		}
+	case "static":
+		if len(c.Static) == 0 {
+			return errors.New("Missing runtime static files")
+		}
 	default:
 		return errors.New("Invalid app type")
 	}
