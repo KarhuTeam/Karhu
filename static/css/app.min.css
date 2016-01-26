@@ -32,7 +32,8 @@ pre {
   padding: 20px;
   background: #444;
   margin: 10px 0;
-  color: #fff; }
+  color: #fff;
+  white-space: pre-wrap; }
 
 /* Basics */
 .text-center {

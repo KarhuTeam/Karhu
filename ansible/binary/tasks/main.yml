@@ -18,13 +18,13 @@
   when: item != ""
 
 - name: Setup Dest Dirs
-  file: path={{ item.destdir }} state=directory
+  file: path={{ item.destdir }} owner={{ item.user }} group={{ item.user }} state=directory
   with_items: runtime_files
   when: item.destdir is defined
 
 - name: Setup Files
 #  copy: src={{ item.src }} dest={{ item.dest }} owner={{ runtime_user }} group={{ runtime_user }} mode={{ item.mode }}
-  copy: src={{ item.src }} dest={{ item.dest }} mode={{ item.mode }}
+  copy: src={{ item.src }} dest={{ item.dest }} owner={{ item.user }} group={{ item.user }} mode={{ item.mode }}
   with_items: runtime_files
   notify: restart service
 
