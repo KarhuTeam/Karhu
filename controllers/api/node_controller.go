@@ -8,9 +8,7 @@ import (
 	"github.com/karhuteam/karhu/models"
 	"github.com/karhuteam/karhu/ressources/ssh"
 	"log"
-	"net"
 	"net/http"
-	"strings"
 )
 
 type NodeController struct {
@@ -37,11 +35,7 @@ func (pc *NodeController) getRegisterSH(c *gin.Context) {
 
 	log.Println("URL:", c.Request.URL)
 
-	clientIP, _, err := net.SplitHostPort(c.Request.RemoteAddr)
-	if err != nil {
-		clientIP = c.Request.RemoteAddr
-	}
-	clientIP = strings.TrimSpace(clientIP)
+	clientIP := c.ClientIP()
 
 	c.String(http.StatusOK, fmt.Sprintf(`
 #!/bin/bash
