@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/models"
@@ -78,6 +79,20 @@ func (pc *BuildController) postBuild(c *gin.Context) {
 
 	if err := models.BuildMapper.Save(build); err != nil {
 		panic(err)
+	}
+
+	if c.DefaultQuery("deploy", "0") == "1" {
+
+		resp, err := http.Post(fmt.Sprintf("http://localhost:8080/api/apps/%s/builds/%s/deploy", app.Id.Hex(), build.Id.Hex()), "json/application", nil)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, errors.New(errors.Error{
+				Label: "deploy_issue",
+				Field: "deploy",
+				Text:  err.Error(),
+			}))
+			return
+		}
+		resp.Body.Close()
 	}
 
 	c.JSON(http.StatusCreated, build)
