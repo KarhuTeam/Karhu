@@ -25,10 +25,16 @@ func NewNodeController(s *web.Server) *NodeController {
 
 func (pc *NodeController) getNodeAddAction(c *gin.Context) {
 
+	basicAuth := env.Get("BASIC_AUTH")
+	if auth := env.Get("BASIC_AUTH"); auth != "" {
+		basicAuth = "-u " + auth + " "
+	}
+
 	c.HTML(http.StatusOK, "node_add.html", map[string]interface{}{
 		"PublicHost": c.DefaultQuery("karhu_url", env.Get("PUBLIC_HOST")),
 		"SshUser":    c.DefaultQuery("ssh_user", "root"),
 		"SshPort":    c.DefaultQuery("ssh_port", "22"),
+		"BasicAuth":  basicAuth,
 	})
 }
 

@@ -37,6 +37,11 @@ func (pc *NodeController) getRegisterSH(c *gin.Context) {
 
 	clientIP := c.ClientIP()
 
+	basicAuth := ""
+	if auth := env.Get("BASIC_AUTH"); auth != "" {
+		basicAuth = "-u " + auth + " "
+	}
+
 	c.String(http.StatusOK, fmt.Sprintf(`
 #!/bin/bash
 echo "Registering host on Karhu..."; echo
@@ -58,8 +63,8 @@ echo "Setting up ssh keys..."
 grep -q -F "$(echo $PUBLIC_KEY)" $AUTHORIZED_KEYS_FILE || echo $PUBLIC_KEY >> $AUTHORIZED_KEYS_FILE
 
 echo "Registering node..."
-curl -X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=%s -d ssh_user=%s; echo
-echo "Done."`, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), karhuHost, clientIP, c.DefaultQuery("ssh_port", "22"), c.DefaultQuery("ssh_user", "root")))
+curl %s-X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=%s -d ssh_user=%s; echo
+echo "Done."`, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), karhuHost, clientIP, basicAuth, c.DefaultQuery("ssh_port", "22"), c.DefaultQuery("ssh_user", "root")))
 }
 
 func (pc *NodeController) postNode(c *gin.Context) {

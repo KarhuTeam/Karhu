@@ -23,8 +23,9 @@
         <label for="ssh_user">SSH user (root or sudo) :</label>
         <input class="form-control" type="text" id="ssh_user" name="ssh_user" placeholder="root" value="{{ .SshUser }}"/>
       </div>
+      <input type="hidden" name="basic_auth" value="{{ .BasicAuth }}" />
       <h3 class="box-subtitle">Execute this on your server:</h3>
-      <pre id="register_cmd">curl "{{ .PublicHost }}/api/nodes/register.sh?ssh_user={{ .SshUser }}&ssh_port={{ .SshPort }}" | bash</pre>
+      <pre id="register_cmd">curl {{ .BasicAuth }}"{{ .PublicHost }}/api/nodes/register.sh?ssh_user={{ .SshUser }}&ssh_port={{ .SshPort }}" | bash</pre>
       <div class="text-center">
         <a href="/nodes" class="btn">OK</a>
       </div>
@@ -38,8 +39,9 @@ for (i = 0; i < inputs.length; i++) {
         karhuUrl = document.getElementById("karhu_url").value;
         sshUser = document.getElementById("ssh_user").value;
         sshPort = document.getElementById("ssh_port").value;
+        basicAuth = document.getElementById("basic_auth").value;
 
-        document.getElementById("register_cmd").innerHTML = "curl \"" + karhuUrl + "/api/nodes/register.sh?ssh_user="+sshUser+"&ssh_port="+sshPort + "\" | bash";
+        document.getElementById("register_cmd").innerHTML = "curl "+basicAuth+"\"" + karhuUrl + "/api/nodes/register.sh?ssh_user="+sshUser+"&ssh_port="+sshPort + "\" | bash";
     };
 }
 </script>
