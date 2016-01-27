@@ -46,6 +46,9 @@
   with_items: runtime_files
   register: runtime_files_installed
 
+- name: Setup Access on Workdir
+  file: path={{ runtime_workdir }} recurse=yes group={{ runtime_user }} owner={{ runtime_user }}
+
 - name: Setup systemctl script
   template: src=binary.service dest=/lib/systemd/system/{{ application_name }}.service
   notify: systemctl daemon-reload
