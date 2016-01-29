@@ -23,7 +23,7 @@
         <label for="ssh_user">SSH user (root or sudo) :</label>
         <input class="form-control" type="text" id="ssh_user" name="ssh_user" placeholder="root" value="{{ .SshUser }}"/>
       </div>
-      <input type="hidden" name="basic_auth" value="{{ .BasicAuth }}" />
+      <input type="hidden" id="basic_auth" name="basic_auth" value="{{ .BasicAuth }}" />
       <h3 class="box-subtitle">Execute this on your server:</h3>
       <pre id="register_cmd">curl {{ .BasicAuth }}"{{ .PublicHost }}/api/nodes/register.sh?ssh_user={{ .SshUser }}&ssh_port={{ .SshPort }}" | bash</pre>
       <div class="text-center">
