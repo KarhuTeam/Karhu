@@ -19,6 +19,7 @@ func NewNodeController(s *web.Server) *NodeController {
 	s.GET("/node/edit/:id", ctl.getNodeAction)
 	s.POST("/node/edit/:id", ctl.postNodeAction)
 	s.GET("/node/add", ctl.getNodeAddAction)
+	s.POST("/node/delete/:id", ctl.postDeleteNodeAction)
 
 	return ctl
 }
@@ -69,6 +70,14 @@ func (pc *NodeController) postNodeAction(c *gin.Context) {
 		})
 		return
 	}
+
+	if node == nil {
+		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
+			"text": "Node not found",
+		})
+		return
+	}
+
 	node.Tags = form.Tags
 	node.Description = form.Description
 	models.NodeMapper.Update(node)
@@ -87,8 +96,44 @@ func (pc *NodeController) getNodeAction(c *gin.Context) {
 		})
 		return
 	}
+	if node == nil {
+		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
+			"text": "Node not found",
+		})
+		return
+	}
+
 	c.HTML(http.StatusOK, "node_edit.html", map[string]interface{}{
 		"errors": nil,
 		"node":   node,
 	})
+}
+
+func (pc *NodeController) postDeleteNodeAction(c *gin.Context) {
+
+	id := c.Param("id")
+
+	node, err := models.NodeMapper.FetchOneById(id)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
+
+	if node == nil {
+		c.HTML(http.StatusNotFound, "error_404.html", map[string]interface{}{
+			"text": "Node not found",
+		})
+		return
+	}
+
+	if err := models.NodeMapper.Delete(node); err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/nodes")
 }

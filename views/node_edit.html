@@ -5,7 +5,11 @@
 </header>
 <main>
   <div class="box">
-    <h2 class="box-title">Edit a node</h2>
+    <h2 class="box-title">Edit a node
+        <form style="display:inline-block;" class="right" method="POST" action="/node/delete/{{ .node.Id.Hex }}">
+            <button type="submit" class="btn btn-danger btn-small" data-text="Delete node {{ .node.Hostname }} ({{ .node.IP }})?">Delete</button>
+        </form>
+    </h2>
     {{ if .errors }}
     <div class="alert alert-danger">
       {{ range .errors }}
