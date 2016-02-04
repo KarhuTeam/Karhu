@@ -7,6 +7,7 @@ import (
 	"github.com/karhuteam/karhu/models"
 	"github.com/karhuteam/karhu/web"
 	"net/http"
+	"strconv"
 )
 
 type ApplicationController struct {
@@ -113,6 +114,18 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 				"error": err,
 			})
 			return
+		}
+
+		// Limit array size
+		count, _ := strconv.Atoi(c.DefaultQuery("count", "5"))
+		if count <= 0 {
+			count = 5
+		}
+		if len(builds) > count {
+			builds = builds[:count]
+		}
+		if len(deployments) > count {
+			deployments = deployments[:count]
 		}
 
 		c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
