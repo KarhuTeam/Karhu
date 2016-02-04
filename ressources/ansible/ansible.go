@@ -163,7 +163,7 @@ func Run(depl *models.Deployment) error {
 	if err := models.DeploymentMapper.Update(depl); err != nil {
 		return err
 	}
-	// defer os.RemoveAll(tmpPath)
+	defer os.RemoveAll(tmpPath)
 
 	// build hosts
 	if err := buildHosts(tmpPath, depl.Build.RuntimeCfg, nodes); err != nil {
@@ -198,6 +198,13 @@ func Run(depl *models.Deployment) error {
 	if err := runPlaybook(tmpPath); err != nil {
 		return err
 	}
+
+	data, err := ioutil.ReadFile(path.Join(tmpPath, "karhu.log"))
+	if err != nil {
+		return err
+	}
+
+	depl.Logs = string(data)
 
 	return nil
 
@@ -373,9 +380,9 @@ func extractConfigs(tmpPath string, runtimeCfg *models.RuntimeConfiguration, app
 		}
 
 		configFiles = append(configFiles, ConfigFile{
-			Src:     src,      // Absolute path to src file
-			Dest:    destPath, // absolute path
-			DestDir: path.Dir(destPath),
+			Src:     path.Clean(src),      // Absolute path to src file
+			Dest:    path.Clean(destPath), // absolute path
+			DestDir: path.Dir(path.Clean(destPath)),
 			Mode:    "0644",
 			Notify:  config.Notify,
 		})

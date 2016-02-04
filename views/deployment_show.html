@@ -4,8 +4,18 @@
   </div>
 </header>
 <main>
+    <div class="box">
+      <h2 class="box-title"><span class="state state-{{ .deployment.Status}}"></span> <span class="select">{{ .application.Name }}</span></h2>
+      <p class="box-text">Created: {{ .deployment.CreatedAt.String }}</p>
+      <p class="box-text">Last Update: {{ .deployment.UpdatedAt.String }}</p>
+      <p class="box-text">Duration: {{ .deployment.Duration.String }}</p>
+    </div>
   <div class="box">
+      {{ if ne .deployment.Logs "" }}
+      <pre class="stream">{{ .deployment.Logs }}</pre>
+      {{ else }}
       <pre class="stream" data-socket="{{ .websocket_proto }}://{{ .public_host }}/ws/application/deployment/{{ .application.Id.Hex }}/{{ .deployment.Id.Hex }}"></pre>
+      {{ end }}
   </div>
 </main>
 {{template "footer"}}

@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"runtime"
+	"time"
 )
 
 type BuildController struct {
@@ -147,6 +148,8 @@ func (pc *BuildController) postBuildDeploy(c *gin.Context) {
 
 	go func() {
 
+		start := time.Now()
+
 		// catch panic
 		defer func() {
 			if err := recover(); err != nil {
@@ -157,6 +160,7 @@ func (pc *BuildController) postBuildDeploy(c *gin.Context) {
 				log.Println(string(trace))
 
 				depl.Status = models.STATUS_ERROR
+				depl.Duration = time.Since(start)
 				if err := models.DeploymentMapper.Update(depl); err != nil {
 					log.Println(err)
 				}
@@ -173,6 +177,7 @@ func (pc *BuildController) postBuildDeploy(c *gin.Context) {
 		}
 
 		depl.Status = models.STATUS_DONE
+		depl.Duration = time.Since(start)
 		if err := models.DeploymentMapper.Update(depl); err != nil {
 			return
 		}

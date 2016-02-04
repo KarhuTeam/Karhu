@@ -186,25 +186,45 @@ func (ctl *DeploymentController) getDeploymentWSAction(c *gin.Context) {
 	}
 	defer sock.Close()
 
-	file, err := os.Open(path.Join(deployment.TmpPath, "karhu.log"))
-	if err != nil {
-		log.Println("ws: ", err)
-	}
-	defer file.Close()
+	if deployment.Status == models.STATUS_NEW ||
+		deployment.Status == models.STATUS_RUNNING {
 
-	reader := bufio.NewReader(file)
-
-	for {
-		line, _, err := reader.ReadLine()
-
-		if err == io.EOF {
-			time.Sleep(1 * time.Second)
-			continue
-		} else if err != nil {
+		file, err := os.Open(path.Join(deployment.TmpPath, "karhu.log"))
+		if err != nil {
 			log.Println("ws: ", err)
-			break
 		}
-		line = append(line, '\n')
-		sock.WriteMessage(websocket.TextMessage, line)
+		defer file.Close()
+
+		reader := bufio.NewReader(file)
+
+		for {
+			line, _, err := reader.ReadLine()
+
+			if err == io.EOF {
+
+				// Check for end
+				deployment := ctl.getDeployment(c, application, deployId)
+				if deployment == nil {
+					log.Println("ws: deployment not found")
+					return
+				}
+
+				if deployment.Status == models.STATUS_DONE ||
+					deployment.Status == models.STATUS_ERROR {
+					break
+				}
+
+				time.Sleep(1 * time.Second)
+				continue
+			} else if err != nil {
+				log.Println("ws: ", err)
+				break
+			}
+			line = append(line, '\n')
+			sock.WriteMessage(websocket.TextMessage, line)
+
+		}
+	} else {
+		sock.WriteMessage(websocket.TextMessage, []byte(deployment.Logs))
 	}
 }

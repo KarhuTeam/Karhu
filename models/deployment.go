@@ -51,6 +51,8 @@ type Deployment struct {
 	BuildId       bson.ObjectId    `json:"-" bson:"build_id"`
 	Build         *Build           `json:"-" bson:"-"`
 	TmpPath       string           `json:"-" bson:"tmp_path"`
+	Logs          string           `json:"logs" bson:"logs"`
+	Duration      time.Duration    `json:"duration" bson:"duration"`
 	CreatedAt     time.Time        `json:"created_at" bson:"created_at"`
 	UpdatedAt     time.Time        `json:"updated_at" bson:"updated_at"`
 	Status        DeploymentStatus `json:"status" bson:"status"`
