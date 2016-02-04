@@ -117,9 +117,9 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 		}
 
 		// Limit array size
-		count, _ := strconv.Atoi(c.DefaultQuery("count", "5"))
+		count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
 		if count <= 0 {
-			count = 5
+			count = 10
 		}
 		if len(builds) > count {
 			builds = builds[:count]
