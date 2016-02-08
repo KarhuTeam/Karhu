@@ -24,4 +24,10 @@
             content: '…';
         }
     }
+    &-new {
+        background: #da8d1a;
+        &::after {
+            content: '…';
+        }
+    }
 }

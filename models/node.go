@@ -12,6 +12,11 @@ import (
 	"time"
 )
 
+func init() {
+
+	go NodeMapper.nodeStatusCheck()
+}
+
 type nodeMapper struct{}
 
 var NodeMapper = &nodeMapper{}
@@ -26,6 +31,8 @@ type Node struct {
 	SshUser     string        `json:"ssh_user" bson:"ssh_user"`
 	Description string        `json:"description" bson:"description"`
 	Tags        []string      `json:"tags" bson:"tags"` // Tags are used for node search
+	Status      string        `json:"status" bson:"status"`
+	StatusAt    time.Time     `json:"status_at" bson:"status_at"`
 	CreatedAt   time.Time     `json:"created_at" bson:"created_at"`
 	UpdatedAt   time.Time     `json:"updated_at" bson:"updated_at"`
 }
@@ -65,8 +72,6 @@ func (pm *nodeMapper) Create(f *NodeCreateForm) *Node {
 		f.SshUser = "root"
 	}
 
-	log.Println("form:", *f)
-
 	return &Node{
 		Id:          bson.NewObjectId(),
 		Hostname:    f.Hostname,
@@ -75,6 +80,7 @@ func (pm *nodeMapper) Create(f *NodeCreateForm) *Node {
 		SshPort:     sshPort,
 		SshUser:     f.SshUser,
 		Tags:        f.Tags,
+		Status:      STATUS_NEW,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -175,4 +181,39 @@ func (nm *nodeMapper) FetchAllForApp(app *Application) (Nodes, error) {
 	}
 
 	return nodes, nil
+}
+
+func (nm *nodeMapper) nodeStatusCheck() {
+
+	log.Println("Run NodeStatusCheck routine")
+
+	for {
+		time.Sleep(5 * time.Second)
+
+		func() {
+			col := C(nodeCollection)
+			defer col.Database.Session.Close()
+
+			var nodes Nodes
+			if err := col.Find(bson.M{"status_at": bson.M{"$lt": time.Now().Add(-time.Minute)}}).All(&nodes); err != nil {
+				log.Println("nodeStatusCheck:", err)
+			}
+
+			for _, n := range nodes {
+
+				log.Println("Check node:", *n)
+				if err := nm.CheckSsh(n); err != nil {
+					log.Println("nodeStatusCheck:", *n, err)
+					n.Status = STATUS_ERROR
+				} else {
+					n.Status = STATUS_DONE
+				}
+
+				n.StatusAt = time.Now()
+				if err := nm.Update(n); err != nil {
+					log.Println("nodeStatusCheck:", *n, err)
+				}
+			}
+		}()
+	}
 }

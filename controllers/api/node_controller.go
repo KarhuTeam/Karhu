@@ -61,7 +61,11 @@ COLLECTD_CONFIG_PATH=/etc/collectd/collectd.conf.d/karhu.conf
 SUDO=
 if [ "$SSH_USER" != "root" ]; then
 	echo "Check sudo..."
-	sudo -n true || $(echo "You need root access or sudo without password..." && exit 1)
+	sudo -n true
+	if [ "$?" != "0" ]; then
+		echo "You need root access or sudo without password..."
+		exit 1
+	fi
 	SUDO=sudo
 fi
 

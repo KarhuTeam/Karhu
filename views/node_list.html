@@ -10,8 +10,13 @@
   <div class="box-col">
     {{ range .nodes }}
     <div class="box">
-      <h2 class="box-title"><span class="select">{{ .Hostname }}</span><span class="box-subtitle">- <span class="select">{{ .IP }}</span></span><a class="right" href="/node/edit/{{ .Id.Hex }}">Edit</a></h2>
+      <h2 class="box-title"><span class="state state-{{ .Status }}"></span> <span class="select">{{ .Hostname }}</span><span class="box-subtitle">- <span class="select">{{ .IP }}</span></span><a class="right" href="/node/edit/{{ .Id.Hex }}">Edit</a></h2>
       <p class="box-text">{{ .Description }}</p>
+      <p class="box-text">Created At: {{ .CreatedAt }}</p>
+      <p class="box-text">Updated At: {{ .UpdatedAt }}</p>
+      <p class="box-text">Status At: {{ .StatusAt }}</p>
+      <p class="box-text">Port: {{ .SshPort }}</p>
+      <p class="box-text">User: {{ .SshUser }}</p>
       <p class="box-text">Tags : {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
     </div>
     {{ end }}

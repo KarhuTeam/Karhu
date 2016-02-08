@@ -35,27 +35,18 @@ func init() {
 	})
 }
 
-type DeploymentStatus string
-
-const (
-	STATUS_NEW     DeploymentStatus = "new"
-	STATUS_RUNNING                  = "running"
-	STATUS_DONE                     = "done"
-	STATUS_ERROR                    = "error"
-)
-
 type Deployment struct {
-	Id            bson.ObjectId    `json:"id" bson:"_id"`
-	ApplicationId bson.ObjectId    `json:"-" bson:"application_id"`
-	Application   *Application     `json:"-" bson:"-"`
-	BuildId       bson.ObjectId    `json:"-" bson:"build_id"`
-	Build         *Build           `json:"-" bson:"-"`
-	TmpPath       string           `json:"-" bson:"tmp_path"`
-	Logs          string           `json:"logs" bson:"logs"`
-	Duration      time.Duration    `json:"duration" bson:"duration"`
-	CreatedAt     time.Time        `json:"created_at" bson:"created_at"`
-	UpdatedAt     time.Time        `json:"updated_at" bson:"updated_at"`
-	Status        DeploymentStatus `json:"status" bson:"status"`
+	Id            bson.ObjectId `json:"id" bson:"_id"`
+	ApplicationId bson.ObjectId `json:"-" bson:"application_id"`
+	Application   *Application  `json:"-" bson:"-"`
+	BuildId       bson.ObjectId `json:"-" bson:"build_id"`
+	Build         *Build        `json:"-" bson:"-"`
+	TmpPath       string        `json:"-" bson:"tmp_path"`
+	Logs          string        `json:"logs" bson:"logs"`
+	Duration      time.Duration `json:"duration" bson:"duration"`
+	CreatedAt     time.Time     `json:"created_at" bson:"created_at"`
+	UpdatedAt     time.Time     `json:"updated_at" bson:"updated_at"`
+	Status        string        `json:"status" bson:"status"`
 }
 
 type Deployments []*Deployment

@@ -211,5 +211,9 @@ pre {
     background: #da8d1a; }
     .state-running::after {
       content: '…'; }
+  .state-new {
+    background: #da8d1a; }
+    .state-new::after {
+      content: '…'; }
 
 /*# sourceMappingURL=app.min.css.map */
