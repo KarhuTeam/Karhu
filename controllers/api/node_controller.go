@@ -50,6 +50,20 @@ AUTHORIZED_KEYS_DIR=%s
 AUTHORIZED_KEYS_FILE=%s
 KARHU_HOST=%s
 CLIENT_IP=%s
+SSH_PORT=%s
+SSH_USER=$USER
+BASIC_AUTH="%s"
+SETUP_MONITORING=%s
+INFLUXDB_COLLECTD_HOST=%s
+INFLUXDB_COLLECTD_PORT=%s
+COLLECTD_CONFIG_PATH=/etc/collectd/collectd.conf.d/karhu.conf
+
+SUDO=
+if [ "$SSH_USER" != "root" ]; then
+	echo "Check sudo..."
+	sudo -n true || $(echo "You need root access or sudo without password..." && exit 1)
+	SUDO=sudo
+fi
 
 if [ ! -d "$AUTHORIZED_KEYS_DIR" ]; then
 	mkdir -p $AUTHORIZED_KEYS_DIR || exit 1
@@ -63,8 +77,20 @@ echo "Setting up ssh keys..."
 grep -q -F "$(echo $PUBLIC_KEY)" $AUTHORIZED_KEYS_FILE || echo $PUBLIC_KEY >> $AUTHORIZED_KEYS_FILE
 
 echo "Registering node..."
-curl %s-X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=%s -d ssh_user=%s; echo
-echo "Done."`, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), karhuHost, clientIP, basicAuth, c.DefaultQuery("ssh_port", "22"), c.DefaultQuery("ssh_user", "root")))
+curl --fail $BASIC_AUTH-X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=$SSH_PORT -d ssh_user=$SSH_USER || exit 1
+echo
+if [ "$SETUP_MONITORING" = "1" ]; then
+	echo "Setup monitoring..."
+	$SUDO apt-get update || exit 1
+	$SUDO apt-get install -y collectd || exit 1
+	echo "LoadPlugin network
+<Plugin "network">
+    Server \"$INFLUXDB_COLLECTD_HOST\" \"$INFLUXDB_COLLECTD_PORT\"
+</Plugin>" | $SUDO tee $COLLECTD_CONFIG_PATH || exit 1
+	echo "Restard collectd"
+	$SUDO service collectd restart || exit 1
+fi
+echo "Done."`, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), karhuHost, clientIP, c.DefaultQuery("ssh_port", "22") /*, c.DefaultQuery("ssh_user", "root") */, basicAuth, c.DefaultQuery("monit", "1"), env.Get("INFLUXDB_COLLECTD_HOST"), env.Get("INFLUXDB_COLLECTD_PORT")))
 }
 
 func (pc *NodeController) postNode(c *gin.Context) {

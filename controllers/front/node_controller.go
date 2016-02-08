@@ -35,6 +35,7 @@ func (pc *NodeController) getNodeAddAction(c *gin.Context) {
 		"PublicHost": c.DefaultQuery("karhu_url", env.Get("PUBLIC_HOST")),
 		"SshUser":    c.DefaultQuery("ssh_user", "root"),
 		"SshPort":    c.DefaultQuery("ssh_port", "22"),
+		"Monit":      c.DefaultQuery("monit", "1"),
 		"BasicAuth":  basicAuth,
 	})
 }

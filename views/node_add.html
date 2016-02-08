@@ -19,13 +19,17 @@
         <label for="ssh_port">SSH port :</label>
         <input class="form-control" type="text" id="ssh_port" name="ssh_port" placeholder="22" value="{{ .SshPort }}"/>
       </div>
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="ssh_user">SSH user (root or sudo) :</label>
         <input class="form-control" type="text" id="ssh_user" name="ssh_user" placeholder="root" value="{{ .SshUser }}"/>
+      </div> -->
+      <div class="form-group">
+        <label for="monit">Enable monitoring :</label>
+        <input class="form-control" type="checkbox" id="monit" name="monit" {{ if eq .Monit "1" }}checked="checked"{{ end }}/>
       </div>
       <input type="hidden" id="basic_auth" name="basic_auth" value="{{ .BasicAuth }}" />
       <h3 class="box-subtitle">Execute this on your server:</h3>
-      <pre id="register_cmd">curl {{ .BasicAuth }}"{{ .PublicHost }}/api/nodes/register.sh?ssh_user={{ .SshUser }}&ssh_port={{ .SshPort }}" | bash</pre>
+      <pre id="register_cmd">curl {{ .BasicAuth }}"{{ .PublicHost }}/api/nodes/register.sh?monit={{ .Monit }}&ssh_port={{ .SshPort }}" | bash</pre>
       <div class="text-center">
         <a href="/nodes" class="btn">OK</a>
       </div>
@@ -37,12 +41,14 @@ var inputs = document.getElementById("add_node").getElementsByTagName("input");
 for (i = 0; i < inputs.length; i++) {
     inputs[i].oninput = function() {
         karhuUrl = document.getElementById("karhu_url").value;
-        sshUser = document.getElementById("ssh_user").value;
-        sshPort = document.getElementById("ssh_port").value;
+        // sshUser = document.getElementById("ssh_user").value;
+        monit = document.getElementById("monit").checked ? "1" : "0";
+        sshPort = document.getElementById("ssh_port").value || "22";
         basicAuth = document.getElementById("basic_auth").value;
 
-        document.getElementById("register_cmd").innerHTML = "curl "+basicAuth+"\"" + karhuUrl + "/api/nodes/register.sh?ssh_user="+sshUser+"&ssh_port="+sshPort + "\" | bash";
+        document.getElementById("register_cmd").innerHTML = "curl "+basicAuth+"\"" + karhuUrl + "/api/nodes/register.sh?monit="+monit+"&ssh_port="+sshPort + "\" | bash";
     };
+    inputs[i].onchange = inputs[i].oninput;
 }
 </script>
 {{template "footer"}}
