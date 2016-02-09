@@ -141,6 +141,22 @@ func (pm *nodeMapper) FetchOne(hostname string) (*Node, error) {
 	return node, nil
 }
 
+func (pm *nodeMapper) FetchOneIP(ip string) (*Node, error) {
+
+	col := C(nodeCollection)
+	defer col.Database.Session.Close()
+
+	node := new(Node)
+	if err := col.Find(bson.M{"ip": ip}).One(node); err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return node, nil
+}
+
 func (pm *nodeMapper) FetchOneById(id string) (*Node, error) {
 
 	if !bson.IsObjectIdHex(id) {
