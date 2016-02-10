@@ -39,7 +39,7 @@ func (pc *NodeController) getRegisterSH(c *gin.Context) {
 
 	basicAuth := ""
 	if auth := env.Get("BASIC_AUTH"); auth != "" {
-		basicAuth = "-u " + auth + " "
+		basicAuth = `"-u ` + auth + `"`
 	}
 
 	c.String(http.StatusOK, fmt.Sprintf(`
@@ -52,7 +52,7 @@ KARHU_HOST=%s
 CLIENT_IP=%s
 SSH_PORT=%s
 SSH_USER=$USER
-BASIC_AUTH="%s"
+BASIC_AUTH=%s
 SETUP_MONITORING=%s
 INFLUXDB_COLLECTD_HOST=%s
 INFLUXDB_COLLECTD_PORT=%s
@@ -81,12 +81,12 @@ echo "Setting up ssh keys..."
 grep -q -F "$(echo $PUBLIC_KEY)" $AUTHORIZED_KEYS_FILE || echo $PUBLIC_KEY >> $AUTHORIZED_KEYS_FILE
 
 echo "Registering node..."
-curl --fail $BASIC_AUTH-X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=$SSH_PORT -d ssh_user=$SSH_USER || exit 1
+curl --fail $BASIC_AUTH -X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=$SSH_PORT -d ssh_user=$SSH_USER || exit 1
 echo
 if [ "$SETUP_MONITORING" = "1" ]; then
 	echo "Setup monitoring..."
 	$SUDO apt-get update || exit 1
-	$SUDO apt-get install -y collectd || exit 1
+	$SUDO apt-get install -y --no-install-recommends collectd || exit 1
 	echo "LoadPlugin network
 <Plugin "network">
     Server \"$INFLUXDB_COLLECTD_HOST\" \"$INFLUXDB_COLLECTD_PORT\"

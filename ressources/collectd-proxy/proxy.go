@@ -126,7 +126,7 @@ func runProxy() {
 		}
 
 		if !allowed {
-			log.Println("collectdproxy: disalowwed:", cliaddr.IP.String())
+			log.Println("collectdproxy: disalowed:", cliaddr.IP.String())
 			continue
 		}
 

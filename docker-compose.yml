@@ -1,0 +1,60 @@
+mongo:
+   hostname: mongo
+   image: mongo
+   ports:
+   - "27017:27017"
+
+elasticsearch:
+    hostname: elasticsearch
+    image: elasticsearch
+    ports:
+    - "9200:9200"
+    - "9300:9300"
+
+kibana:
+    hostname: kibana
+    image: kibana
+    links:
+    - "elasticsearch:elasticsearch"
+    ports:
+    - "5601:5601"
+    environment:
+    - ELASTICSEARCH_URL=http://elasticsearch:9200
+
+logstash:
+    hostname: logstash
+    build: logstash/
+    volumes:
+    - "./logstash/certs:/etc/logstash/certs"
+    - "./logstash/conf.d:/etc/logstash/conf.d"
+    ports:
+    - "5044:5044"
+    - "25826:25826/udp"
+    links:
+    - "elasticsearch:elasticsearch"
+    environment:
+    - LOGSTASH_HOST=logstash
+
+# karhu:
+#     hostname: karhu
+#     build: .
+#     links:
+#     - "mongo:mongo"
+#     - "influxdb:influxdb"
+#     volumes:
+#     - "./data:/data"
+#     ports:
+#     - "25827:25827/udp"
+#     - "8080:8080"
+#     environment:
+#     - DEBUG=1
+#     - MGO_HOSTS=mongo
+#     - MGO_DB=karhu
+#     - STORAGE_DRIVER=fs
+#     - STORAGE_PATH=/data
+#     - PUBLIC_HOST=http://192.168.99.100:8080
+#     - COLLECTD_PROXY_BIND=0.0.0.0:25827
+#     - COLLECTD_PROXY_TARGET=influxdb:25826
+#     - INFLUXDB_COLLECTD_HOST=karhu.my-sign.org
+#     - INFLUXDB_COLLECTD_PORT=25827
+#     - LOGSTASH_HOST=logstash
