@@ -32,8 +32,6 @@ logstash:
     - "25826:25826/udp"
     links:
     - "elasticsearch:elasticsearch"
-    environment:
-    - LOGSTASH_HOST=logstash
 
 # karhu:
 #     hostname: karhu
@@ -57,4 +55,4 @@ logstash:
 #     - COLLECTD_PROXY_TARGET=influxdb:25826
 #     - INFLUXDB_COLLECTD_HOST=karhu.my-sign.org
 #     - INFLUXDB_COLLECTD_PORT=25827
-#     - LOGSTASH_HOST=logstash
+#     - LOGSTASH_IP=192.168.99.100

@@ -6,7 +6,7 @@ ENV LOGSTASH_TLS_CRT /etc/logstash/certs/logstash.crt
 
 # custom ppa
 RUN apt-get update
-RUN apt-get install -y software-properties-common wget
+RUN apt-get install -y software-properties-common wget curl
 RUN add-apt-repository -y ppa:webupd8team/java
 
 # Logstash deps
@@ -18,11 +18,9 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 
 # Install ansible && deps
 RUN apt-get update && \
-    apt-get install -y logstash oracle-java8-installer
-
-# Cleanup
-RUN rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
+    apt-get install -y logstash oracle-java8-installer && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/oracle-jdk8-installer
 
 # Setup Logstash
 # Default logstash cert path
