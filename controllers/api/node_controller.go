@@ -66,6 +66,7 @@ SETUP_MONITORING=%s
 INFLUXDB_COLLECTD_HOST=%s
 INFLUXDB_COLLECTD_PORT=%s
 COLLECTD_CONFIG_PATH=/etc/collectd/collectd.conf.d/karhu.conf
+NO_REGISTER=%s
 
 SUDO=
 if [ "$SSH_USER" != "root" ]; then
@@ -78,20 +79,23 @@ if [ "$SSH_USER" != "root" ]; then
 	SUDO=sudo
 fi
 
-if [ ! -d "$AUTHORIZED_KEYS_DIR" ]; then
-	mkdir -p $AUTHORIZED_KEYS_DIR || exit 1
+if [ "$NO_REGISTER" != "1" ]; then
+
+	if [ ! -d "$AUTHORIZED_KEYS_DIR" ]; then
+		mkdir -p $AUTHORIZED_KEYS_DIR || exit 1
+	fi
+
+	if [ ! -f "$AUTHORIZED_KEYS_FILE" ]; then
+		touch $AUTHORIZED_KEYS_FILE || exit 1
+	fi
+
+	echo "Setting up ssh keys..."
+	grep -q -F "$(echo $PUBLIC_KEY)" $AUTHORIZED_KEYS_FILE || echo $PUBLIC_KEY >> $AUTHORIZED_KEYS_FILE
+
+	echo "Registering node..."
+	curl --fail $BASIC_AUTH -X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=$SSH_PORT -d ssh_user=$SSH_USER || exit 1
+	echo
 fi
-
-if [ ! -f "$AUTHORIZED_KEYS_FILE" ]; then
-	touch $AUTHORIZED_KEYS_FILE || exit 1
-fi
-
-echo "Setting up ssh keys..."
-grep -q -F "$(echo $PUBLIC_KEY)" $AUTHORIZED_KEYS_FILE || echo $PUBLIC_KEY >> $AUTHORIZED_KEYS_FILE
-
-echo "Registering node..."
-curl --fail $BASIC_AUTH -X POST $KARHU_HOST/api/nodes -d hostname=$(hostname) -d ip=$CLIENT_IP -d ssh_port=$SSH_PORT -d ssh_user=$SSH_USER || exit 1
-echo
 if [ "$SETUP_MONITORING" = "1" ]; then
 
 	echo "Setup logstash host"
@@ -128,7 +132,7 @@ if [ "$SETUP_MONITORING" = "1" ]; then
 
 	$SUDO service filebeat restart || exit 1
 fi
-echo "Done."`, karhuHost, logstashIP, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), clientIP, c.DefaultQuery("ssh_port", "22") /*, c.DefaultQuery("ssh_user", "root") */, basicAuth, c.DefaultQuery("monit", "1"), env.Get("INFLUXDB_COLLECTD_HOST"), env.Get("INFLUXDB_COLLECTD_PORT")))
+echo "Done."`, karhuHost, logstashIP, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), clientIP, c.DefaultQuery("ssh_port", "22") /*, c.DefaultQuery("ssh_user", "root") */, basicAuth, c.DefaultQuery("monit", "1"), env.Get("INFLUXDB_COLLECTD_HOST"), env.Get("INFLUXDB_COLLECTD_PORT"), c.DefaultQuery("noreg", "0")))
 }
 
 func (pc *NodeController) postNode(c *gin.Context) {
