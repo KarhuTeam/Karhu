@@ -1,0 +1,51 @@
+{{template "header"}}
+  <div class="breadcrumb">
+    <a href="/log">All logs</a>
+  </div>
+</header>
+<main>
+  <div class="box">
+    <h2 class="box-title">Search</h2>
+    {{ if .errors }}
+    <div class="alert alert-danger">
+      {{ range .errors }}
+      {{ .Field }} : {{ .Text }}<br/>
+      {{ end }}
+    </div>
+    {{ end }}
+    <form method="GET" action="/logs">
+      <div class="form-group">
+        <label for="query">Name :</label>
+        <input class="form-control" id="query" name="query" type="text" placeholder="Search..." {{ if .query }}value="{{ .query }}"{{ end }}/>
+        <button class="btn" type="submit">Search</button>
+      </div>
+      <div class="form-group">
+        <label for="count">Options :</label>
+        <select name="count">
+          <option value="10">10</option>
+          <option value="30">30</option>
+          <option value="50" selected="selected">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+    </form>
+  </div>
+  <div class="box">
+      <ul class="box-list fold-container">
+          {{ range $index, $elem := .result }}
+          <li class="fold-parent" data-fold-id="{{ $index }}"><span class="select">{{ .Host }}</span> <span class="select">{{ $elem.Message }}</span></li>
+          <li class="fold-child fold-child-hidden" data-fold-id="{{ $index }}">
+              <ul>
+                  <li>@timestamp: <span class="select">{{ $elem.Timestamp }}</span></li>
+                  <li>host: <span class="select">{{ $elem.Host }}</span></li>
+                  <li>source: <span class="select">{{ $elem.Source }}</span></li>
+                  <li>input_type: <span class="select">{{ $elem.InputType }}</span></li>
+                  <li>type: <span class="select">{{ $elem.Type }}</span></li>
+                  <li>tags: <span class="select">{{ $elem.TagsString }}</span></li>
+              </ul>
+          </li>
+          {{ end }}
+      </ul>
+  </div>
+</main>
+{{template "footer"}}

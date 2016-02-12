@@ -16,6 +16,7 @@ func NewFrontController(s *web.Server) *FrontController {
 	front.NewNodeController(s)
 	front.NewDeploymentController(s)
 	front.NewConfigurationController(s)
+	front.NewLogController(s)
 
 	return ctl
 }

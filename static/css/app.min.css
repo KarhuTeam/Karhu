@@ -192,6 +192,12 @@ pre {
   border-radius: 3px;
   color: #fff; }
 
+.fold-child {
+  background: rgba(87, 124, 159, 0.8); }
+
+.fold-child-hidden {
+  display: none; }
+
 .state {
   border-radius: 50%;
   width: 15px;
