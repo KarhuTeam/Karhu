@@ -1,9 +1,9 @@
-mongo:
-   hostname: mongo
-   image: mongo
-   ports:
-   - "27017:27017"
-
+#mongo:
+#   hostname: mongo
+#   image: mongo
+#   ports:
+#   - "27017:27017"
+#
 elasticsearch:
     hostname: elasticsearch
     image: elasticsearch
