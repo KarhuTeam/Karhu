@@ -29,3 +29,30 @@
         }
     }
 }
+
+@media screen and (min-width: $large) {
+    .navbar {
+        margin-left: 10px;
+        display: block;
+        float: right;
+        line-height: 60px;
+        height: 60px;
+        &-btn {
+            display: none;
+        }
+
+        & > li {
+            display: inline-block;
+            & > a {
+                padding: 0 20px;
+                border: 0;
+                background: $blue;
+                color: #fff;
+                &:hover {
+                    border: 0;
+                    background: $light-blue;
+                }
+            }
+        }
+    }
+}
