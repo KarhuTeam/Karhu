@@ -66,7 +66,7 @@
       </ul>
     </div>
     <div class="box">
-      <h2 class="box-title">Logs files<a class="right btn" href="/application/logfile/{{ .application.Name }}">Add log file</a></h2>
+      <h2 class="box-title">Logs files - <a href='/logs?query=karhu_app%3A+"{{ .application.Name }}"'>Show all</a><a class="right btn" href="/application/logfile/{{ .application.Name }}">Add log file</a></h2>
       <ul class="box-list">
           {{ range $logfile := .logfiles }}
             <li>
@@ -75,7 +75,7 @@
                 {{ else }}
                     <span class="state state-running"></span>
                 {{ end }}
-                <span class="select">{{$logfile.Path}}</span>
+                <span class="select">{{$logfile.Path}}</span> - <a href='/logs?query=karhu_app%3A+"{{ $.application.Name }}"+AND+source%3A+"{{ $logfile.Path }}"'>show</a>
                 <span class="right">
                     <a href="/application/logfile/{{ $.application.Name }}/{{ $logfile.Id.Hex }}">Edit</a>
                 </span>
