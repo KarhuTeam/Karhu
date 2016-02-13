@@ -1,0 +1,43 @@
+{{template "header"}}
+  <div class="breadcrumb">
+    <a href="/nodes">All nodes</a> &gt; Generate script to register a node
+  </div>
+</header>
+<main>
+  <div class="box">
+    <h2 class="box-title">Account Access</h2>
+    <div class="alert alert-info">
+        <h3 class="alert-title">Lorem ipsum</h3>
+        <p>Coucou</p>
+    </div>
+    <form id="add_ec2_node" method="" action="">
+      <div class="form-group">
+        <label for="karhu_url">Access Key :</label>
+        <input class="form-control" type="text" id="access_key" name="access_key" placeholder="Your AWS access key"/>
+      </div>
+      <div class="form-group">
+        <label for="ssh_port">Secret Key :</label>
+        <input class="form-control" type="text" id="secret_key" name="secret_key" placeholder="Your AWS secret key"/>
+      </div>
+      <div class="text-center">
+        <a href="/nodes" class="btn">NEXT AUTHENTICATE AND SELECT A NETWORK</a>
+      </div>
+    </form>
+  </div>
+</main>
+<script>
+var inputs = document.getElementById("add_node").getElementsByTagName("input");
+for (i = 0; i < inputs.length; i++) {
+    inputs[i].oninput = function() {
+        karhuUrl = document.getElementById("karhu_url").value;
+        // sshUser = document.getElementById("ssh_user").value;
+        monit = document.getElementById("monit").checked ? "1" : "0";
+        sshPort = document.getElementById("ssh_port").value || "22";
+        basicAuth = document.getElementById("basic_auth").value;
+
+        document.getElementById("register_cmd").innerHTML = "curl "+basicAuth+"\"" + karhuUrl + "/api/nodes/register.sh?monit="+monit+"&ssh_port="+sshPort + "\" | bash";
+    };
+    inputs[i].onchange = inputs[i].oninput;
+}
+</script>
+{{template "footer"}}
