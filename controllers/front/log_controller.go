@@ -29,22 +29,32 @@ func (ctl *LogController) getLogsAction(c *gin.Context) {
 
 	tags := c.Request.URL.Query()["tags[]"]
 
-	s := c.DefaultQuery("count", "50")
+	app := c.DefaultQuery("app", "")
+
+	s := c.DefaultQuery("count", "30")
 	count, _ := strconv.Atoi(s)
 
-	query := c.Query("query")
+	query := c.DefaultQuery("query", "*")
 	var logs models.Logs
 	if query != "" {
 		var err error
-		logs, err = models.LogMapper.Search(query, tags, count)
+		logs, err = models.LogMapper.Search(query, tags, app, count)
 		if err != nil {
 			panic(err)
 		}
 	}
 
+	applications, err := models.ApplicationMapper.FetchAll()
+	if err != nil {
+		panic(err)
+	}
+
 	c.HTML(http.StatusOK, "log_show.html", map[string]interface{}{
-		"query":  query,
-		"result": logs,
-		"tags":   tags,
+		"query":        query,
+		"result":       logs,
+		"tags":         tags,
+		"app":          app,
+		"count":        s,
+		"applications": applications,
 	})
 }
