@@ -3,8 +3,8 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -22,18 +22,21 @@ type Log struct {
 	InputType string      `json:"input_type"`
 	Fields    interface{} `json:"fields"`
 	Type      string      `json:"type"`
-	Tags      []string    `json:"tags"`
-}
-
-func (l *Log) TagsString() string {
-	return strings.Join(l.Tags, ", ")
+	KarhuTags []string    `json:"karhu_tags"`
+	KarhuApp  string      `json:"karhu_app"`
 }
 
 type Logs []*Log
 
-func (lm *logMapper) Search(q string, count int) (Logs, error) {
+func (lm *logMapper) Search(q string, tags []string, count int) (Logs, error) {
+
+	for _, t := range tags {
+		q += " AND karhu_tags: " + strconv.Quote(t)
+	}
 
 	q = strconv.Quote(q)
+
+	log.Println("query:", q)
 
 	query := fmt.Sprintf(`{
   "size": %d,

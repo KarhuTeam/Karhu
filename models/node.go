@@ -102,6 +102,20 @@ func (pm *nodeMapper) Save(n *Node) error {
 	return nil
 }
 
+func (pm *nodeMapper) internalUpdate(n *Node) error {
+
+	col := C(nodeCollection)
+	defer col.Database.Session.Close()
+
+	n.UpdatedAt = time.Now()
+
+	if err := col.UpdateId(n.Id, n); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (pm *nodeMapper) Update(n *Node) error {
 
 	col := C(nodeCollection)
@@ -250,7 +264,7 @@ func (nm *nodeMapper) nodeStatusCheck() {
 				}
 
 				n.StatusAt = time.Now()
-				if err := nm.Update(n); err != nil {
+				if err := nm.internalUpdate(n); err != nil {
 					log.Println("nodeStatusCheck:", *n, err)
 				}
 			}

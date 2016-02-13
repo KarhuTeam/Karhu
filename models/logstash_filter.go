@@ -2,7 +2,9 @@ package models
 
 import (
 	"fmt"
+	"github.com/gotoolz/env"
 	"github.com/karhuteam/karhu/ressources/logstash"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
@@ -19,6 +21,10 @@ func LogstashRefreshTagsFilters() error {
 	filters := logstash.NewTagFilters()
 
 	for _, n := range nodes {
+
+		if len(n.Tags) == 0 {
+			continue
+		}
 
 		var tags []string
 		for _, t := range n.Tags {
@@ -39,6 +45,10 @@ func LogstashRefreshTagsFilters() error {
 	}
 
 	log.Println(string(data))
+
+	if err := ioutil.WriteFile(env.GetDefault("LOGSTASH_TAGS_FILTERS", "./logstash/conf.d/10-tags-filters.conf"), data, 0644); err != nil {
+		return err
+	}
 
 	return nil
 }

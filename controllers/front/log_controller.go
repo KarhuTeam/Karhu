@@ -27,6 +27,8 @@ func NewLogController(s *web.Server) *LogController {
  */
 func (ctl *LogController) getLogsAction(c *gin.Context) {
 
+	tags := c.Request.URL.Query()["tags[]"]
+
 	s := c.DefaultQuery("count", "50")
 	count, _ := strconv.Atoi(s)
 
@@ -34,7 +36,7 @@ func (ctl *LogController) getLogsAction(c *gin.Context) {
 	var logs models.Logs
 	if query != "" {
 		var err error
-		logs, err = models.LogMapper.Search(query, count)
+		logs, err = models.LogMapper.Search(query, tags, count)
 		if err != nil {
 			panic(err)
 		}
@@ -43,5 +45,6 @@ func (ctl *LogController) getLogsAction(c *gin.Context) {
 	c.HTML(http.StatusOK, "log_show.html", map[string]interface{}{
 		"query":  query,
 		"result": logs,
+		"tags":   tags,
 	})
 }
