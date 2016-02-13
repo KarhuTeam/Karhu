@@ -28,7 +28,7 @@ RUN mkdir -p /etc/logstash/certs
 ADD docker-entrypoint.sh /
 
 # Default data path volume
-VOLUME /etc/logstash/certs
+VOLUME /etc/logstash
 
 WORKDIR /
 
