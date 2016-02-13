@@ -25,7 +25,8 @@ do
     chsum2=`find /etc/logstash/conf.d -type f -exec md5sum {} \;`
     if [ "$chsum1" != "$chsum2" ]; then
 
-        echo "Config changed, restart logstash"
+        date=$(date)
+        echo "$date Config changed, restart logstash"
         /opt/logstash/bin/logstash -f /etc/logstash/conf.d -t && \
             service logstash restart && \
         chsum1=$chsum2

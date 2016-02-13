@@ -52,6 +52,7 @@
                   <li>input_type: <span class="select">{{ $elem.InputType }}</span></li>
                   <li>type: <span class="select">{{ $elem.Type }}</span></li>
                   <li>tags: {{range $tag := $elem.KarhuTags}}<span class="label">{{$tag}}</span> {{else}} no tags {{end}}</li>
+                  {{ if $elem.KarhuApp }}<li>app: <a href="/application/show/{{$elem.KarhuApp}}"><span class="label">{{$elem.KarhuApp}}</span></a>{{ end }}
               </ul>
           </li>
           {{ end }}

@@ -22,8 +22,8 @@ type Log struct {
 	InputType string      `json:"input_type"`
 	Fields    interface{} `json:"fields"`
 	Type      string      `json:"type"`
-	KarhuTags []string    `json:"karhu_tags"`
-	KarhuApp  string      `json:"karhu_app"`
+	KarhuTags []string    `json:"karhu_tags,omitempty"`
+	KarhuApp  string      `json:"karhu_app,omitempty"`
 }
 
 type Logs []*Log
