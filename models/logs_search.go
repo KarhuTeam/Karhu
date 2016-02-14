@@ -28,10 +28,14 @@ type Log struct {
 
 type Logs []*Log
 
-func (lm *logMapper) Search(q string, tags []string, count int) (Logs, error) {
+func (lm *logMapper) Search(q string, tags []string, app string, count int) (Logs, error) {
 
 	for _, t := range tags {
 		q += " AND karhu_tags: " + strconv.Quote(t)
+	}
+
+	if app != "" {
+		q += " AND karhu_app: " + strconv.Quote(app)
 	}
 
 	q = strconv.Quote(q)

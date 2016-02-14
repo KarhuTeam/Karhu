@@ -28,5 +28,11 @@ tmp
 data
 .sass-cache
 karhu
-
 .DS_Store
+*.swp
+*.crt
+*.key
+
+10-tags-filters.conf
+11-apps-filters.conf
+20-stdout-output.conf

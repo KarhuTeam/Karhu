@@ -22,14 +22,14 @@
       <div class="form-group">
         <label for="count">Options :</label>
         <select name="count">
-          <option value="10">10</option>
-          <option value="30">30</option>
-          <option value="50" selected="selected">50</option>
-          <option value="100">100</option>
+          <option value="10" {{ if eq .count "10" }}selected="selected"{{ end }}>10</option>
+          <option value="30" {{ if eq .count "30" }}selected="selected"{{ end }}>30</option>
+          <option value="50" {{ if eq .count "50" }}selected="selected"{{ end }}>50</option>
+          <option value="100" {{ if eq .count "100" }}selected="selected"{{ end }}>100</option>
         </select>
       </div>
       <div class="form-group">
-        <label for="karhu-tags">Tags :</label>
+        <label for="tags[]">Tags :</label>
         <div class="form-control form-tag">
             <div class="form-control form-tag">
               <div class="form-tag-list">
@@ -37,6 +37,15 @@
               </div>
             </div>
         </div>
+      </div>
+      <div class="form-group">
+        <label for="app">App :</label>
+        <select name="app">
+            <option value="" {{ if eq .app "" }}selected="selected"{{ end }}>Choose an App</option>
+            {{ range .applications}}
+            <option value="{{ .Name }}" {{ if eq $.app .Name }}selected="selected"{{ end }}>{{ .Name }}</option>
+            {{ end }}
+        </select>
       </div>
     </form>
   </div>
