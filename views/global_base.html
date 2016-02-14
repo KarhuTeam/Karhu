@@ -19,11 +19,11 @@
       <h1 class="header-title"><a href="/">Karhu</a></h1>
       <a class="navbar-btn" href=""></a>
       <ul class="navbar">
-        <li><a class="navbar-item" href="/">Applications</a></li>
-        <li><a class="navbar-item" href="/nodes">Infrastructure</a></li>
-        <li><a class="navbar-item" href="">Monitoring</a></li>
-        <li><a class="navbar-item" href="/logs">Logs</a></li>
-        <li><a class="navbar-item" href="">Alerts</a></li>
+        <li><a class="navbar-item {{ if eq . "applications" }} is-selected{{ end }}" href="/">Applications</a></li>
+        <li><a class="navbar-item {{ if eq . "infrastructure" }} is-selected{{ end }}" href="/nodes">Infrastructure</a></li>
+        <li><a class="navbar-item {{ if eq . "monitoring" }} is-selected{{ end }}" href="">Monitoring</a></li>
+        <li><a class="navbar-item {{ if eq . "logs" }} is-selected{{ end }}" href="/logs">Logs</a></li>
+        <li><a class="navbar-item {{ if eq . "alerts" }} is-selected{{ end }}" href="">Alerts</a></li>
       </ul>
     </div>
 {{end}}

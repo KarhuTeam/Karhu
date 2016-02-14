@@ -62,9 +62,26 @@ func (ctl *ApplicationController) getApplication(c *gin.Context, id string) *mod
  */
 func (ctl *ApplicationController) getApplicationsAction(c *gin.Context) {
 
-	applications, _ := models.ApplicationMapper.FetchAll()
+	tag := c.DefaultQuery("tag", "")
+
+	applications, err := models.ApplicationMapper.FetchAllByTag(tag)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
+
+	tags, err := models.ApplicationMapper.FetchAllTags()
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
 
 	c.HTML(http.StatusOK, "application_list.html", map[string]interface{}{
+		"tags":         tags,
 		"applications": applications,
 	})
 }

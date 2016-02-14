@@ -1,4 +1,4 @@
-{{template "header"}}
+{{template "header" "applications"}}
   <div class="breadcrumb">
     <a href="/">All applications</a> &gt; <a href="/application/show/{{ .application.Name }}">{{ .application.Name }}</a> &gt; Add a configuration
   </div>
@@ -24,11 +24,11 @@
       </div>
       <div class="form-group">
         <label for="config-enabled">Enabled :</label>
-        <input class="form-control" id="config-enabled" name="enabled" type="checkbox" {{ if .form.Enabled}}checked="checked"{{end}}/>
+        <input class="form-control" id="config-enabled" name="enabled" type="checkbox"{{ if .form.Enabled }} checked="checked"{{end}} />
       </div>
       <div class="form-group">
         <label for="config-notify">Notify :</label>
-        <input class="form-control" id="config-notify" name="notify" type="text" placeholder="Notify..." {{ if .form }}value="{{.form.Notify}}"{{ end }} />
+        <input class="form-control" id="config-notify" name="notify" type="text" placeholder="Notify..."{{ if .form }} value="{{.form.Notify}}"{{ end }} />
       </div>
       <div class="text-center">
         <button class="btn" type="submit">Add a config</button>
