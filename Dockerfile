@@ -10,9 +10,9 @@ ENV GOROOT /usr/local/go
 ENV WORKDIR ${GOPATH}/src/github.com/karhuteam/karhu
 ENV PATH ${PATH}:${GOROOT}/bin
 ENV LOGSTASH_TLS_CRT=/etc/logstash/certs/logstash.crt
+ENV LOGSTASH_AUTHFILE=/etc/logstash/certs/authfile
 ENV LOGSTASH_TAGS_FILTERS=/etc/logstash/conf.d/10-tags-filters.conf
 ENV LOGSTASH_APPS_FILTERS=/etc/logstash/conf.d/11-apps-filters.conf
-ENV LOGSTASH_AUTHFILE=/etc/logstash/authfile
 
 # custom ppa for ansible
 RUN apt-get update
