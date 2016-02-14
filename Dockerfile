@@ -25,7 +25,8 @@ RUN echo 'deb http://packages.elastic.co/logstash/2.2/debian stable main' | tee 
 
 # Install ansible && deps
 RUN apt-get update && \
-    apt-get install -y ansible git logstash
+    apt-get install -y ansible git logstash && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Golang
 RUN wget https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz -O /tmp/go.tar.gz
