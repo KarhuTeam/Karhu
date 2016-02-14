@@ -36,6 +36,10 @@ func (pc *NodeController) getRegisterSH(c *gin.Context) {
 
 	karhuHost := env.GetDefault("PUBLIC_HOST", "http://127.0.0.1:8080")
 	logstashIP := env.GetDefault("LOGSTASH_IP", "127.0.0.1")
+	collectdUser, collectdPassword, err := logstash.ReadAuthfile()
+	if err != nil {
+		panic(err)
+	}
 
 	log.Println("URL:", c.Request.URL)
 
@@ -65,6 +69,8 @@ BASIC_AUTH=%s
 SETUP_MONITORING=%s
 INFLUXDB_COLLECTD_HOST=%s
 INFLUXDB_COLLECTD_PORT=%s
+COLLECTD_USERNAME=%s
+COLLECTD_PASSWORD=%s
 COLLECTD_CONFIG_PATH=/etc/collectd/collectd.conf.d/karhu.conf
 NO_REGISTER=%s
 
@@ -108,7 +114,11 @@ if [ "$SETUP_MONITORING" = "1" ]; then
 	fi
 	echo "LoadPlugin network
 <Plugin "network">
-    Server \"karhu\" \"$INFLUXDB_COLLECTD_PORT\"
+    <Server \"karhu\" \"$INFLUXDB_COLLECTD_PORT\">
+		SecurityLevel "Encrypt"
+		Username "$COLLECTD_USERNAME"
+		Password "$COLLECTD_PASSWORD"
+	</Server>
 </Plugin>" | $SUDO tee $COLLECTD_CONFIG_PATH || exit 1
 	echo "Restard collectd"
 	$SUDO service collectd restart || exit 1
@@ -132,7 +142,7 @@ if [ "$SETUP_MONITORING" = "1" ]; then
 
 	$SUDO service filebeat restart || exit 1
 fi
-echo "Done."`, karhuHost, logstashIP, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), clientIP, c.DefaultQuery("ssh_port", "22") /*, c.DefaultQuery("ssh_user", "root") */, basicAuth, c.DefaultQuery("monit", "1"), env.Get("INFLUXDB_COLLECTD_HOST"), env.Get("INFLUXDB_COLLECTD_PORT"), c.DefaultQuery("noreg", "0")))
+echo "Done."`, karhuHost, logstashIP, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), clientIP, c.DefaultQuery("ssh_port", "22") /*, c.DefaultQuery("ssh_user", "root") */, basicAuth, c.DefaultQuery("monit", "1"), env.Get("INFLUXDB_COLLECTD_HOST"), env.Get("INFLUXDB_COLLECTD_PORT"), collectdUser, collectdPassword, c.DefaultQuery("noreg", "0")))
 }
 
 func (pc *NodeController) postNode(c *gin.Context) {

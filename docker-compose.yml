@@ -27,6 +27,7 @@ logstash:
     volumes:
     - "./logstash/certs:/etc/logstash/certs"
     - "./logstash/conf.d:/etc/logstash/conf.d"
+    - "./logstash/authfile:/etc/logstash/authfile"
     ports:
     - "5044:5044"
     - "25826:25826/udp"

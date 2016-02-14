@@ -3,6 +3,7 @@ MAINTAINER max@wayt.me
 
 ENV LOGSTASH_TLS_KEY /etc/logstash/certs/logstash.key
 ENV LOGSTASH_TLS_CRT /etc/logstash/certs/logstash.crt
+ENV LOGSTASH_COLLECTD_AUTHFILE /etc/logstash/authfile
 
 # custom ppa
 RUN apt-get update
@@ -24,8 +25,10 @@ RUN apt-get update && \
 
 # Setup Logstash
 # Default logstash cert path
-RUN mkdir -p /etc/logstash/certs
+RUN mkdir -p /etc/logstash/certs && \
+    mkdir -p /etc/logstash/conf.d
 ADD docker-entrypoint.sh /
+ADD conf.d /etc/logstash/conf.d
 
 # Default data path volume
 VOLUME /etc/logstash

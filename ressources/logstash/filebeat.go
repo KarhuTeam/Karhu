@@ -2,6 +2,9 @@ package logstash
 
 import (
 	"bytes"
+	"github.com/gotoolz/env"
+	"io/ioutil"
+	"strings"
 	"text/template"
 )
 
@@ -22,6 +25,24 @@ func GetFilebeatConfig() ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func ReadAuthfile() (string, string, error) {
+
+	data, err := ioutil.ReadFile(env.GetDefault("LOGSTASH_AUTHFILE", "./logstash/authfile"))
+	if err != nil {
+		return "", "", err
+	}
+
+	buf := bytes.NewBuffer(data)
+	line, err := buf.ReadString('\n')
+	if err != nil {
+		return "", "", err
+	}
+
+	auth := strings.SplitN(string(line), ":", 2)
+
+	return auth[0], auth[1], nil
 }
 
 func init() {
