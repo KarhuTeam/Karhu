@@ -42,7 +42,7 @@ func ReadAuthfile() (string, string, error) {
 
 	auth := strings.SplitN(string(line), ":", 2)
 
-	return auth[0], auth[1], nil
+	return strings.Trim(auth[0]), strings.Trim(auth[1]), nil
 }
 
 func init() {
