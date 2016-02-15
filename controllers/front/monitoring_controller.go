@@ -6,7 +6,6 @@ import (
 	"github.com/karhuteam/karhu/web"
 	"net/http"
 	"github.com/karhuteam/karhu/models"
-	"fmt"
 )
 
 type MonitoringController struct {
@@ -44,10 +43,9 @@ func (pc *MonitoringController) getMonitoringAction(c *gin.Context) {
 			if h == "" {
 				h = n.Hostname	
 			} else {
-				h = "," + n.Hostname
+				h = h + "," + n.Hostname
 			}
 		}
-		fmt.Printf("HOSTS => %s", h)
 		grafana_url = grafana_url + "?hosts=\"" + h + "\""
 	}
 
