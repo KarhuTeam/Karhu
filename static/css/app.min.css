@@ -145,7 +145,10 @@ pre {
   line-height: 40px;
   font-size: 12px;
   padding-left: 10px;
-  color: #fff; }
+  color: #fff;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; }
   .breadcrumb a {
     color: #b8d3ed; }
 
@@ -301,5 +304,16 @@ pre {
     color: #cdd0d2; }
   .filter-item.is-selected {
     background: #577c9f; }
+
+.stream {
+  background: #444;
+  padding: 10px;
+  color: #fff;
+  white-space: pre-wrap;
+  font-family: monospace; }
+  .stream-success {
+    color: #DCF2C2; }
+  .stream-error {
+    color: #FFB8BB; }
 
 /*# sourceMappingURL=app.min.css.map */

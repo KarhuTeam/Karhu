@@ -9,7 +9,7 @@
     <a class="btn" href="/application/add?type=service">New Service</a>
   </div>
   <div class="box text-right">
-      Filter :
+      Filters : <a class="filter-item{{ if eq (len $.selectedTags) 0 }} is-selected{{ end }}" href="/">all</a> - 
       {{ range $tag := .tags }}
         <a class="filter-item{{ if $.selectedTags.HasTag $tag }} is-selected{{ end }}" href="/{{ $.selectedTags.Query $tag }}">{{ $tag }}</a>
       {{ end }}

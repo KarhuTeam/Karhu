@@ -1,0 +1,13 @@
+.stream {
+    background: #444;
+    padding: 10px;
+    color: #fff;
+    white-space: pre-wrap;
+    font-family: monospace;
+    &-success {
+        color: #DCF2C2;
+    }
+    &-error {
+        color: #FFB8BB;
+    }
+}
