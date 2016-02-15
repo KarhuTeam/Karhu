@@ -1,0 +1,32 @@
+{{template "header"}}
+<!-- 	// <script type="application/javascript" src="/static/libs/chart.js"></script>
+	<div class="breadcrumb">
+		Monitoring
+	</div> -->
+</header>
+
+<main>
+	<iframe src="{{ .grafana_url }}/dashboard/script/karhu.js" style="width:100%;height:calc(100vh - 65px);border:0"></iframe>
+<!-- 	<div class="box">
+		<h2 class="box-title">
+			<span>Machine 1</span>
+			<a href="/nodes">All nodes</a>
+		</h2>
+	</div>
+
+	<div class="box">
+		<h2 class="box-title">
+			<span>Machine 1</span>
+			<a href="/nodes">All nodes</a>
+		</h2>
+	</div>
+
+	<div class="box">
+		<h2 class="box-title">
+			<span>Machine 1</span>
+			<a href="/nodes">All nodes</a>
+		</h2>
+	</div> -->
+</main>
+
+{{template "footer"}}

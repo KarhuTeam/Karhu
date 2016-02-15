@@ -4,6 +4,15 @@ mongo:
    ports:
    - "27017:27017"
 
+grafana:
+    hostname: grafana
+    image: grafana/grafana:latest
+    volumes:
+    - "./grafana/grafana.ini:/etc/grafana/grafana.ini:ro"
+    - "./grafana/karhu.js:/usr/share/grafana/public/dashboards/karhu.js:ro"
+    ports:
+    - "3000:3000"
+
 elasticsearch:
     hostname: elasticsearch
     image: elasticsearch:latest

@@ -16,6 +16,7 @@
           <span class="box-subtitle">
               - <span class="select">{{ .IP }}</span>
               - <a href='/logs?query=host%3A+"{{ .Hostname }}"'>Logs</a>
+              - <a href='/monitoring?hosts="{{ .Hostname }}"'>Monito</a>
           </span>
           <a class="right" href="/node/edit/{{ .Id.Hex }}">Edit</a>
       </h2>

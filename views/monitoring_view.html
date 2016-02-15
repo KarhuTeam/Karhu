@@ -1,0 +1,9 @@
+{{template "header" "monitoring"}}
+</header>
+
+<main>
+	<h3 id="grafana_hider" style="position:absolute;width:200px;height:50px;cursor: default; background-color: #262626;line-height: 50px;text-align: center;font-size: 20px;color: #ADAFAE;font-weight: bold;">{{ .page_title }}</h3>
+	<iframe src="{{ .grafana_url }}" style="width:100%;height:calc(100vh - 65px);border:0"></iframe>
+</main>
+
+{{template "footer"}}

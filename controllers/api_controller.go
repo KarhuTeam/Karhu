@@ -22,6 +22,9 @@ func NewAPIController(s *web.Server) *APIController {
 	api.NewNodeController(apiGroup)
 	api.NewDeploymentController(apiGroup)
 	api.NewConfigController(apiGroup)
+	api.NewEsProxyController(apiGroup)
+
+	//api.NewMonitoringController(apiGroup)
 
 	return ctl
 }
