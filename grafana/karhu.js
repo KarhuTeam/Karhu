@@ -74,7 +74,8 @@ function build_panel_targets(v) {
 					field: "@timestamp"
 				}],
 				timeField: "@timestamp",
-				query: 'collectd_type="cpu"'
+				query: 'collectd_type="cpu"',
+				datasource: 'es'
 			}];
 
 		case 'memory':
@@ -96,7 +97,8 @@ function build_panel_targets(v) {
 					field: "@timestamp"
 				}],
 				timeField: "@timestamp",
-				query: 'collectd_type="memory"ANDtype_instance:"used"'
+				query: 'collectd_type="memory"ANDtype_instance:"used"',
+				datasource: 'es'
 			}, {
 				refId: 'A',
 				metrics: [{
@@ -115,7 +117,8 @@ function build_panel_targets(v) {
 					field: "@timestamp"
 				}],
 				timeField: "@timestamp",
-				query: 'collectd_type="swap"'
+				query: 'collectd_type="swap"',
+				datasource: 'es'
 			}];
 
 		case 'disk':
@@ -137,7 +140,8 @@ function build_panel_targets(v) {
 					field: "@timestamp"
 				}],
 				timeField: "@timestamp",
-				query: 'collectd_type="disk_merged"'
+				query: 'collectd_type="disk_merged"',
+				datasource: 'es'
 			}, {
 				refId: 'A',
 				metrics: [{
@@ -156,7 +160,8 @@ function build_panel_targets(v) {
 					field: "@timestamp"
 				}],
 				timeField: "@timestamp",
-				query: 'collectd_type="disk_octets"'
+				query: 'collectd_type="disk_octets"',
+				datasource: 'es'
 			}, {
 				refId: 'A',
 				metrics: [{
@@ -175,7 +180,8 @@ function build_panel_targets(v) {
 					field: "@timestamp"
 				}],
 				timeField: "@timestamp",
-				query: 'collectd_type="disk_ops"'
+				query: 'collectd_type="disk_ops"',
+				datasource: 'es'
 			}, {
 				refId: 'A',
 				metrics: [{
@@ -194,7 +200,8 @@ function build_panel_targets(v) {
 					field: "@timestamp"
 				}],
 				timeField: "@timestamp",
-				query: 'collectd_type="disk_time"'
+				query: 'collectd_type="disk_time"',
+				datasource: 'es'
 			}];
 
 		case 'others':
