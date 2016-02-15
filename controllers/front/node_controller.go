@@ -19,6 +19,7 @@ func NewNodeController(s *web.Server) *NodeController {
 	s.GET("/node/edit/:id", ctl.getNodeAction)
 	s.POST("/node/edit/:id", ctl.postNodeAction)
 	s.GET("/node/add", ctl.getNodeAddAction)
+	s.GET("/node/add/ec2", ctl.getNodeAddEc2Action)
 	s.POST("/node/delete/:id", ctl.postDeleteNodeAction)
 
 	return ctl
@@ -40,6 +41,21 @@ func (pc *NodeController) getNodeAddAction(c *gin.Context) {
 	})
 }
 
+func (pc *NodeController) getNodeAddEc2Action(c *gin.Context) {
+
+	basicAuth := env.Get("BASIC_AUTH")
+	if auth := env.Get("BASIC_AUTH"); auth != "" {
+		basicAuth = "-u " + auth + " "
+	}
+
+	c.HTML(http.StatusOK, "node_add_ec2.html", map[string]interface{}{
+		"PublicHost": c.DefaultQuery("karhu_url", env.Get("PUBLIC_HOST")),
+		"SshUser":    c.DefaultQuery("ssh_user", "root"),
+		"SshPort":    c.DefaultQuery("ssh_port", "22"),
+		"Monit":      c.DefaultQuery("monit", "1"),
+		"BasicAuth":  basicAuth,
+	})
+}
 func (pc *NodeController) getNodesAction(c *gin.Context) {
 
 	nodes, err := models.NodeMapper.FetchAll()

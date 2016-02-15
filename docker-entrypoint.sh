@@ -5,7 +5,7 @@
 #
 #
 #     mkdir -p `dirname $LOGSTASH_TLS_KEY` || exit 1
-#     openssl req -subj "/CN=$LOGSTASH_HOST/" -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout $LOGSTASH_TLS_KEY -out $LOGSTASH_TLS_CRT || exit 1
+#     openssl req -subj "/CN=karhu/" -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout $LOGSTASH_TLS_KEY -out $LOGSTASH_TLS_CRT || exit 1
 # else
 #     echo "Use exising logstash certificats $LOGSTASH_TLS_KEY"
 # fi
@@ -24,6 +24,6 @@ mkdir -p $STORAGE_PATH
 #
 # cat .env; echo
 
-service logstash start
+service grafana start
 
 ./karhu
