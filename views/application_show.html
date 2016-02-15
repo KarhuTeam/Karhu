@@ -65,6 +65,24 @@
           {{ end }}
       </ul>
     </div>
+    <div class="box">
+      <h2 class="box-title">Logs files - <a href='/logs?query=*&app={{ .application.Name }}'>Show all</a><a class="right btn" href="/application/logfile/{{ .application.Name }}">Add log file</a></h2>
+      <ul class="box-list">
+          {{ range $logfile := .logfiles }}
+            <li>
+                {{ if $logfile.Enabled }}
+                    <span class="state state-done"></span>
+                {{ else }}
+                    <span class="state state-running"></span>
+                {{ end }}
+                <span class="select">{{$logfile.Path}}</span> - <a href='/logs?query=source%3A+"{{ $logfile.Path }}"&app={{ $.application.Name}}'>show</a>
+                <span class="right">
+                    <a href="/application/logfile/{{ $.application.Name }}/{{ $logfile.Id.Hex }}">Edit</a>
+                </span>
+            </li>
+          {{ end }}
+      </ul>
+    </div>
   </div>
 </main>
 {{template "footer"}}

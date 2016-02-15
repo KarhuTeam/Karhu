@@ -91,7 +91,29 @@ func (pm *nodeMapper) Save(n *Node) error {
 	col := C(nodeCollection)
 	defer col.Database.Session.Close()
 
-	return col.Insert(n)
+	if err := col.Insert(n); err != nil {
+		return err
+	}
+
+	if err := LogstashRefreshTagsFilters(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (pm *nodeMapper) internalUpdate(n *Node) error {
+
+	col := C(nodeCollection)
+	defer col.Database.Session.Close()
+
+	n.UpdatedAt = time.Now()
+
+	if err := col.UpdateId(n.Id, n); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (pm *nodeMapper) Update(n *Node) error {
@@ -101,7 +123,15 @@ func (pm *nodeMapper) Update(n *Node) error {
 
 	n.UpdatedAt = time.Now()
 
-	return col.UpdateId(n.Id, n)
+	if err := col.UpdateId(n.Id, n); err != nil {
+		return err
+	}
+
+	if err := LogstashRefreshTagsFilters(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (pm *nodeMapper) Delete(n *Node) error {
@@ -109,7 +139,15 @@ func (pm *nodeMapper) Delete(n *Node) error {
 	col := C(nodeCollection)
 	defer col.Database.Session.Close()
 
-	return col.RemoveId(n.Id)
+	if err := col.RemoveId(n.Id); err != nil {
+		return err
+	}
+
+	if err := LogstashRefreshTagsFilters(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (pm *nodeMapper) FetchAll() (Nodes, error) {
@@ -226,7 +264,7 @@ func (nm *nodeMapper) nodeStatusCheck() {
 				}
 
 				n.StatusAt = time.Now()
-				if err := nm.Update(n); err != nil {
+				if err := nm.internalUpdate(n); err != nil {
 					log.Println("nodeStatusCheck:", *n, err)
 				}
 			}

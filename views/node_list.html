@@ -6,11 +6,19 @@
 <main>
     <div class="box">
       <a class="btn" href="/node/add">Add Node</a>
+      <a class="btn" href="/node/add/ec2">Add EC2 Node</a>
     </div>
   <div class="box-col">
     {{ range .nodes }}
     <div class="box">
-      <h2 class="box-title"><span class="state state-{{ .Status }}"></span> <span class="select">{{ .Hostname }}</span><span class="box-subtitle">- <span class="select">{{ .IP }}</span></span><a class="right" href="/node/edit/{{ .Id.Hex }}">Edit</a></h2>
+      <h2 class="box-title">
+          <span class="state state-{{ .Status }}"></span> <span class="select">{{ .Hostname }}</span>
+          <span class="box-subtitle">
+              - <span class="select">{{ .IP }}</span>
+              - <a href='/logs?query=host%3A+"{{ .Hostname }}"'>Logs</a>
+          </span>
+          <a class="right" href="/node/edit/{{ .Id.Hex }}">Edit</a>
+      </h2>
       <p class="box-text">{{ .Description }}</p>
       <p class="box-text">Created At: {{ .CreatedAt }}</p>
       <p class="box-text">Updated At: {{ .UpdatedAt }}</p>

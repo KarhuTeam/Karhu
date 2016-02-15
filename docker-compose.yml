@@ -1,6 +1,6 @@
 mongo:
    hostname: mongo
-   image: mongo
+   image: mongo:latest
    ports:
    - "27017:27017"
 
@@ -14,14 +14,14 @@ grafana:
 
 elasticsearch:
     hostname: elasticsearch
-    image: elasticsearch
+    image: elasticsearch:latest
     ports:
     - "9200:9200"
     - "9300:9300"
 
 kibana:
     hostname: kibana
-    image: kibana
+    image: kibana:latest
     links:
     - "elasticsearch:elasticsearch"
     ports:
@@ -35,13 +35,12 @@ logstash:
     volumes:
     - "./logstash/certs:/etc/logstash/certs"
     - "./logstash/conf.d:/etc/logstash/conf.d"
+    - "./logstash/authfile:/etc/logstash/authfile"
     ports:
     - "5044:5044"
     - "25826:25826/udp"
     links:
     - "elasticsearch:elasticsearch"
-    environment:
-    - LOGSTASH_HOST=logstash
 
 # karhu:
 #     hostname: karhu
@@ -65,4 +64,4 @@ logstash:
 #     - COLLECTD_PROXY_TARGET=influxdb:25826
 #     - INFLUXDB_COLLECTD_HOST=karhu.my-sign.org
 #     - INFLUXDB_COLLECTD_PORT=25827
-#     - LOGSTASH_HOST=logstash
+#     - LOGSTASH_IP=192.168.99.100

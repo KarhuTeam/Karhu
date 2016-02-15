@@ -98,12 +98,21 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 		return
 	}
 
+	logfiles, err := models.LogfileMapper.FetchAll(application)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
+
 	if application.Type == models.APPLICATION_TYPE_SERVICE {
 
 		c.HTML(http.StatusOK, "service_show.html", map[string]interface{}{
 			"application": application,
 			"configs":     configs,
 			"builds":      builds,
+			"logfiles":    logfiles,
 		})
 
 	} else {
@@ -133,6 +142,7 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 			"builds":      builds,
 			"deployments": deployments,
 			"configs":     configs,
+			"logfiles":    logfiles,
 		})
 	}
 }
