@@ -297,6 +297,52 @@ func (am *applicationMapper) FetchAll() (Applications, error) {
 	return applications, nil
 }
 
+func (am *applicationMapper) FetchAllByTag(tag string) (Applications, error) {
+
+	col := C(applicationCollection)
+	defer col.Database.Session.Close()
+
+	var applications Applications
+	var query *mgo.Query
+
+	if tag != "" {
+		query = col.Find(bson.M{"tags": bson.M{"$all": []string{tag}}})
+	} else {
+		query = col.Find(nil)
+	}
+
+	if err := query.All(&applications); err != nil {
+		return nil, err
+	}
+
+	for _, application := range applications {
+		for _, dep := range application.DepsIds {
+			app, err := am.FetchOne(dep)
+			if err != nil {
+				panic(err)
+			}
+
+			application.Deps = append(application.Deps, app)
+		}
+	}
+
+	return applications, nil
+}
+
+func (am *applicationMapper) FetchAllTags() ([]string, error) {
+
+	col := C(applicationCollection)
+	defer col.Database.Session.Close()
+
+	var result []string
+
+	if err := col.Find(nil).Distinct("tags", &result); err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
 func (am *applicationMapper) FetchOne(idOrSlug string) (*Application, error) {
 
 	col := C(applicationCollection)

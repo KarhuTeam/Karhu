@@ -26,6 +26,9 @@
             &:hover {
                 border-left: 10px solid $blue;
             }
+            &.is-selected {
+                border-left: 10px solid $light-blue;
+            }
         }
     }
 }
@@ -51,6 +54,11 @@
                 &:hover {
                     border: 0;
                     background: $light-blue;
+                }
+                &.is-selected {
+                    border-left: 0;
+                    border-bottom: 10px solid $light-blue;
+                    line-height: 50px;
                 }
             }
         }

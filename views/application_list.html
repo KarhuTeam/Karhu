@@ -1,4 +1,4 @@
-{{template "header"}}
+{{template "header" "applications"}}
   <div class="breadcrumb">
     All applications
   </div>
@@ -7,6 +7,12 @@
   <div class="box">
     <a class="btn" href="/application/add">New Application</a>
     <a class="btn" href="/application/add?type=service">New Service</a>
+  </div>
+  <div class="box filter" data-filter-class="filter-app">
+      Filter :
+      {{ range $tag := .tags }}
+        <a href="/?tag={{ $tag }}">{{ $tag }}</a>
+      {{ end }}
   </div>
   <div class="box-col">
     {{ range .applications }}

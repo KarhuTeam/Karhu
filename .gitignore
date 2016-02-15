@@ -28,6 +28,7 @@ tmp
 data
 .sass-cache
 karhu
+.DS_Store
 *.swp
 *.crt
 *.key
