@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -86,6 +87,35 @@ func (p *Application) Update(f *ApplicationUpdateForm) {
 }
 
 type Applications []*Application
+
+// Tags filter
+type TagsFilter []string
+
+func (tf TagsFilter) HasTag(key string) bool {
+	for _, tag := range tf {
+		if key == tag {
+			return true
+		}
+	}
+	return false
+}
+
+func (tf TagsFilter) Query(key string) string {
+
+	tags := make([]string, 0)
+
+	for _, tag := range tf {
+		if key != tag && tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	if !tf.HasTag(key) {
+		tags = append(tags, key)
+	}
+
+	return "?tags=" + strings.Join(tags, ",")
+}
 
 // Application creation form
 type ApplicationCreateForm struct {
@@ -297,7 +327,7 @@ func (am *applicationMapper) FetchAll() (Applications, error) {
 	return applications, nil
 }
 
-func (am *applicationMapper) FetchAllByTag(tag string) (Applications, error) {
+func (am *applicationMapper) FetchAllByTag(tags []string) (Applications, error) {
 
 	col := C(applicationCollection)
 	defer col.Database.Session.Close()
@@ -305,8 +335,8 @@ func (am *applicationMapper) FetchAllByTag(tag string) (Applications, error) {
 	var applications Applications
 	var query *mgo.Query
 
-	if tag != "" {
-		query = col.Find(bson.M{"tags": bson.M{"$all": []string{tag}}})
+	if len(tags) > 0 {
+		query = col.Find(bson.M{"tags": bson.M{"$all": tags}})
 	} else {
 		query = col.Find(nil)
 	}

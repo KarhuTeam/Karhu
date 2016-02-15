@@ -248,4 +248,16 @@ pre {
     .state-new::after {
       content: '…'; }
 
+/* Filter */
+.filter-item {
+  background: #444;
+  padding: 3px 5px;
+  margin-left: 5px;
+  border-radius: 5px;
+  color: #fff; }
+  .filter-item:hover {
+    color: #cdd0d2; }
+  .filter-item.is-selected {
+    background: #577c9f; }
+
 /*# sourceMappingURL=app.min.css.map */

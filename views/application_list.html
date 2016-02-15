@@ -11,7 +11,7 @@
   <div class="box filter" data-filter-class="filter-app">
       Filter :
       {{ range $tag := .tags }}
-        <a href="/?tag={{ $tag }}">{{ $tag }}</a>
+        <a class="filter-item{{ if $.selectedTags.HasTag $tag }} is-selected{{ end }}" href="/{{ $.selectedTags.Query $tag }}">{{ $tag }}</a>
       {{ end }}
   </div>
   <div class="box-col">

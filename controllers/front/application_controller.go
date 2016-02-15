@@ -8,6 +8,7 @@ import (
 	"github.com/karhuteam/karhu/web"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type ApplicationController struct {
@@ -60,11 +61,17 @@ func (ctl *ApplicationController) getApplication(c *gin.Context, id string) *mod
 /**
  * 1 - Applications list
  */
+
 func (ctl *ApplicationController) getApplicationsAction(c *gin.Context) {
 
-	tag := c.DefaultQuery("tag", "")
+	var selectedTags models.TagsFilter
+	tagsQuery := c.DefaultQuery("tags", "")
 
-	applications, err := models.ApplicationMapper.FetchAllByTag(tag)
+	if len(tagsQuery) > 0 {
+		selectedTags = strings.Split(tagsQuery, ",")
+	}
+
+	applications, err := models.ApplicationMapper.FetchAllByTag(selectedTags)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
 			"error": err,
@@ -81,6 +88,7 @@ func (ctl *ApplicationController) getApplicationsAction(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "application_list.html", map[string]interface{}{
+		"selectedTags": selectedTags,
 		"tags":         tags,
 		"applications": applications,
 	})

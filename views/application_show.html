@@ -9,7 +9,7 @@
     <a class="btn btn-danger" data-text="Do you want to remove this application ?" href="/application/delete/{{ .application.Id.Hex }}">Delete</a>
   </div>
   <div class="box">
-    <h2 class="box-title">{{ .application.Name }}<a class="right" href="/application/edit/{{ .application.Id.Hex }}">Edit</a></h2>
+    <h2 class="box-title">{{ .application.Name }}</h2>
     <p class="box-text">{{ .application.Description }}</p>
     <p class="box-text">Tags : {{range $tag := .application.Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
     <p class="box-text">Deps : {{range $dep := .application.Deps}}<a href="/application/show/{{$dep.Name}}"><span class="label">{{$dep.Name}}</span></a> {{else}} No dep {{end}}</p>
@@ -45,7 +45,7 @@
       </ul>
     </div>
     <div class="box">
-      <h2 class="box-title">Configs<a class="right btn" href="/application/configuration/{{ .application.Name }}">Add configuration</a></h2>
+      <h2 class="box-title">Configs<a class="right btn btn-small" href="/application/configuration/{{ .application.Name }}">Add configuration</a></h2>
       <ul class="box-list">
           {{ range $config := .configs }}
             <li>
@@ -66,7 +66,7 @@
       </ul>
     </div>
     <div class="box">
-      <h2 class="box-title">Logs files - <a href='/logs?query=*&app={{ .application.Name }}'>Show all</a><a class="right btn" href="/application/logfile/{{ .application.Name }}">Add log file</a></h2>
+      <h2 class="box-title">Logs files - <a href='/logs?query=*&app={{ .application.Name }}'>Show all</a><a class="right btn btn-small" href="/application/logfile/{{ .application.Name }}">Add log file</a></h2>
       <ul class="box-list">
           {{ range $logfile := .logfiles }}
             <li>

@@ -1,0 +1,19 @@
+/* Filter */
+
+.filter {
+    &-item {
+        background: $gray;
+        padding: 3px 5px;
+        margin-left: 5px;
+        border-radius: 5px;
+        color: #fff;
+
+        &:hover {
+            color: $light-gray;
+        }
+
+        &.is-selected {
+            background: $light-blue;
+        }
+    }
+}
