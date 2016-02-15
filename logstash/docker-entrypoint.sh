@@ -10,7 +10,7 @@ else
     echo "Use exising logstash certificats $LOGSTASH_TLS_KEY"
 fi
 
-code=`curl --write-out "%{http_code}\n" --silent --output /dev/null http://192.168.99.100:9200/_template/filebeat?pretty`
+code=`curl --write-out "%{http_code}\n" --silent --output /dev/null http://elasticsearch:9200/_template/filebeat?pretty`
 
 # Generate filebeat index in ES
 if [ "$code" != "200" ]; then
