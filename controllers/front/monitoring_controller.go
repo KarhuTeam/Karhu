@@ -3,6 +3,7 @@ package front
 import (
 	// "fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gotoolz/env"
 	// "github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/web"
 	"net/http"
@@ -24,6 +25,7 @@ func (pc *MonitoringController) getMonitoringAction(c *gin.Context) {
 
 	// monitoring_data := models.GetDefaultMonitoring()
 
-	c.HTML(http.StatusOK, "monitoring.html", map[string]interface{} {
+	c.HTML(http.StatusOK, "monitoring.html", map[string]interface{}{
+		"grafana_url": env.GetDefault("GRAFANA_URL", "http://localhost:3000"),
 	})
 }

@@ -1,9 +1,17 @@
-#mongo:
-#   hostname: mongo
-#   image: mongo
-#   ports:
-#   - "27017:27017"
-#
+mongo:
+   hostname: mongo
+   image: mongo
+   ports:
+   - "27017:27017"
+
+grafana:
+    hostname: grafana
+    image: grafana/grafana:latest
+    volumes:
+    - "./grafana.ini:/etc/grafana/grafana.ini:ro"
+    ports:
+    - "3000:3000"
+
 elasticsearch:
     hostname: elasticsearch
     image: elasticsearch

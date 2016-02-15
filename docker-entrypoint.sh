@@ -24,6 +24,6 @@ mkdir -p $STORAGE_PATH
 #
 # cat .env; echo
 
-service logstash start
+service grafana start
 
 ./karhu
