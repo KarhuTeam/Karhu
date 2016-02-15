@@ -29,7 +29,7 @@
         };
         webSocket.onclose = function () {
             console.debug('[Stream] OnClose');
-             window.scrollTo(0, 0);
+            window.scrollTo(0, 0);
             location.reload();
         };
     }
