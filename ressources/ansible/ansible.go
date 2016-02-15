@@ -195,9 +195,7 @@ func Run(depl *models.Deployment) error {
 	}
 
 	// run playbook
-	if err := runPlaybook(tmpPath); err != nil {
-		return err
-	}
+	errPlaybook := runPlaybook(tmpPath)
 
 	data, err := ioutil.ReadFile(path.Join(tmpPath, "karhu.log"))
 	if err != nil {
@@ -206,7 +204,7 @@ func Run(depl *models.Deployment) error {
 
 	depl.Logs = string(data)
 
-	return nil
+	return errPlaybook
 
 }
 

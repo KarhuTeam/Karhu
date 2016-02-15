@@ -11,7 +11,7 @@
       <p class="box-text">Duration: {{ .deployment.Duration.String }}</p>
     </div>
   <div class="box">
-      {{ if ne .deployment.Logs "" }}
+      {{ if or (eq .deployment.Status "error") (eq .deployment.Status "done") }}
       <pre class="stream">{{ .deployment.Logs }}</pre>
       {{ else }}
       <pre class="stream" data-socket="{{ .websocket_proto }}://{{ .public_host }}/ws/application/deployment/{{ .application.Id.Hex }}/{{ .deployment.Id.Hex }}"></pre>
