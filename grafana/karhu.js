@@ -1,5 +1,5 @@
 'use strict';
-console.log("DAAD");
+
 var dashboard = {
 	title: 'Karhu',
 	time: {
