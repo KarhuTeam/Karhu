@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -86,6 +87,35 @@ func (p *Application) Update(f *ApplicationUpdateForm) {
 }
 
 type Applications []*Application
+
+// Tags filter
+type TagsFilter []string
+
+func (tf TagsFilter) HasTag(key string) bool {
+	for _, tag := range tf {
+		if key == tag {
+			return true
+		}
+	}
+	return false
+}
+
+func (tf TagsFilter) Query(key string) string {
+
+	tags := make([]string, 0)
+
+	for _, tag := range tf {
+		if key != tag && tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	if !tf.HasTag(key) {
+		tags = append(tags, key)
+	}
+
+	return "?tags=" + strings.Join(tags, ",")
+}
 
 // Application creation form
 type ApplicationCreateForm struct {
@@ -295,6 +325,52 @@ func (am *applicationMapper) FetchAll() (Applications, error) {
 	}
 
 	return applications, nil
+}
+
+func (am *applicationMapper) FetchAllByTag(tags []string) (Applications, error) {
+
+	col := C(applicationCollection)
+	defer col.Database.Session.Close()
+
+	var applications Applications
+	var query *mgo.Query
+
+	if len(tags) > 0 {
+		query = col.Find(bson.M{"tags": bson.M{"$all": tags}})
+	} else {
+		query = col.Find(nil)
+	}
+
+	if err := query.All(&applications); err != nil {
+		return nil, err
+	}
+
+	for _, application := range applications {
+		for _, dep := range application.DepsIds {
+			app, err := am.FetchOne(dep)
+			if err != nil {
+				panic(err)
+			}
+
+			application.Deps = append(application.Deps, app)
+		}
+	}
+
+	return applications, nil
+}
+
+func (am *applicationMapper) FetchAllTags() ([]string, error) {
+
+	col := C(applicationCollection)
+	defer col.Database.Session.Close()
+
+	var result []string
+
+	if err := col.Find(nil).Distinct("tags", &result); err != nil {
+		return result, err
+	}
+
+	return result, nil
 }
 
 func (am *applicationMapper) FetchOne(idOrSlug string) (*Application, error) {
