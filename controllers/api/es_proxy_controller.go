@@ -2,11 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	// "fmt"
-	"log"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"fmt"
 )
 
 type EsProxyController struct {
@@ -37,7 +36,9 @@ func (pc *EsProxyController) reverseProxy(c *gin.Context) {
 
 	proxy := httputil.NewSingleHostReverseProxy(url)
 
-	c.Request.URL.Path = strings.TrimPrefix(c.Request.URL.Path, "/api/es")
+	c.Request.URL.Path = strings.TrimPrefix(c.Request.URL.Path, "/api/es/")
 
+	fmt.Printf("URL > %v\n", c.Request.URL)
+	
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
