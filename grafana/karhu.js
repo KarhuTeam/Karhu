@@ -1,5 +1,5 @@
 'use strict';
-
+console.log("DAAD");
 var dashboard = {
 	title: 'Karhu',
 	time: {
@@ -9,17 +9,26 @@ var dashboard = {
 	rows: []
 };
 
-var host = -1;
-if (ARGS.host !== undefined) {
-	host = ARGS.host;
+if (ARGS.hosts !== undefined) {
+	var hosts = ARGS.hosts.split(",")
+
+	for (var i = 0 ; i < hosts.length ; i++) {
+		dashboard.rows.push({
+			title: hosts[i],
+			height: '300px',
+			panels: get_panels(hosts[i])
+		});
+	}
+
+} else {
+
+	dashboard.rows.push({
+		title: 'Global',
+		height: '300px',
+		panels: get_panels()
+	});
+
 }
-
-dashboard.rows.push({
-	title: 'creme',
-	height: '300px',
-	panels: get_panels()
-});
-
 
 function get_panels() {
 	var panels = [];
@@ -212,5 +221,4 @@ function build_panel_targets(v) {
 	}
 }
 
-console.log('DASHBOARD > ', dashboard);
 return dashboard;
