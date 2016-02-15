@@ -43,7 +43,8 @@ RUN go get -v && \
     go build
 
 # Install Grafana
-ADD grafana.ini /etc/grafana/grafana.ini
+ADD grafana/grafana.ini /etc/grafana/grafana.ini
+ADD grafana/karhu.js /usr/share/grafana/public/dashboards/karhu.js
 
 # Setup Logstash
 # Default logstash cert path

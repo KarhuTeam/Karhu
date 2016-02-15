@@ -8,7 +8,8 @@ grafana:
     hostname: grafana
     image: grafana/grafana:latest
     volumes:
-    - "./grafana.ini:/etc/grafana/grafana.ini:ro"
+    - "./grafana/grafana.ini:/etc/grafana/grafana.ini:ro"
+    - "./grafana/karhu.js:/usr/share/grafana/public/dashboards/karhu.js:ro"
     ports:
     - "3000:3000"
 
@@ -35,7 +36,6 @@ logstash:
     volumes:
     - "./logstash/certs:/etc/logstash/certs"
     - "./logstash/conf.d:/etc/logstash/conf.d"
-    - "./logstash/authfile:/etc/logstash/authfile"
     ports:
     - "5044:5044"
     - "25826:25826/udp"
