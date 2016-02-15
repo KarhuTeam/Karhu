@@ -1,6 +1,6 @@
 {{template "header" "logs"}}
   <div class="breadcrumb">
-    <a href="/log">All logs</a>
+    <a href="/logs">All logs</a>
   </div>
 </header>
 <main>
@@ -17,7 +17,6 @@
       <div class="form-group">
         <label for="query">Name :</label>
         <input class="form-control" id="query" name="query" type="text" placeholder="Search..." {{ if .query }}value="{{ .query }}"{{ end }}/>
-        <button class="btn" type="submit">Search</button>
       </div>
       <div class="form-group">
         <label for="count">Options :</label>
@@ -41,26 +40,29 @@
       <div class="form-group">
         <label for="app">App :</label>
         <select name="app">
-            <option value="" {{ if eq .app "" }}selected="selected"{{ end }}>Choose an App</option>
+            <option value="" {{ if eq .app "" }}selected="selected"{{ end }}>Choose an application</option>
             {{ range .applications}}
             <option value="{{ .Name }}" {{ if eq $.app .Name }}selected="selected"{{ end }}>{{ .Name }}</option>
             {{ end }}
         </select>
+      </div>
+      <div class="text-center">
+          <button class="btn" type="submit">Search</button>
       </div>
     </form>
   </div>
   <div class="box">
       <ul class="box-list fold-container">
           {{ range $index, $elem := .result }}
-          <li class="fold-parent" data-fold-id="{{ $index }}"><span class="select">{{ .Host }}</span> <span class="select">{{ $elem.Message }}</span></li>
+          <li class="fold-parent" data-fold-id="{{ $index }}"><span class="box-list-label select">{{ .Host }}</span> <span class="select">{{ $elem.Message }}</span></li>
           <li class="fold-child fold-child-hidden" data-fold-id="{{ $index }}">
-              <ul>
-                  <li>@timestamp: <span class="select">{{ $elem.Timestamp }}</span></li>
-                  <li>host: <span class="select">{{ $elem.Host }}</span></li>
-                  <li>source: <span class="select">{{ $elem.Source }}</span></li>
-                  <li>input_type: <span class="select">{{ $elem.InputType }}</span></li>
-                  <li>type: <span class="select">{{ $elem.Type }}</span></li>
-                  <li>tags: {{range $tag := $elem.KarhuTags}}<span class="label">{{$tag}}</span> {{else}} no tags {{end}}</li>
+              <ul class="box-list">
+                  <li><span class="box-list-label">Timestamp :</span> <span class="select">{{ $elem.Timestamp.Format "2006-01-02 15:04:05" }}</span></li>
+                  <li><span class="box-list-label">Host :</span> <span class="select">{{ $elem.Host }}</span></li>
+                  <li><span class="box-list-label">Source :</span> <span class="select">{{ $elem.Source }}</span></li>
+                  <li><span class="box-list-label">Input type :</span> <span class="select">{{ $elem.InputType }}</span></li>
+                  <li><span class="box-list-label">Type :</span> <span class="select">{{ $elem.Type }}</span></li>
+                  <li><span class="box-list-label">Tags :</span> {{range $tag := $elem.KarhuTags}}<span class="label">{{$tag}}</span> {{else}} no tags {{end}}</li>
                   {{ if $elem.KarhuApp }}<li>app: <a href="/application/show/{{$elem.KarhuApp}}"><span class="label">{{$elem.KarhuApp}}</span></a>{{ end }}
               </ul>
           </li>

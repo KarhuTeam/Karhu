@@ -5,14 +5,15 @@
 </header>
 <main>
   <div class="box">
-    <a class="btn" href="/application/edit/{{ .application.Id.Hex }}">Edit</a>
-    <a class="btn btn-danger" data-text="Do you want to remove this application ?" href="/application/delete/{{ .application.Id.Hex }}">Delete</a>
-  </div>
-  <div class="box">
-    <h2 class="box-title">{{ .application.Name }}</h2>
+    <h2 class="box-title">{{ .application.Name }}
+        <a class="right btn btn-danger btn-small" data-text="Do you want to remove this application ?" href="/application/delete/{{ .application.Id.Hex }}">Delete</a>
+        <a class="right btn btn-small" href="/application/edit/{{ .application.Id.Hex }}">Edit</a>
+    </h2>
     <p class="box-text">{{ .application.Description }}</p>
-    <p class="box-text">Tags : {{range $tag := .application.Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>
-    <p class="box-text">Deps : {{range $dep := .application.Deps}}<a href="/application/show/{{$dep.Name}}"><span class="label">{{$dep.Name}}</span></a> {{else}} No dep {{end}}</p>
+    <ul class="box-list">
+        <li><span class="box-list-label">Tags :</span> {{range $tag := .application.Tags}}<span class="label">{{$tag}}</span> {{else}}n/a{{end}}</li>
+        <li><span class="box-list-label">Dependencies :</span> {{range $dep := .application.Deps}}<a href="/application/show/{{$dep.Name}}"><span class="label">{{$dep.Name}}</span></a> {{else}}n/a{{end}}</li>
+    </ul>
   </div>
   <div class="box-col">
     <div class="box">
@@ -20,14 +21,13 @@
       <ul class="box-list">
         {{ range $deployment := .deployments }}
           <li>
+              <form class="right" action="/application/deployment/{{ $.application.Name }}/{{$deployment.BuildId.Hex}}" method="POST">
+                  <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Redeploy</button>
+              </form>
               <span class="state state-{{$deployment.Status}}"></span>
               Deploy <a href="/application/deployment/{{$.application.Name}}/{{$deployment.Id.Hex}}">#{{$deployment.Id.Hex}}</a>
-              - {{ $deployment.UpdatedAt.String }}
-              <span class="right">
-                  <form action="/application/deployment/{{ $.application.Name }}/{{$deployment.BuildId.Hex}}" method="POST">
-                      <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Redeploy</button>
-                  </form>
-              </span></li>
+              - <span class="text-gray">{{ $deployment.UpdatedAt.Format "2006-01-02 15:04:05"  }}</span>
+          </li>
         {{ end }}
       </ul>
     </div>
@@ -35,17 +35,17 @@
       <h2 class="box-title">Builds</h2>
       <ul class="box-list">
           {{ range $build := .builds }}
-            <li>Build #{{$build.Id.Hex}} - {{ $build.CreatedAt.String }}
-                <span class="right">
-                    <form action="/application/deployment/{{ $.application.Name }}/{{$build.Id.Hex}}" method="POST">
-                        <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Deploy</button>
-                    </form>
-                </span></li>
+            <li>
+                <form class="right" action="/application/deployment/{{ $.application.Name }}/{{$build.Id.Hex}}" method="POST">
+                    <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Deploy</button>
+                </form>
+                Build #{{$build.Id.Hex}} - <span class="text-gray">{{ $build.CreatedAt.Format "2006-01-02 15:04:05" }}</span>
+            </li>
           {{ end }}
       </ul>
     </div>
     <div class="box">
-      <h2 class="box-title">Configs<a class="right btn btn-small" href="/application/configuration/{{ .application.Name }}">Add configuration</a></h2>
+      <h2 class="box-title">Configs<a class="right btn btn-small" href="/application/configuration/{{ .application.Name }}">Add config</a></h2>
       <ul class="box-list">
           {{ range $config := .configs }}
             <li>
@@ -62,11 +62,17 @@
                     <a href="/application/configuration/{{ $.application.Name }}/{{ $config.Id.Hex }}">Edit</a>
                 </span>
             </li>
+          {{ else }}
+            <li>No configuration file, you can <a href="/application/configuration/{{ .application.Name }}">add a file</a></li>
           {{ end }}
       </ul>
     </div>
     <div class="box">
-      <h2 class="box-title">Logs files - <a href='/logs?query=*&app={{ .application.Name }}'>Show all</a><a class="right btn btn-small" href="/application/logfile/{{ .application.Name }}">Add log file</a></h2>
+      <h2 class="box-title">
+          Logs files
+          <a class="right btn btn-small" href="/application/logfile/{{ .application.Name }}">Add log file</a>
+          <a class="right btn btn-small" href='/logs?query=*&app={{ .application.Name }}'>Show all</a>
+      </h2>
       <ul class="box-list">
           {{ range $logfile := .logfiles }}
             <li>
@@ -80,6 +86,8 @@
                     <a href="/application/logfile/{{ $.application.Name }}/{{ $logfile.Id.Hex }}">Edit</a>
                 </span>
             </li>
+          {{ else }}
+            <li>No log file, you can <a href="/application/logfile/{{ .application.Name }}">add a file</a></li>
           {{ end }}
       </ul>
     </div>
