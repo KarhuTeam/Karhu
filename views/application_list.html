@@ -4,11 +4,11 @@
   </div>
 </header>
 <main>
-  <div class="box">
+  <div class="box text-right">
     <a class="btn" href="/application/add">New Application</a>
     <a class="btn" href="/application/add?type=service">New Service</a>
   </div>
-  <div class="box filter" data-filter-class="filter-app">
+  <div class="box text-right">
       Filter :
       {{ range $tag := .tags }}
         <a class="filter-item{{ if $.selectedTags.HasTag $tag }} is-selected{{ end }}" href="/{{ $.selectedTags.Query $tag }}">{{ $tag }}</a>
@@ -17,13 +17,23 @@
   <div class="box-col">
     {{ range .applications }}
     <div class="box">
-      <h2 class="box-title"><span class="select">{{ .Name }}</span><a class="right" href="/application/show/{{ .Name }}">Show</a></h2>
+      <h2 class="box-title"><span class="select">{{ .Name }}</span><a class="right btn btn-small" href="/application/show/{{ .Name }}">Show</a></h2>
       <p class="box-text">{{ .Description }}</p>
-      {{ if len .Tags }}<p class="box-text">Tags : {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</p>{{ end }}
-      {{ if len .Deps }}<p class="box-text">Deps : {{range $dep := .Deps}}<a href="/application/show/{{$dep.Name}}"><span class="label">{{$dep.Name}}</span></a> {{else}} No dep {{end}}</p>{{ end }}
       <ul class="box-list">
-        <li>Last deployment #c0cb8a1d <span class="right"><a href="">Show</a> - <a href="">Replay</a></span></li>
-        <li><a href="">Show more deployment</a></li>
+      {{ if len .Tags }}<li><span class="box-list-label">Tags :</span> {{range $tag := .Tags}}<span class="label">{{$tag}}</span> {{else}} No tag {{end}}</li>{{ end }}
+      {{ if len .Deps }}<li><span class="box-list-label">Dependencies :</span> {{range $dep := .Deps}}<a href="/application/show/{{$dep.Name}}"><span class="label">{{$dep.Name}}</span></a> {{else}} No dep {{end}}</li>{{ end }}
+      </ul>
+      <ul class="box-list">
+        {{ if .Deployment }}
+        <li>
+            <form class="right" action="/application/deployment/{{ .Name }}/{{.Deployment.BuildId.Hex}}" method="POST">
+                <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">Redeploy</button>
+            </form>
+            <span class="state state-{{.Deployment.Status}}"></span>
+            Deploy <a href="/application/deployment/{{.Name}}/{{.Deployment.Id.Hex}}">#{{.Deployment.Id.Hex}}</a>
+            - <span class="text-gray">{{ .Deployment.UpdatedAt.Format "2006-01-02 15:04:05" }}</span>
+        </li>
+        {{ end }}
       </ul>
     </div>
     {{ end }}

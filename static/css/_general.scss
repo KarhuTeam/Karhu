@@ -40,6 +40,13 @@ pre {
 .text-center {
     text-align:center;
 }
+.text-right {
+    text-align: right;
+}
+
+.text-gray {
+    color: $gray;
+}
 
 .right {
     float: right;

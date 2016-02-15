@@ -6,15 +6,18 @@
 <main>
     <div class="box">
       <h2 class="box-title"><span class="state state-{{ .deployment.Status}}"></span> <span class="select">{{ .application.Name }}</span></h2>
-      <p class="box-text">Created: {{ .deployment.CreatedAt.String }}</p>
-      <p class="box-text">Last Update: {{ .deployment.UpdatedAt.String }}</p>
-      <p class="box-text">Duration: {{ .deployment.Duration.String }}</p>
+
+        <ul class="box-list">
+            <li><span class="box-list-label">Created At :</span> {{ .deployment.CreatedAt.String }}</li>
+            <li><span class="box-list-label">Last Update :</span> {{ .deployment.UpdatedAt.String }}</li>
+            <li><span class="box-list-label">Duration :</span> {{ .deployment.Duration.String }}</li>
+        </ul>
     </div>
   <div class="box">
       {{ if or (eq .deployment.Status "error") (eq .deployment.Status "done") }}
       <pre class="stream">{{ .deployment.Logs }}</pre>
       {{ else }}
-      <pre class="stream" data-socket="{{ .websocket_proto }}://{{ .public_host }}/ws/application/deployment/{{ .application.Id.Hex }}/{{ .deployment.Id.Hex }}"></pre>
+      <div class="stream" data-socket="{{ .websocket_proto }}://{{ .public_host }}/ws/application/deployment/{{ .application.Id.Hex }}/{{ .deployment.Id.Hex }}"></div>
       {{ end }}
   </div>
 </main>

@@ -39,6 +39,12 @@ pre {
 .text-center {
   text-align: center; }
 
+.text-right {
+  text-align: right; }
+
+.text-gray {
+  color: #444; }
+
 .right {
   float: right; }
 
@@ -74,6 +80,28 @@ pre {
     width: 56px;
     line-height: 56px;
     text-align: center; }
+    .navbar-btn .icon {
+      position: relative;
+      vertical-align: middle;
+      width: 30px;
+      height: 30px;
+      display: block;
+      margin: 18px 15px 0; }
+      .navbar-btn .icon span::before, .navbar-btn .icon span, .navbar-btn .icon span::after {
+        display: block;
+        position: absolute;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.5);
+        width: 100%;
+        top: 8px; }
+      .navbar-btn .icon span::before, .navbar-btn .icon span::after {
+        content: ""; }
+      .navbar-btn .icon span::before {
+        top: -8px; }
+      .navbar-btn .icon span::after {
+        top: 8px; }
+    .navbar-btn:hover .icon span, .navbar-btn:hover .icon span::before, .navbar-btn:hover .icon span::after {
+      background: #fff; }
   .navbar > li > a {
     display: block;
     background: #cdd0d2;
@@ -132,12 +160,22 @@ pre {
     border-bottom: 3px solid #305a83;
     padding: 5px;
     margin-bottom: 10px; }
+    .box-title .btn {
+      margin-left: 5px; }
   .box-text {
     padding: 5px;
     margin-bottom: 10px; }
   .box-list > li {
     border-bottom: 1px solid #333;
     padding: 10px; }
+    .box-list > li:hover {
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid #444; }
+  .box-list-label {
+    font-weight: bold;
+    color: #888;
+    display: inline-block;
+    width: 100px; }
   .box-subtitle {
     color: #cdd0d2;
     font-size: 12px; }
@@ -161,7 +199,8 @@ pre {
   border-radius: 3px; }
   .btn.btn-small {
     padding: 4px 6px;
-    font-size: 9px; }
+    font-size: 9px;
+    line-height: 1em; }
   .btn:hover {
     background-color: #183b5f;
     color: #fff; }
@@ -213,21 +252,24 @@ pre {
 .label {
   display: inline-block;
   background: rgba(87, 124, 159, 0.8);
-  padding: 4px;
+  padding: 3px 5px;
   border-radius: 3px;
   color: #fff; }
 
 .fold-child {
-  border-style: solid;
-  border-color: rgba(87, 124, 159, 0.8); }
+  border-left: 3px solid #305a83; }
 
 .fold-child-hidden {
   display: none; }
 
+.fold-parent-selected {
+  border-left: 3px solid #305a83; }
+
 .state {
   border-radius: 50%;
-  width: 15px;
-  height: 15px;
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 0.3em;
   display: inline-block;
   text-align: center;
   color: #1e1e1e; }

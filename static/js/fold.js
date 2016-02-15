@@ -1,7 +1,6 @@
 (function() {
 	'use strict';
 
-	// Copy|Delete|manage tags inputs
 	document.addEventListener('DOMContentLoaded', function() {
 
 		/*
@@ -34,8 +33,10 @@
 			for (var i = 0; i < folds.length; i++) {
 
                 folds[i].onclick = function(event) {
-                    var id = this.getAttribute('data-fold-id');
 
+					this.classList.toggle('fold-parent-selected');
+
+                    var id = this.getAttribute('data-fold-id');
                     var childs = self.foldContainer.getElementsByClassName('fold-child');
 
                     for ( var j = 0; j < childs.length; j++) {
@@ -43,7 +44,6 @@
                             childs[j].classList.toggle('fold-child-hidden');
                         }
                     }
-
                 };
 			}
 		}
