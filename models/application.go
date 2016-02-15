@@ -55,15 +55,16 @@ func init() {
 }
 
 type Application struct {
-	Id          bson.ObjectId  `json:"id" bson:"_id"`
-	Name        string         `json:"name" bson:"name"` // Slug name
-	Type        string         `json:"type" bson:"type"`
-	Description string         `json:"description" bson:"description"`
-	Tags        []string       `json:"tags" bson:"tags"` // Tags are used for application search
-	DepsIds     []string       `json:"-" bson:"deps"`
-	Deps        []*Application `json:"deps" bson:"-"`
-	CreatedAt   time.Time      `json:"created_at" bson:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at" bson:"updated_at"`
+	Id                  bson.ObjectId  `json:"id" bson:"_id"`
+	Name                string         `json:"name" bson:"name"` // Slug name
+	Type                string         `json:"type" bson:"type"`
+	Description         string         `json:"description" bson:"description"`
+	Tags                []string       `json:"tags" bson:"tags"` // Tags are used for application search
+	DepsIds             []string       `json:"-" bson:"deps"`
+	CurrentDeploymentId string         `json:"-" bson:"current_deployment_id"`
+	Deps                []*Application `json:"deps" bson:"-"`
+	CreatedAt           time.Time      `json:"created_at" bson:"created_at"`
+	UpdatedAt           time.Time      `json:"updated_at" bson:"updated_at"`
 }
 
 func (p *Application) Update(f *ApplicationUpdateForm) {
@@ -396,4 +397,13 @@ func (am *applicationMapper) FetchOne(idOrSlug string) (*Application, error) {
 	}
 
 	return application, nil
+}
+
+func (a *Application) Deployment() (*Deployment, error) {
+
+	if a.CurrentDeploymentId == "" {
+		return nil, nil
+	}
+
+	return DeploymentMapper.FetchOne(a, a.CurrentDeploymentId)
 }

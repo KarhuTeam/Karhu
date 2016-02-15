@@ -146,6 +146,11 @@ func (pc *BuildController) postBuildDeploy(c *gin.Context) {
 		panic(err)
 	}
 
+	app.CurrentDeploymentId = depl.Id.Hex()
+	if err := models.ApplicationMapper.Update(app); err != nil {
+		panic(err)
+	}
+
 	go func() {
 
 		start := time.Now()
