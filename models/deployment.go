@@ -273,6 +273,9 @@ func (d *Deployment) Playbook() (*ansible.Playbook, error) {
 	if len(d.Build.RuntimeCfg.Static) > 0 {
 		setupStaticRole(role, d)
 	}
+	if len(d.Build.RuntimeCfg.Dependencies) > 0 {
+		setupDependenciesRole(role, d)
+	}
 
 	playbook.AddRole(role)
 
