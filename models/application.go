@@ -198,7 +198,7 @@ func (f *ApplicationUpdateForm) Hydrate(a *Application) {
 			panic("no build for application: " + a.Name)
 		}
 
-		f.Packages = build.RuntimeCfg.Dependencies
+		f.Packages = build.RuntimeCfg.Dependencies.ToString()
 	}
 }
 

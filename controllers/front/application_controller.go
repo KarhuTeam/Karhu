@@ -318,7 +318,7 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 			panic("No last build for service: " + application.Name)
 		}
 
-		build.RuntimeCfg.Dependencies = form.Packages
+		build.RuntimeCfg.Dependencies.FromString(form.Packages)
 
 		if err := models.BuildMapper.Update(build); err != nil {
 			panic(err)

@@ -5,11 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/models"
-	"github.com/karhuteam/karhu/ressources/ansible"
-	"log"
+	// "github.com/karhuteam/karhu/ressources/ansible"
 	"net/http"
-	"runtime"
-	"time"
 )
 
 type BuildController struct {
@@ -151,42 +148,7 @@ func (pc *BuildController) postBuildDeploy(c *gin.Context) {
 		panic(err)
 	}
 
-	go func() {
-
-		start := time.Now()
-
-		// catch panic
-		defer func() {
-			if err := recover(); err != nil {
-				log.Println("ansible:", err)
-
-				trace := make([]byte, 2048)
-				runtime.Stack(trace, true)
-				log.Println(string(trace))
-
-				depl.Status = models.STATUS_ERROR
-				depl.Duration = time.Since(start)
-				if err := models.DeploymentMapper.Update(depl); err != nil {
-					log.Println(err)
-				}
-			}
-		}()
-
-		depl.Status = models.STATUS_RUNNING
-		if err := models.DeploymentMapper.Update(depl); err != nil {
-			return
-		}
-
-		if err := ansible.Run(depl); err != nil {
-			panic(err)
-		}
-
-		depl.Status = models.STATUS_DONE
-		depl.Duration = time.Since(start)
-		if err := models.DeploymentMapper.Update(depl); err != nil {
-			return
-		}
-	}()
+	go depl.Run()
 
 	c.JSON(http.StatusOK, depl)
 }
