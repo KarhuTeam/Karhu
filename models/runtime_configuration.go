@@ -19,7 +19,6 @@ type StaticConfiguration struct {
 	Src  string `yml:"src" bson:"src"`
 	Dest string `yml:"dest" bson:"dest"`
 	Mode string `yml:"mode" bson:"mode"`
-	User string `yml:"user" bson:"user"`
 }
 
 type DependenciesConfiguration struct {

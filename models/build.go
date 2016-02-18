@@ -135,12 +135,6 @@ func (b *Build) readRuntimeConfig(data []byte) error {
 		config.Binary.User = config.User
 	}
 
-	for _, s := range config.Static {
-		if s.User == "" {
-			s.User = config.User
-		}
-	}
-
 	if err := config.isValid(); err != nil {
 		return err
 	}

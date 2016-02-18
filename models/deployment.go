@@ -268,8 +268,10 @@ func (d *Deployment) Playbook() (*ansible.Playbook, error) {
 	}
 
 	if d.Build.RuntimeCfg.Binary != nil {
-		log.Println("Setup binary role stuffs")
 		setupBinaryRole(role, d)
+	}
+	if len(d.Build.RuntimeCfg.Static) > 0 {
+		setupStaticRole(role, d)
 	}
 
 	playbook.AddRole(role)
