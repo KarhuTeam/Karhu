@@ -38,7 +38,7 @@ func setupBinaryRole(role *ansible.Role, d *Deployment) *ansible.Role {
 	}).AddTask(ansible.Task{
 		`name`:   `Setup Bin`,
 		`copy`:   fmt.Sprintf(`src={{ ansible_workdir }}%s dest=%s mode=0755 owner=%s group=%s`, path.Join("/karhu/", d.Build.RuntimeCfg.Binary.Bin), path.Join(d.Build.RuntimeCfg.Workdir, "/bin/", d.Build.RuntimeCfg.Binary.Bin), d.Build.RuntimeCfg.Binary.User, d.Build.RuntimeCfg.Binary.User),
-		`notify`: fmt.Sprintf(`Restart %s`, d.Application.Name),
+		`notify`: fmt.Sprintf(`restarted %s`, d.Application.Name),
 	}).AddTask(ansible.Task{
 		`name`:   `Setup systemctl Script`,
 		`copy`:   fmt.Sprintf(`src=binary.service dest=/lib/systemd/system/%s.service`, d.Application.Name),
@@ -49,7 +49,7 @@ func setupBinaryRole(role *ansible.Role, d *Deployment) *ansible.Role {
 		`name`:  `Reload systemctl daemon`,
 		`shell`: `/bin/systemctl daemon-reload`,
 	}).AddHandler(ansible.Task{
-		`name`:    fmt.Sprintf(`Restart %s`, d.Application.Name),
+		`name`:    fmt.Sprintf(`restarted %s`, d.Application.Name),
 		`service`: fmt.Sprintf(`name=%s state=restarted enabled=yes`, d.Application.Name),
 	})
 

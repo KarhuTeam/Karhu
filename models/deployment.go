@@ -277,6 +277,13 @@ func (d *Deployment) Playbook() (*ansible.Playbook, error) {
 		setupDependenciesRole(role, d)
 	}
 
+	// Check for application configs
+	if configs, err := ConfigMapper.FetchAllEnabled(d.Application); err != nil {
+		return nil, err
+	} else if len(configs) > 0 {
+		setupConfigsRole(role, d, configs)
+	}
+
 	playbook.AddRole(role)
 
 	return playbook, nil
