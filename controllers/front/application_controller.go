@@ -131,45 +131,33 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 		return
 	}
 
-	if application.Type == models.APPLICATION_TYPE_SERVICE {
-
-		c.HTML(http.StatusOK, "service_show.html", map[string]interface{}{
-			"application": application,
-			"configs":     configs,
-			"builds":      builds,
-			"logfiles":    logfiles,
+	deployments, err := models.DeploymentMapper.FetchAll(application)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
+			"error": err,
 		})
-
-	} else {
-
-		deployments, err := models.DeploymentMapper.FetchAll(application)
-		if err != nil {
-			c.HTML(http.StatusInternalServerError, "error_500.html", map[string]interface{}{
-				"error": err,
-			})
-			return
-		}
-
-		// Limit array size
-		count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
-		if count <= 0 {
-			count = 10
-		}
-		if len(builds) > count {
-			builds = builds[:count]
-		}
-		if len(deployments) > count {
-			deployments = deployments[:count]
-		}
-
-		c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
-			"application": application,
-			"builds":      builds,
-			"deployments": deployments,
-			"configs":     configs,
-			"logfiles":    logfiles,
-		})
+		return
 	}
+
+	// Limit array size
+	count, _ := strconv.Atoi(c.DefaultQuery("count", "10"))
+	if count <= 0 {
+		count = 10
+	}
+	if len(builds) > count {
+		builds = builds[:count]
+	}
+	if len(deployments) > count {
+		deployments = deployments[:count]
+	}
+
+	c.HTML(http.StatusOK, "application_show.html", map[string]interface{}{
+		"application": application,
+		"builds":      builds,
+		"deployments": deployments,
+		"configs":     configs,
+		"logfiles":    logfiles,
+	})
 }
 
 /**
@@ -177,13 +165,7 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
  */
 func (ctl *ApplicationController) getAddApplicationAction(c *gin.Context) {
 
-	switch c.DefaultQuery("type", "application") {
-	case models.APPLICATION_TYPE_SERVICE:
-		c.HTML(http.StatusOK, "service_add.html", nil)
-	// case models.APPLICATION_TYPE_APP:
-	default:
-		c.HTML(http.StatusOK, "application_add.html", nil)
-	}
+	c.HTML(http.StatusOK, "application_add.html", nil)
 }
 
 func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
@@ -205,19 +187,7 @@ func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
 
 	application := models.ApplicationMapper.Create(&form)
 
-	if form.Type == models.APPLICATION_TYPE_SERVICE {
-
-		if len(form.Packages) == 0 {
-			c.HTML(http.StatusOK, "service_add.html", map[string]interface{}{
-				"errors": errors.New(errors.Error{
-					Label: "invalid_packages",
-					Field: "packages",
-					Text:  "Invalid packages count, min 1",
-				}).Errors,
-				"form": form,
-			})
-			return
-		}
+	if application.Type == models.APPLICATION_TYPE_SERVICE {
 
 		build := models.BuildMapper.CreateService(application, form.Packages)
 
@@ -252,17 +222,9 @@ func (ctl *ApplicationController) getEditApplicationAction(c *gin.Context) {
 	var form models.ApplicationUpdateForm
 	form.Hydrate(application)
 
-	switch c.DefaultQuery("type", "application") {
-	case models.APPLICATION_TYPE_SERVICE:
-		c.HTML(http.StatusOK, "service_edit.html", map[string]interface{}{
-			"form": form,
-		})
-	// case models.APPLICATION_TYPE_APP:
-	default:
-		c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
-			"form": form,
-		})
-	}
+	c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
+		"form": form,
+	})
 }
 
 func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
@@ -298,7 +260,7 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 	if application.Type == models.APPLICATION_TYPE_SERVICE {
 
 		if len(form.Packages) == 0 {
-			c.HTML(http.StatusOK, "service_edit.html", map[string]interface{}{
+			c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
 				"errors": errors.New(errors.Error{
 					Label: "invalid_packages",
 					Field: "packages",
@@ -318,7 +280,7 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 			panic("No last build for service: " + application.Name)
 		}
 
-		build.RuntimeCfg.Dependencies.FromString(form.Packages)
+		build.RuntimeCfg.Dependencies = build.RuntimeCfg.Dependencies.FromString(form.Packages)
 
 		if err := models.BuildMapper.Update(build); err != nil {
 			panic(err)

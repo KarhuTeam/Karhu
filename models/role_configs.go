@@ -41,15 +41,21 @@ func setupConfigsRole(role *ansible.Role, d *Deployment, configs Configs) *ansib
 		}
 		if conf.Notify.Service != "" {
 			task[`notify`] = fmt.Sprintf("%s %s", conf.Notify.State, conf.Notify.Service)
+			role.AddHandler(ansible.Task{
+				`name`:    task[`notify`],
+				`service`: fmt.Sprintf(`name=%s state=%s`, conf.Notify.Service, conf.Notify.State),
+			})
 		}
 
 		role.AddTask(task).AddFile(ansible.NewFile(hash, []byte(conf.Content)))
 	}
 
-	role.AddTask(ansible.Task{
-		`name`: `Setup Workdir Owner`,
-		`file`: fmt.Sprintf(`path=%s recurse=yes group=%s owner=%s`, d.Build.RuntimeCfg.Workdir, d.Build.RuntimeCfg.User, d.Build.RuntimeCfg.User),
-	})
+	if d.Build.RuntimeCfg.Workdir != "" {
+		role.AddTask(ansible.Task{
+			`name`: `Setup Workdir Owner`,
+			`file`: fmt.Sprintf(`path=%s recurse=yes group=%s owner=%s`, d.Build.RuntimeCfg.Workdir, d.Build.RuntimeCfg.User, d.Build.RuntimeCfg.User),
+		})
+	}
 
 	return role
 }

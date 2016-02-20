@@ -30,17 +30,6 @@ func init() {
 		return slugRegexp.MatchString(str)
 	})
 
-	govalidator.TagMap["app_type"] = govalidator.Validator(func(str string) bool {
-
-		for _, typ := range appTypes {
-			if typ == str {
-				return true
-			}
-		}
-
-		return false
-	})
-
 	col := C(applicationCollection)
 	defer col.Database.Session.Close()
 
@@ -67,11 +56,11 @@ type Application struct {
 	UpdatedAt           time.Time      `json:"updated_at" bson:"updated_at"`
 }
 
-func (p *Application) Update(f *ApplicationUpdateForm) {
+func (a *Application) Update(f *ApplicationUpdateForm) {
 
-	p.Name = f.Name
-	p.Description = f.Description
-	p.Tags = f.Tags
+	a.Name = f.Name
+	a.Description = f.Description
+	a.Tags = f.Tags
 
 	var deps []*Application
 
@@ -84,7 +73,7 @@ func (p *Application) Update(f *ApplicationUpdateForm) {
 		deps = append(deps, app)
 	}
 
-	p.Deps = deps
+	a.Deps = deps
 }
 
 type Applications []*Application
@@ -121,7 +110,6 @@ func (tf TagsFilter) Query(key string) string {
 // Application creation form
 type ApplicationCreateForm struct {
 	Name        string   `form:"name" json:"name" valid:"slug,required"`
-	Type        string   `form:"type" json:"type" valid:"app_type,required"`
 	Description string   `form:"description" json:"description" valid:"ascii"`
 	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
 	Deps        []string `form:"deps[]" json:"deps" valid:"-"` // Inter app deps
@@ -254,10 +242,15 @@ func (am *applicationMapper) Create(f *ApplicationCreateForm) *Application {
 		deps = append(deps, app)
 	}
 
+	typ := APPLICATION_TYPE_APP
+	if len(f.Packages) > 0 {
+		typ = APPLICATION_TYPE_SERVICE
+	}
+
 	return &Application{
 		Id:          bson.NewObjectId(),
 		Name:        f.Name,
-		Type:        f.Type,
+		Type:        typ,
 		Description: f.Description,
 		Tags:        f.Tags,
 		Deps:        deps,

@@ -14,7 +14,6 @@
     </div>
     {{ end }}
     <form method="POST" action="">
-      <input type="hidden" name="type" value="app" />
       <div class="form-group">
         <label for="app-name">Name :</label>
         <input class="form-control" id="app-name" name="name" type="text" placeholder="Name..." {{ if .form }} value="{{.form.Name}}" {{ end }} />
@@ -39,6 +38,14 @@
                   {{range $dep := .form.Deps}}<span class="form-tag-item"><input type="text" name="deps[]" readonly="" value="{{$dep}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="deps" type="text" placeholder="Add a dependence..." />
               </div>
             </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="app-packages">Packages (service only):</label>
+        <div class="form-control form-tag">
+          <div class="form-tag-list">
+              {{range $pkg := .form.Packages}}<span class="form-tag-item"><input type="text" name="packages[]" readonly="" value="{{$pkg}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="packages" type="text" placeholder="Add a package..." />
+          </div>
         </div>
       </div>
       <div class="text-center">

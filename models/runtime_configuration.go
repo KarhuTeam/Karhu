@@ -26,7 +26,7 @@ type DependenciesConfiguration struct {
 }
 type DependenciesConfigurations []*DependenciesConfiguration
 
-func (dc DependenciesConfigurations) FromString(pkgs []string) {
+func (dc DependenciesConfigurations) FromString(pkgs []string) DependenciesConfigurations {
 
 	dc = nil
 
@@ -35,6 +35,8 @@ func (dc DependenciesConfigurations) FromString(pkgs []string) {
 			Name: pkg,
 		})
 	}
+
+	return dc
 }
 
 func (dc DependenciesConfigurations) ToString() []string {

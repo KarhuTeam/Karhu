@@ -171,7 +171,7 @@ func (bm *buildMapper) Create(app *Application, commitHash string) *Build {
 func (bm *buildMapper) CreateService(app *Application, packages []string) *Build {
 
 	rtmcfg := new(RuntimeConfiguration)
-	rtmcfg.Dependencies.FromString(packages)
+	rtmcfg.Dependencies = rtmcfg.Dependencies.FromString(packages)
 
 	return &Build{
 		Id:            bson.NewObjectId(),

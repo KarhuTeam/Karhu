@@ -224,6 +224,10 @@ func (d *Deployment) Run() {
 
 func (d *Deployment) extractArchive(workdir string) error {
 
+	if d.Application.Type == APPLICATION_TYPE_SERVICE {
+		return nil
+	}
+
 	// Fetch zip
 	data, err := file.Get(d.Build.FilePath)
 	if err != nil {
@@ -253,13 +257,16 @@ func (d *Deployment) Playbook() (*ansible.Playbook, error) {
 
 	playbook := ansible.NewPlaybook()
 
-	role := ansible.NewRole("deployment").AddTask(ansible.Task{
-		`name`:  `Setup User Group`,
-		`group`: fmt.Sprintf(`name=%s system=yes`, d.Build.RuntimeCfg.User),
-	}).AddTask(ansible.Task{
-		`name`: `Setup User`,
-		`user`: fmt.Sprintf(`name=%s group=%s system=yes`, d.Build.RuntimeCfg.User, d.Build.RuntimeCfg.User),
-	})
+	role := ansible.NewRole("deployment")
+	if d.Build.RuntimeCfg.User != "" {
+		role.AddTask(ansible.Task{
+			`name`:  `Setup User Group`,
+			`group`: fmt.Sprintf(`name=%s system=yes`, d.Build.RuntimeCfg.User),
+		}).AddTask(ansible.Task{
+			`name`: `Setup User`,
+			`user`: fmt.Sprintf(`name=%s group=%s system=yes`, d.Build.RuntimeCfg.User, d.Build.RuntimeCfg.User),
+		})
+	}
 	if d.Build.RuntimeCfg.Workdir != "" {
 		role.AddTask(ansible.Task{
 			`name`: `Setup Workdir`,
