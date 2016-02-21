@@ -31,7 +31,7 @@ chsum1=""
 while true
 do
     chsum2=`find /etc/logstash/conf.d -type f -exec md5sum {} \;`
-    if [ "$chsum1" != "$chsum2" ]; then
+    if [ "$chsum1" != "$chsum2" ] || [ ! $(pidof java) ]; then
 
         date=$(date)
         echo "$date Config changed, restart logstash"
