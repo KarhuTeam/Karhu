@@ -62,6 +62,7 @@ filebeat:
       # Make sure not file is defined twice as this can lead to unexpected behaviour.
       paths:
         - /var/log/*.log
+        - /var/log/*/*.log
         - /var/log/syslog
         #- c:\programdata\elasticsearch\logs\*
 
