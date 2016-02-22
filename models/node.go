@@ -4,6 +4,7 @@ import (
 	goerrors "errors"
 	"github.com/gotoolz/errors"
 	"github.com/gotoolz/validator"
+	"github.com/karhuteam/ansible"
 	"github.com/karhuteam/karhu/ressources/ssh"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -220,21 +221,30 @@ func (pm *nodeMapper) CheckSsh(n *Node) error {
 	return ssh.CheckSsh(n.SshUser, n.IP, n.SshPort)
 }
 
-func (nm *nodeMapper) FetchAllForApp(app *Application) (Nodes, error) {
+func (nm *nodeMapper) AnsibleHostsForTags(tags []string) (ansible.Hosts, error) {
 
-	if len(app.Tags) == 0 {
+	if len(tags) == 0 {
 		return nil, goerrors.New("No tags on app")
 	}
 
 	col := C(nodeCollection)
 	defer col.Database.Session.Close()
 
+	log.Println("tags:", tags)
+
 	var nodes Nodes
-	if err := col.Find(bson.M{"tags": bson.M{"$all": app.Tags}}).All(&nodes); err != nil {
+	if err := col.Find(bson.M{"tags": bson.M{"$all": tags}}).All(&nodes); err != nil {
 		return nil, err
 	}
 
-	return nodes, nil
+	log.Println("nodes:", len(nodes))
+
+	hosts := ansible.NewHosts()
+	for _, n := range nodes {
+		hosts = hosts.AddHost(ansible.NewHost(n.Hostname, n.IP, n.SshPort, n.SshUser))
+	}
+
+	return hosts, nil
 }
 
 func (nm *nodeMapper) nodeStatusCheck() {

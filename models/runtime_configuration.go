@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"strings"
 )
 
 const (
@@ -11,60 +10,66 @@ const (
 	KARHU_DEFAULT_RUNTIME_USER         = "root"
 )
 
-type StaticFiles []string
-
-func (sf StaticFiles) Src(i int) string {
-
-	s := strings.Split(sf[i], ":")
-	return s[0]
+type BinaryConfiguration struct {
+	User string `yml:"user" bson:"user"`
+	Bin  string `yml:"bin" bson:"bin"`
 }
 
-func (sf StaticFiles) Dest(i int) string {
-
-	s := strings.Split(sf[i], ":")
-	if len(s) >= 2 {
-		return s[1]
-	}
-	return s[0]
+type StaticConfiguration struct {
+	Src  string `yml:"src" bson:"src"`
+	Dest string `yml:"dest" bson:"dest"`
+	Mode string `yml:"mode" bson:"mode"`
 }
 
-func (sf StaticFiles) Mode(i int) string {
+type DependenciesConfiguration struct {
+	Name string `yml:"name" bson:"name"`
+}
+type DependenciesConfigurations []*DependenciesConfiguration
 
-	s := strings.Split(sf[i], ":")
-	if len(s) >= 3 {
-		return s[2]
+func (dc DependenciesConfigurations) FromString(pkgs []string) DependenciesConfigurations {
+
+	dc = nil
+
+	for _, pkg := range pkgs {
+		dc = append(dc, &DependenciesConfiguration{
+			Name: pkg,
+		})
 	}
-	return "0644"
+
+	return dc
+}
+
+func (dc DependenciesConfigurations) ToString() []string {
+
+	var pkgs []string
+
+	for _, dep := range dc {
+		pkgs = append(pkgs, dep.Name)
+	}
+
+	return pkgs
 }
 
 type RuntimeConfiguration struct {
-	Type         string      `yml:"type" bson:"type"`
-	User         string      `yml:"user" bson:"user"`
-	Bin          string      `yml:"bin" bson:"bin"`
-	Workdir      string      `yml:"workdir" bson:"workdir"`
-	Static       StaticFiles `yml:"static" bson:"static"`
-	Dependencies []string    `yml:"dependencies" bson:"dependencies"`
+	Workdir      string                     `yml:"workdir" bson:"workdir"`
+	User         string                     `yml:"user" bson:"user"`
+	Binary       *BinaryConfiguration       `yml:"binary" bson:"binary"`
+	Static       []*StaticConfiguration     `yml:"static" bson:"static"`
+	Dependencies DependenciesConfigurations `yml:"dependencies" bson:"dependencies"`
 }
 
 func (c *RuntimeConfiguration) isValid() error {
 
-	switch c.Type {
-	case "binary":
-		if c.Bin == "" {
+	if c.Binary != nil {
+		if c.Binary.Bin == "" {
 			return errors.New("Invalid app runtime bin value")
 		}
-	case "static":
-		if len(c.Static) == 0 {
-			return errors.New("Missing runtime static files")
-		}
-	default:
-		return errors.New("Invalid app type")
 	}
 
-	for j := range c.Static {
+	for _, s := range c.Static {
 
-		if c.Static.Src(j)[0] == '/' ||
-			c.Static.Dest(j)[0] == '/' {
+		if len(s.Src) > 0 && s.Src[0] == '/' ||
+			len(s.Dest) > 0 && s.Dest[0] == '/' {
 			return errors.New("Invalid runtime static files")
 		}
 	}

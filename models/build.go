@@ -128,7 +128,11 @@ func (b *Build) readRuntimeConfig(data []byte) error {
 	}
 
 	if config.User == "" {
-		config.User = KARHU_DEFAULT_RUNTIME_USER
+		config.User = "root"
+	}
+
+	if config.Binary != nil && config.Binary.User == "" {
+		config.Binary.User = config.User
 	}
 
 	if err := config.isValid(); err != nil {
@@ -166,14 +170,14 @@ func (bm *buildMapper) Create(app *Application, commitHash string) *Build {
 
 func (bm *buildMapper) CreateService(app *Application, packages []string) *Build {
 
+	rtmcfg := new(RuntimeConfiguration)
+	rtmcfg.Dependencies = rtmcfg.Dependencies.FromString(packages)
+
 	return &Build{
 		Id:            bson.NewObjectId(),
 		ApplicationId: app.Id,
 		CreatedAt:     time.Now(),
-		RuntimeCfg: &RuntimeConfiguration{
-			Type:         APPLICATION_TYPE_SERVICE,
-			Dependencies: packages,
-		},
+		RuntimeCfg:    rtmcfg,
 	}
 }
 
