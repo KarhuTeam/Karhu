@@ -1,0 +1,60 @@
+{{template "header" "monitoring"}}
+<div class="breadcrumb">
+  <a href="/monitoring">All hosts</a>{{ if .host }} &gt; <a href="/monitoring?host={{ .host }}">{{ .host }}</a>{{ end }}
+</div>
+</header>
+<main>
+	<div class="box">
+		<form id="form-monitoring" method="GET" action="">
+			<div>
+				<select name="host">
+                    <option value="" {{ if eq $.host "" }}selected="selected"{{ end }}>Select an host</option>
+					{{ range .hosts }}
+					<option value="{{ .Hostname }}" {{ if eq $.host .Hostname }}selected="selected"{{ end }}>{{ .Hostname }}</option>
+					{{ end }}
+				</select>
+                <select name="stat">
+                    <option value="all" {{ if eq $.stat "" }}selected="selected"{{ end }}>Select a stat</option>
+                    {{ range .stats }}
+                    <option value="{{ . }}" {{ if eq $.stat . }}selected="selected"{{ end }}>{{ . }}</option>
+                    {{ end }}
+                </select>
+			</div>
+			<div class="text-right">
+				<select name="time">
+					<option value="last900" selected="selected">Last 15 minutes</option>
+					<option value="last1800">Last 30 minutes</option>
+					<option value="last3600">Last hour</option>
+					<option value="last86400">Last 24 hours</option>
+				</select>
+			</div>
+		</form>
+	</div>
+	<div class="box-col">
+		{{ range .graphs }}
+		<div class="box">
+			<h2 class="box-title">{{ .Title }}</h2>
+			<div data-graph="{{ .MarshalData }}">
+			</div>
+		</div>
+		{{ end }}
+	</div>
+</main>
+<script>
+(function() {
+  'use strict';
+
+  document.addEventListener('DOMContentLoaded', function () {
+      var form = document.getElementById('form-monitoring');
+      var selects = form.getElementsByTagName('select');
+      for (var i = 0; i < selects.length; i++) {
+          selects[i].onchange = function() {
+            form.submit();
+          };
+      }
+  });
+})();
+
+</script>
+
+{{template "footer"}}
