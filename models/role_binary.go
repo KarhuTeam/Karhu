@@ -23,6 +23,7 @@ User=%s
 Group=%s
 
 ExecStart=%s
+Restart=on-failure
 
 LimitNOFILE=65536
 
