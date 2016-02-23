@@ -9,10 +9,11 @@ import (
 )
 
 type Graph struct {
-	Title   string                   `json:"title"`
-	Type    string                   `json:"type"`
-	Stacked bool                     `json:"stacked"`
-	Data    map[string][]interface{} `json:"data"`
+	Title    string                   `json:"title"`
+	Type     string                   `json:"type"`
+	Stacked  bool                     `json:"stacked"`
+	DataType string                   `json:"data_type"`
+	Data     map[string][]interface{} `json:"data"`
 }
 type Graphs []*Graph
 
@@ -34,6 +35,7 @@ type GraphTemplate struct {
 	CollectdType  string
 	Type          string
 	Stacked       bool
+	DataType      string
 	ValueField    string
 	TypeInstances []string
 }
@@ -43,6 +45,7 @@ var graphQueries = map[string]GraphTemplate{
 		CollectdType:  "memory",
 		Type:          "line",
 		Stacked:       true,
+		DataType:      "bytes",
 		ValueField:    "value",
 		TypeInstances: []string{"used", "cached", "buffered", "free"},
 	},
@@ -50,6 +53,7 @@ var graphQueries = map[string]GraphTemplate{
 		CollectdType:  "cpu",
 		Type:          "line",
 		Stacked:       true,
+		DataType:      "percent",
 		ValueField:    "value",
 		TypeInstances: []string{"system", "user", "nice", "idle", "iowait", "irq", "softirq", "steal", "guest"},
 	},
@@ -138,10 +142,11 @@ func (gm *graphMapper) FetchOne(stat, host string, tm time.Time) (*Graph, error)
 	}
 
 	return &Graph{
-		Title:   fmt.Sprintf("%s %s", host, stat),
-		Type:    template.Type,
-		Stacked: template.Stacked,
-		Data:    data,
+		Title:    fmt.Sprintf("%s %s", host, stat),
+		Type:     template.Type,
+		Stacked:  template.Stacked,
+		DataType: template.DataType,
+		Data:     data,
 	}, nil
 }
 
