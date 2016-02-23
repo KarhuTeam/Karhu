@@ -34,7 +34,7 @@
 		{{ range .graphs }}
 		<div class="box">
 			<h2 class="box-title">{{ .Title }}</h2>
-			<div class="graph-builder" data-graph="{{ .Marshal }}">
+			<div class="graph-builder" data-graph="{{ .Marshal }}" style="width:100%;height:300px;">
 			</div>
 		</div>
 		{{ end }}
@@ -56,6 +56,8 @@
 })();
 
 </script>
+<!-- <script type="text/javascript" src="/static/js/chart.min.js"></script> -->
+<script src="http://code.highcharts.com/highcharts.js"></script>
 <script type="text/javascript" src="/static/js/monitoring.js"></script>
 
 {{template "footer"}}
