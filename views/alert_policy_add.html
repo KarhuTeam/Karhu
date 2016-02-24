@@ -1,0 +1,176 @@
+{{template "header" "applications"}}
+  <div class="breadcrumb">
+    <a href="/alerts-policies">All alerts policies</a> &gt; Add an alert policy
+  </div>
+</header>
+<main>
+  <div class="box">
+    <h2 class="box-title">Add an alert policy
+        {{ if .policy }}
+        <form style="display:inline-block;" class="right" method="POST" action="/alerts-groups/delete/{{ .policy.Id.Hex }}">
+            <button type="submit" class="btn btn-danger btn-small" data-text="Delete policy {{ .policy.Name }} ?">Delete</button>
+        </form></h2>
+        {{ end }}
+    </h2>
+    {{ if .errors }}
+    <div class="alert alert-danger">
+      {{ range .errors }}
+      {{ .Field }} : {{ .Text }}<br/>
+      {{ end }}
+    </div>
+    {{ end }}
+    <form method="POST" action="">
+      <input type="hidden" name="type" value="app" />
+      <div class="form-group">
+        <label for="app-name">Name :</label>
+        <input class="form-control" id="app-name" name="name" type="text" placeholder="Name..." {{ if .form }} value="{{ .form.Name }}" {{ end }} />
+      </div>
+      <div class="form-group">
+        <label for="app-description">Description :</label>
+        <textarea class="form-control" id="app-description" name="description" placeholder="Description...">{{ if .form }}{{ .form.Description }}{{ end }}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="app-tags">Alert Groups :</label>
+        <div class="form-control form-tag">
+          <div class="form-tag-list">
+              {{ range $group := .form.AlertGroups }}<span class="form-tag-item"><input type="text" name="alert-groups[]" readonly="" value="{{ $group }}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="alert-groups" type="text" placeholder="Add a group..." />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group tab">
+        <label for="cond-tab-menu">Condition :</label>
+        <div id="cond-tab-menu" class="tab-menu">
+            <label for="cond-http-radio">HTTP(S) check</label>
+            <input type="radio" name="cond-type" id="cond-http-radio" value="cond-http" {{ if .form }}{{ if eq .form.CondType "cond-http" }}checked="checked"{{ end }}{{ end }}/>
+            <label for="cond-metric-radio">Metric check</label>
+            <input type="radio" name="cond-type" id="cond-metric-radio" value="cond-metric" {{ if .form }}{{ if eq .form.CondType "cond-metric" }}checked="checked" {{ end }}{{ end }} />
+        </div>
+        <div class='tab-content {{ if .form }}{{ if ne .form.CondType "cond-http" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="cond-http">
+            <label for="cond-http-proto">Proto:</label>
+            <select id="cond-http-proto" name="cond-http-proto">
+                <option value="http" {{ if .form }}{{ if eq .form.CondHttpProto "http" }}selected="selected"{{ end }}{{ end }}>HTTP</option>
+                <option value="https" {{ if .form }}{{ if eq .form.CondHttpProto "https" }}selected="selected"{{ end }}{{ end }}>HTTPS</option>
+            </select>
+
+            <label for="cond-http-path">Path:</label>
+            <input type="text" id="cond-http-path" name="cond-http-path" placeholder="/ping" {{ if .form }} value="{{ .form.CondHttpPath }}" {{ end }} />
+
+            <label for="cond-http-hostname">Hostname:</label>
+            <input type="text" id="cond-http-hostname" name="cond-http-hostname" placeholder="api.example.com" {{ if .form }} value="{{ .form.CondHttpHostname }}" {{ end }} />
+
+            <label for="cond-http-port">Port:</label>
+            <input type="text" id="cond-http-port" name="cond-http-port" {{ if .form }} value="{{ .form.CondHttpPort }}" {{ else }}value="80"{{ end }} />
+
+            <label for="cond-http-status">Expected status:</label>
+            <input type="text" id="cond-http-status" name="cond-http-status" {{ if .form }} value="{{ .form.CondHttpStatus }}" {{ else }}value="200"{{ end }}/>
+        </div>
+        <div class='tab-content {{ if .form }}{{ if ne .form.CondType "cond-metric" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="cond-metric">
+        </div>
+      </div>
+
+      <div class="form-group tab">
+          <label for="cond-target-menu">Target</label>
+          <div id="cond-target-menu" class="tab-menu">
+              <label for="target-url-radio">URL</label>
+              <input type="radio" name="target-type" id="target-url-radio" value="target-url" {{ if .form }}{{ if eq .form.TargetType "target-url" }}checked="checked"{{ end }}{{ end }}/>
+              <label for="target-tags-radio">Tags</label>
+              <input type="radio" name="target-type" id="target-tags-radio" value="target-tag" {{ if .form }}{{ if eq .form.TargetType "target-tag" }}checked="checked"{{ end }}{{ end }}/>
+              <label for="target-node-radio">Node</label>
+              <input type="radio" name="target-type" id="target-node-radio" value="target-node" {{ if .form }}{{ if eq .form.TargetType "target-node" }}checked="checked"{{ end }}{{ end }}/>
+              <label for="target-all-radio">All</label>
+              <input type="radio" name="target-type" id="target-all-radio" value="target-all" {{ if .form }}{{ if eq .form.TargetType "target-all" }}checked="checked"{{ end }}{{ end }}/>
+          </div>
+          <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-url" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-url">
+              <label for="target-url-host">Host:</label>
+              <input type="text" id="target-url-host" name="target-url-host" placeholder="IP or DNS" {{ if .form }} value="{{ .form.TargetUrlHost }}" {{ end }} />
+          </div>
+          <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-tag" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-tag">
+              <label for="target-tag-tags">Tags :</label>
+              <div id="target-tag-tags" class="form-control form-tag">
+                  <div class="form-control form-tag">
+                    <div class="form-tag-list">
+                        {{ if .form }}{{ range $tag := .form.TargetTagTags }}<span class="form-tag-item"><input type="text" name="target-tag-tags[]" readonly="" value="{{ $tag }}" /><button>x</button></span>{{end}}{{ end }}
+                        <input class="form-control form-tag-add" data-name="target-tag-tags" type="text" placeholder="Add a tag..." />
+                    </div>
+                  </div>
+              </div>
+          </div>
+          <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-node" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-node">
+              <label for="target-node-nodes">Nodes :</label>
+              <div id="target-node-nodes" class="form-control form-tag">
+                  <div class="form-control form-tag">
+                    <div class="form-tag-list">
+                        {{ if .form }}{{ range $node := .form.TargetNodeNodes }}<span class="form-tag-item"><input type="text" name="target-node-nodes[]" readonly="" value="{{ $node }}" /><button>x</button></span>{{end}}{{ end }}
+                        <input class="form-control form-tag-add" data-name="target-node-nodes" type="text" placeholder="Add a node..." />
+                    </div>
+                  </div>
+              </div>
+          </div>
+          <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-all" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-all">
+          </div>
+      </div>
+
+      <div class="form-group">
+          <label for="interval">Interval</label>
+          <select id="interval" name="interval">
+              <option value="60" {{ if .form }}{{ if eq .form.Interval "60" }}selected="selected"{{ end }}{{ end }}>1 Minute</option>
+              <option value="120" {{ if .form }}{{ if eq .form.Interval "120" }}selected="selected"{{ end }}{{ end }}>2 Minutes</option>
+              <option value="180" {{ if .form }}{{ if eq .form.Interval "180" }}selected="selected"{{ end }}{{ end }}>3 Minutes</option>
+              <option value="300" {{ if .form }}{{ if eq .form.Interval "300" }}selected="selected"{{ end }}{{ end }}>5 Minutes</option>
+              <option value="600" {{ if .form }}{{ if eq .form.Interval "600" }}selected="selected"{{ end }}{{ end }}>10 Minutes</option>
+              <option value="900" {{ if .form }}{{ if eq .form.Interval "900" }}selected="selected"{{ end }}{{ end }}>15 Minutes</option>
+          </select>
+      </div>
+
+      <div class="text-center">
+        <button class="btn" type="submit">Add application</button>
+      </div>
+    </form>
+  </div>
+</main>
+<script>
+(function() {
+  'use strict';
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+      var tabs = document.getElementsByClassName('tab');
+      for (var i = 0; i < tabs.length; i++) {
+
+          new Tab(tabs[i])
+      }
+
+      function Tab(element) {
+
+          var self = this;
+          self.tab = element;
+
+          var menu = self.tab.getElementsByClassName('tab-menu')[0];
+
+          var inputs = menu.getElementsByTagName('input');
+          for (var i  = 0; i < inputs.length; i++){
+              inputs[i].addEventListener('click', function(e) {
+
+                  self.hideAll();
+
+                  console.log('tab:', self.tab);
+
+                  var content = document.getElementById(this.value);
+                  content.classList.toggle('is-hidden');
+              });
+          }
+      }
+
+      Tab.prototype.hideAll = function () {
+
+          var contents = this.tab.getElementsByClassName('tab-content');
+          for (var i = 0; i < contents.length; i++) {
+              contents[i].classList.add('is-hidden');
+          }
+      };
+
+  });
+})();
+</script>
+{{template "footer"}}

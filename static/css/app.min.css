@@ -51,6 +51,9 @@ pre {
 .select {
   display: inline-block; }
 
+.is-hidden {
+  display: none; }
+
 /* Header */
 .header {
   height: 60px;

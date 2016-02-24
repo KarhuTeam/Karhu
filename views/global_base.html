@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/static/css/app.min.css" />
   <script type="text/javascript" src="/static/js/app.js"></script>
   <script type="text/javascript" src="/static/js/tags.js"></script>
+  <script type="text/javascript" src="/static/js/vars.js"></script>
   <script type="text/javascript" src="/static/js/fold.js"></script>
   <script type="text/javascript" src="/static/js/confirm.js"></script>
   <script type="text/javascript" src="/static/js/stream.js"></script>
@@ -23,7 +24,7 @@
         <li><a class="navbar-item {{ if eq . "infrastructure" }} is-selected{{ end }}" href="/nodes">Infrastructure</a></li>
         <li><a class="navbar-item {{ if eq . "monitoring" }} is-selected{{ end }}" href="/monitoring">Monitoring</a></li>
         <li><a class="navbar-item {{ if eq . "logs" }} is-selected{{ end }}" href="/logs">Logs</a></li>
-        <li><a class="navbar-item {{ if eq . "alerts" }} is-selected{{ end }}" href="">Alerts</a></li>
+        <li><a class="navbar-item {{ if eq . "alerts" }} is-selected{{ end }}" href="/alerts">Alerts</a></li>
       </ul>
     </div>
 {{end}}

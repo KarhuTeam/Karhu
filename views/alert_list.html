@@ -1,0 +1,55 @@
+{{template "header" "alerts"}}
+  <div class="breadcrumb">
+    All alerts
+  </div>
+</header>
+<main>
+  <div class="box text-right">
+    <a class="btn" href="/alerts-policies">Alerts Policies</a>
+    <a class="btn" href="/alerts-groups">Alerts Groups</a>
+    <!-- <a class="btn" href="/application/add?type=service">New Service</a> -->
+  </div>
+  <div class="box text-right">
+      Filters : <a class='filter-item {{ if eq .status_filter "all" }}is-selected{{ end }}' href="/alerts?status=all">all</a> -
+        <a class='filter-item {{ if eq .status_filter "open" }}is-selected{{ end }}' href="/alerts?status=open">open</a>
+        <a class='filter-item {{ if eq .status_filter "acknowledge" }}is-selected{{ end }}' href="/alerts?status=acknowledge">acknowledge</a>
+        <a class='filter-item {{ if eq .status_filter "closed" }}is-selected{{ end }}' href="/alerts?status=closed">closed</a>
+  </div>
+  <div class="box-col">
+    {{ range .alerts }}
+    <div class="box">
+      <h2 class="box-title"><span class="select">{{ .Name }}</span></h2>
+      <ul class="box-list">
+          <li><span class="box-list-label">Status:</span> {{ .Status }}
+              {{ if ne .Status "closed" }}
+              <form style="display:inline-block;" class="right" method="POST" action="/alerts/close/{{ .Id.Hex }}">
+                  <button type="submit" class="btn btn-danger btn-small" data-text="Close Alert {{ .Name }} ?">Close</button>
+              </form>
+              {{ end }}
+              {{ if eq .Status "open" }}
+              <form style="display:inline-block;" class="right" method="POST" action="/alerts/acknowledge/{{ .Id.Hex }}">
+                  <button type="submit" class="btn btn-small">Acknowledge</button>
+              </form>
+              {{ end }}
+          </li>
+      </ul>
+      <ul class="box-list">
+          {{ range .Messages }}
+          <li>
+              <span class="box-list-label">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</span>
+              {{ .Text }}
+          </li>
+          {{ end }}
+          <li>
+              <span class="box-list-label">New Message</span>
+              <form style="display:inline-block;" method="POST" action="/alerts/message/{{ .Id.Hex }}">
+                  <textarea class="form-control" name="text" placeholder="Text..."></textarea>
+                    <button type="submit" class="btn btn-small">Send</button>
+              </form>
+          </li>
+      </ul>
+    </div>
+    {{ end }}
+  </div>
+</main>
+{{template "footer"}}

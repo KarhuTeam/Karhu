@@ -1,0 +1,27 @@
+{{template "header" "alerts"}}
+  <div class="breadcrumb">
+    All alerts groups
+  </div>
+</header>
+<main>
+  <div class="box text-right">
+    <a class="btn" href="/alerts">Alerts</a>
+    <a class="btn" href="/alerts-groups/add">New Group</a>
+  </div>
+  <div class="box-col">
+    {{ range .groups }}
+    <div class="box">
+      <h2 class="box-title"><span class="select">{{ .Name }}</span>
+          <a class="right btn btn-small" href="/alerts-groups/edit/{{ .Id.Hex }}">Edit</a>
+      </h2>
+      <p class="box-text">{{ .Description }}</p>
+      <ul class="box-list">
+        {{ range .Methods }}
+        <li><span class="box-list-label">{{ .Type }}</span>{{ .Value }}</li>
+        {{ end }}
+    </ul>
+    </div>
+    {{ end }}
+  </div>
+</main>
+{{template "footer"}}
