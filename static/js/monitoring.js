@@ -13,9 +13,6 @@
 
 		Highcharts.setOptions(Highcharts.theme);
 
-		// console.log('DATA > ', data);
-		// var chart = new Highcharts();
-		// console.log('Chart > ', chart);
 		var chart_base = {
 			chart: {
 				renderTo: node
@@ -24,11 +21,7 @@
 		};
 
 		if (data.type === 'line') {
-			if (data.stacked) {
-				new Highcharts.Chart(build_stack_area(data, chart_base));
-			} else {
-
-			}
+			new Highcharts.Chart(build_stack_area(data, chart_base));
 		}
 	}
 
@@ -38,13 +31,26 @@
 
 	// Graphs
 	function build_stack_area(data, graph) {
+      console.log('DATA > ', data);
+      graph.title = {
+         text: data.title
+      };
+      graph.chart.type = 'area';
+      if (data.stacked === true) {
+         graph.plotOptions = {
+            area: {
+               stacking: 'normal';
+            }
+         }
+      }
+      if (data.type === 'percent') {
+         graph.plotOptions = {
+            area: {
+               stacking: 'percent'
+            }
+         };
+      }
 
-		graph.chart.type = 'area';
-		graph.plotOptions = {
-			area: {
-				stacking: 'percent'
-			}
-		};
 		for (var k in data.data) {
 			graph.series.push({
 				name: k,
