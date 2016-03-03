@@ -3,31 +3,33 @@ package ssh
 import (
 	"fmt"
 	"log"
-	"os"
+	// "os"
 	"os/exec"
 )
 
-func CheckSsh(user, ip string, port int) error {
-
+func Exec(user, ip string, port int, command string) ([]byte, error) {
 	sshPath, err := exec.LookPath("ssh")
 	if err != nil {
 		log.Println("ressources/ssh: cannot find ssh in $PATH, can't connect to nodes.")
-		return err
+		return nil, err
 	}
 
 	privateKey := PrivateKeyPath()
 
-	command := fmt.Sprintf("%s -o BatchMode=yes -o ConnectTimeout=5 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s -p %d %s@%s exit", sshPath, privateKey, port, user, ip)
+	command = fmt.Sprintf("%s -o BatchMode=yes -o ConnectTimeout=5 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s -p %d %s@%s -- %s", sshPath, privateKey, port, user, ip, command)
 
 	log.Println("ressources/ssh: command:", command)
 
 	cmd := exec.Command("sh", "-c", command)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
-	if err := cmd.Run(); err != nil {
-		return err
-	}
+	out, err := cmd.CombinedOutput()
 
-	return nil
+	return out, err
+}
+
+func CheckSsh(user, ip string, port int) error {
+
+	_, err := Exec(user, ip, port, "exit")
+	return err
+
 }

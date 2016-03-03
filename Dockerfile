@@ -17,7 +17,7 @@ ENV GRAFANA_URL http://localhost:3000
 
 # custom ppa for ansible
 RUN apt-get update
-RUN apt-get install -y software-properties-common wget apt-transport-https
+RUN apt-get install -y software-properties-common wget apt-transport-https nagios-plugins
 RUN apt-add-repository ppa:ansible/ansible
 
 # Grafana deps

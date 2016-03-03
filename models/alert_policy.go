@@ -7,7 +7,7 @@ import (
 	"github.com/gotoolz/validator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"net/url"
+	// "net/url"
 	"regexp"
 	"strconv"
 	"time"
@@ -23,17 +23,8 @@ const alertPolicyCollection = "alert_policy"
 
 func init() {
 
-	govalidator.TagMap["cond_type"] = govalidator.Validator(func(str string) bool {
-		for _, c := range CondTypes {
-			if str == c {
-				return true
-			}
-		}
-		return false
-	})
-
-	govalidator.TagMap["http_proto"] = govalidator.Validator(func(str string) bool {
-		for _, p := range []string{"http", "https"} {
+	govalidator.TagMap["nagios_plugin"] = govalidator.Validator(func(str string) bool {
+		for _, p := range NagiosPlugins {
 			if str == p {
 				return true
 			}
@@ -41,18 +32,36 @@ func init() {
 		return false
 	})
 
-	govalidator.TagMap["http_path"] = govalidator.Validator(func(str string) bool {
-
-		if _, err := url.Parse(str); err != nil {
-			return false
-		}
-		return true
-	})
-
-	govalidator.TagMap["http_hostname"] = govalidator.Validator(func(str string) bool {
-
-		return hostnameRegexp.MatchString(str)
-	})
+	// govalidator.TagMap["cond_type"] = govalidator.Validator(func(str string) bool {
+	// 	for _, c := range CondTypes {
+	// 		if str == c {
+	// 			return true
+	// 		}
+	// 	}
+	// 	return false
+	// })
+	//
+	// govalidator.TagMap["http_proto"] = govalidator.Validator(func(str string) bool {
+	// 	for _, p := range []string{"http", "https"} {
+	// 		if str == p {
+	// 			return true
+	// 		}
+	// 	}
+	// 	return false
+	// })
+	//
+	// govalidator.TagMap["http_path"] = govalidator.Validator(func(str string) bool {
+	//
+	// 	if _, err := url.Parse(str); err != nil {
+	// 		return false
+	// 	}
+	// 	return true
+	// })
+	//
+	// govalidator.TagMap["http_hostname"] = govalidator.Validator(func(str string) bool {
+	//
+	// 	return hostnameRegexp.MatchString(str)
+	// })
 
 	govalidator.TagMap["target_type"] = govalidator.Validator(func(str string) bool {
 		for _, c := range TargetTypes {
@@ -76,37 +85,38 @@ func init() {
 	// })
 }
 
-var CondTypes = []string{"cond-http", "cond-metric"}
-var TargetTypes = []string{"target-url", "target-tag", "target-node", "target-all"}
+// var CondTypes = []string{"cond-http", "cond-metric"}
+var TargetTypes = []string{"target-karhu", "target-tag", "target-node", "target-all"}
+var NagiosPlugins = []string{"check_apt", "check_breeze", "check_by_ssh", "check_clamd", "check_cluster", "check_dbi", "check_dhcp", "check_dig", "check_disk", "check_disk_smb", "check_dns", "check_dummy", "check_file_age", "check_flexlm", "check_ftp", "check_host", "check_hpjd", "check_http", "check_icmp", "check_ide_smart", "check_ifoperstatus", "check_ifstatus", "check_imap", "check_ircd", "check_jabber", "check_ldap", "check_ldaps", "check_load", "check_log", "check_mailq", "check_mrtg", "check_mrtgtraf", "check_mysql", "check_mysql_query", "check_nagios", "check_nntp", "check_nntps", "check_nt", "check_ntp", "check_ntp_peer", "check_ntp_time", "check_nwstat", "check_oracle", "check_overcr", "check_pgsql", "check_ping", "check_pop", "check_procs", "check_real", "check_rpc", "check_rta_multi", "check_sensors", "check_simap", "check_smtp", "check_snmp", "check_spop", "check_ssh", "check_ssmtp", "check_swap", "check_tcp", "check_time", "check_udp", "check_ups", "check_users", "check_wave"}
 
 type AlertPolicy struct {
-	Id          bson.ObjectId `json:"id" bson:"_id"`
-	Name        string        `json:"name" bson:"name"` // Slug name
-	Description string        `json:"description" bson:"description"`
-	AlertGroups []string      `json:"alert_groups" bson:"alert_groups"`
-	CondType    string        `json:"cond_type" bson:"cond_type"`
-	Cond        interface{}   `json:"cond" bson:"cond"`
-	TargetType  string        `json:"target_type" bson:"target_type"`
-	Target      interface{}   `json:"target" bson:"target"`
-	Interval    time.Duration `json:"interval" bson:"interval"`
-	CreatedAt   time.Time     `json:"created_at" bson:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at" bson:"updated_at"`
-	NextAt      time.Time     `json:"next_at" bson:"next_at"`
+	Id           bson.ObjectId `json:"id" bson:"_id"`
+	Name         string        `json:"name" bson:"name"` // Slug name
+	Description  string        `json:"description" bson:"description"`
+	AlertGroups  []string      `json:"alert_groups" bson:"alert_groups"`
+	NagiosPlugin string        `json:"nagios_plugin" bson:"nagios_plugin"`
+	NagiosParams string        `json:"nagios_params" bson:"nagios_params"`
+	TargetType   string        `json:"target_type" bson:"target_type"`
+	Target       interface{}   `json:"target" bson:"target"`
+	Interval     time.Duration `json:"interval" bson:"interval"`
+	CreatedAt    time.Time     `json:"created_at" bson:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at" bson:"updated_at"`
+	NextAt       time.Time     `json:"next_at" bson:"next_at"`
 }
 
 type AlertPolicies []*AlertPolicy
 
-type ConditionTypeHttp struct {
-	Proto    string `json:"proto" bson:"proto"`
-	Path     string `json:"path" bson:"path"`
-	Hostname string `json:"hostname" bson:"hostname"`
-	Port     int    `json:"port" bson:"port"`
-	Status   int    `json:"status" bson:"status"`
-}
+// type ConditionTypeHttp struct {
+// 	Proto    string `json:"proto" bson:"proto"`
+// 	Path     string `json:"path" bson:"path"`
+// 	Hostname string `json:"hostname" bson:"hostname"`
+// 	Port     int    `json:"port" bson:"port"`
+// 	Status   int    `json:"status" bson:"status"`
+// }
 
-type TargetTypeUrl struct {
-	Host string `json:"host" bson:"host"`
-}
+// type TargetTypeUrl struct {
+// 	Host string `json:"host" bson:"host"`
+// }
 
 type TargetTypeTag struct {
 	Tags []string `json:"tags" bson:"tags"`
@@ -122,14 +132,17 @@ type AlertPolicyForm struct {
 	Description string   `form:"description" json:"description" valid:"ascii"`
 	AlertGroups []string `form:"alert-groups[]" json:"alert_groups" valid:"-"`
 
-	CondType string `form:"cond-type" json:"cond_type" valid:"cond_type,required"`
+	NagiosPlugin string `form:"cond-nagios-plugin" json:"conf-nagios-plugin" valid:"nagios_plugin,required"`
+	NagiosParams string `form:"cond-nagios-params" json:"conf-nagios-params" valid:"ascii"`
+
+	// CondType string `form:"cond-type" json:"cond_type" valid:"cond_type,required"`
 
 	// CondType: cond-http
-	CondHttpProto    string `form:"cond-http-proto" json:"cond_http_proto" valid:"http_proto"`
-	CondHttpPath     string `form:"cond-http-path" json:"cond_http_path" valid:"http_path"`
-	CondHttpHostname string `form:"cond-http-hostname" json:"cond_http_hostname" valid:"http_hostname"`
-	CondHttpPort     string `form:"cond-http-port" json:"cond_http_port" valid:"port"`
-	CondHttpStatus   string `form:"cond-http-status" json:"cond_http_status" valid:"int"`
+	// CondHttpProto    string `form:"cond-http-proto" json:"cond_http_proto" valid:"http_proto"`
+	// CondHttpPath     string `form:"cond-http-path" json:"cond_http_path" valid:"http_path"`
+	// CondHttpHostname string `form:"cond-http-hostname" json:"cond_http_hostname" valid:"http_hostname"`
+	// CondHttpPort     string `form:"cond-http-port" json:"cond_http_port" valid:"port"`
+	// CondHttpStatus   string `form:"cond-http-status" json:"cond_http_status" valid:"int"`
 
 	TargetType string `form:"target-type" json:"target_type" valid:"target_type,required"`
 
@@ -183,6 +196,8 @@ func (f *AlertPolicyForm) Hydrate(ap *AlertPolicy) {
 	f.Name = ap.Name
 	f.Description = ap.Description
 	f.AlertGroups = ap.AlertGroups
+	f.NagiosPlugin = ap.NagiosPlugin
+	f.NagiosParams = ap.NagiosParams
 	f.Interval = strconv.Itoa(int(ap.Interval / time.Second))
 	f.TargetType = ap.TargetType
 	switch f.TargetType {
@@ -199,44 +214,45 @@ func (f *AlertPolicyForm) Hydrate(ap *AlertPolicy) {
 	case "target-all":
 		// clap
 	}
-	f.CondType = ap.CondType
-	switch f.CondType {
-	case "cond-http":
-		f.CondHttpHostname = ap.Cond.(bson.M)["hostname"].(string)
-		f.CondHttpPath = ap.Cond.(bson.M)["path"].(string)
-		f.CondHttpPort = strconv.Itoa(ap.Cond.(bson.M)["port"].(int))
-		f.CondHttpProto = ap.Cond.(bson.M)["proto"].(string)
-		f.CondHttpStatus = strconv.Itoa(ap.Cond.(bson.M)["status"].(int))
-	case "cond-metric":
-		// TO BE IMPLEMENTED
-	}
+	// f.CondType = ap.CondType
+	// switch f.CondType {
+	// case "cond-http":
+	// 	f.CondHttpHostname = ap.Cond.(bson.M)["hostname"].(string)
+	// 	f.CondHttpPath = ap.Cond.(bson.M)["path"].(string)
+	// 	f.CondHttpPort = strconv.Itoa(ap.Cond.(bson.M)["port"].(int))
+	// 	f.CondHttpProto = ap.Cond.(bson.M)["proto"].(string)
+	// 	f.CondHttpStatus = strconv.Itoa(ap.Cond.(bson.M)["status"].(int))
+	// case "cond-metric":
+	// 	// TO BE IMPLEMENTED
+	// }
 }
 
-func (apm *alertPolicyMapper) createCond(f *AlertPolicyForm) interface{} {
-
-	switch f.CondType {
-	case "cond-http":
-		port, _ := strconv.Atoi(f.CondHttpPort)
-		status, _ := strconv.Atoi(f.CondHttpStatus)
-		return &ConditionTypeHttp{
-			Proto:    f.CondHttpProto,
-			Path:     f.CondHttpPath,
-			Hostname: f.CondHttpHostname,
-			Port:     port,
-			Status:   status,
-		}
-	}
-
-	return nil
-}
+// func (apm *alertPolicyMapper) createCond(f *AlertPolicyForm) interface{} {
+//
+// 	switch f.CondType {
+// 	case "cond-http":
+// 		port, _ := strconv.Atoi(f.CondHttpPort)
+// 		status, _ := strconv.Atoi(f.CondHttpStatus)
+// 		return &ConditionTypeHttp{
+// 			Proto:    f.CondHttpProto,
+// 			Path:     f.CondHttpPath,
+// 			Hostname: f.CondHttpHostname,
+// 			Port:     port,
+// 			Status:   status,
+// 		}
+// 	}
+//
+// 	return nil
+// }
 
 func (apm *alertPolicyMapper) createTarget(f *AlertPolicyForm) interface{} {
 
 	switch f.TargetType {
-	case "target-url":
-		return &TargetTypeUrl{
-			Host: f.TargetUrlHost,
-		}
+	case "target-karhu":
+		return nil
+		// return &TargetTypeUrl{
+		// 	Host: f.TargetUrlHost,
+		// }
 	case "target-tag":
 		return &TargetTypeTag{
 			Tags: f.TargetTagTags,
@@ -257,18 +273,20 @@ func (apm *alertPolicyMapper) Create(f *AlertPolicyForm) *AlertPolicy {
 	interval, _ := strconv.Atoi(f.Interval)
 
 	ap := &AlertPolicy{
-		Id:          bson.NewObjectId(),
-		Name:        f.Name,
-		Description: f.Description,
-		AlertGroups: f.AlertGroups,
-		CondType:    f.CondType,
-		Cond:        apm.createCond(f),
-		TargetType:  f.TargetType,
-		Target:      apm.createTarget(f),
-		Interval:    time.Second * time.Duration(interval),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		NextAt:      time.Now(),
+		Id:           bson.NewObjectId(),
+		Name:         f.Name,
+		Description:  f.Description,
+		AlertGroups:  f.AlertGroups,
+		NagiosPlugin: f.NagiosPlugin,
+		NagiosParams: f.NagiosParams,
+		// CondType:    f.CondType,
+		// Cond:        apm.createCond(f),
+		TargetType: f.TargetType,
+		Target:     apm.createTarget(f),
+		Interval:   time.Second * time.Duration(interval),
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+		NextAt:     time.Now(),
 	}
 
 	return ap
@@ -281,8 +299,10 @@ func (ap *AlertPolicy) Update(f *AlertPolicyForm) {
 	ap.Name = f.Name
 	ap.Description = f.Description
 	ap.AlertGroups = f.AlertGroups
-	ap.CondType = f.CondType
-	ap.Cond = AlertPolicyMapper.createCond(f)
+	ap.NagiosPlugin = f.NagiosPlugin
+	ap.NagiosParams = f.NagiosParams
+	// ap.CondType = f.CondType
+	// ap.Cond = AlertPolicyMapper.createCond(f)
 	ap.TargetType = f.TargetType
 	ap.Target = AlertPolicyMapper.createTarget(f)
 	ap.Interval = time.Second * time.Duration(interval)

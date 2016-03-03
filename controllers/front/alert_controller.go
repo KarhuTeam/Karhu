@@ -29,6 +29,7 @@ func NewAlertController(s *web.Server) *AlertController {
 	s.POST("/alerts-policies/add", ctl.postAddAlertsPolicyAction)
 	s.GET("/alerts-policies/edit/:id", ctl.getEditAlertsPolicyAction)
 	s.POST("/alerts-policies/edit/:id", ctl.postEditAlertsPolicyAction)
+	s.POST("/alerts-policies/delete/:id", ctl.postDeleteAlertsPolicyAction)
 
 	s.GET("/alerts-groups", ctl.getAlertsGroupsListAction)
 	s.GET("/alerts-groups/add", ctl.getAddAlertsGroupAction)
@@ -123,7 +124,9 @@ func (ctl *AlertController) getAlertsPolicyListAction(c *gin.Context) {
 
 func (ctl *AlertController) getAddAlertsPolicyAction(c *gin.Context) {
 
-	c.HTML(http.StatusOK, "alert_policy_add.html", nil)
+	c.HTML(http.StatusOK, "alert_policy_add.html", map[string]interface{}{
+		"NagiosPlugins": models.NagiosPlugins,
+	})
 }
 
 func (ctl *AlertController) postAddAlertsPolicyAction(c *gin.Context) {
@@ -136,8 +139,9 @@ func (ctl *AlertController) postAddAlertsPolicyAction(c *gin.Context) {
 
 	if err := form.Validate(); err != nil {
 		c.HTML(http.StatusOK, "alert_policy_add.html", map[string]interface{}{
-			"errors": err.Errors,
-			"form":   form,
+			"NagiosPlugins": models.NagiosPlugins,
+			"errors":        err.Errors,
+			"form":          form,
 		})
 		return
 	}
@@ -169,8 +173,9 @@ func (ctl *AlertController) getEditAlertsPolicyAction(c *gin.Context) {
 	log.Println("interval", form.Interval)
 
 	c.HTML(http.StatusOK, "alert_policy_add.html", map[string]interface{}{
-		"form":   form,
-		"policy": ap,
+		"NagiosPlugins": models.NagiosPlugins,
+		"form":          form,
+		"policy":        ap,
 	})
 }
 
@@ -194,9 +199,10 @@ func (ctl *AlertController) postEditAlertsPolicyAction(c *gin.Context) {
 
 	if err := form.Validate(); err != nil {
 		c.HTML(http.StatusOK, "alert_policy_add.html", map[string]interface{}{
-			"errors": err.Errors,
-			"form":   form,
-			"policy": ap,
+			"NagiosPlugins": models.NagiosPlugins,
+			"errors":        err.Errors,
+			"form":          form,
+			"policy":        ap,
 		})
 		return
 	}
@@ -204,6 +210,25 @@ func (ctl *AlertController) postEditAlertsPolicyAction(c *gin.Context) {
 	ap.Update(&form)
 
 	if err := models.AlertPolicyMapper.Update(ap); err != nil {
+		panic(err)
+	}
+
+	c.Redirect(http.StatusFound, "/alerts-policies")
+}
+
+func (ctl *AlertController) postDeleteAlertsPolicyAction(c *gin.Context) {
+
+	ap, err := models.AlertPolicyMapper.FetchOne(c.Param("id"))
+	if err != nil {
+		panic(err)
+	}
+
+	if ap == nil {
+		c.Redirect(http.StatusFound, "/alerts-policies")
+		return
+	}
+
+	if err := models.AlertPolicyMapper.Delete(ap); err != nil {
 		panic(err)
 	}
 

@@ -4,11 +4,16 @@ import (
 	"github.com/karhuteam/karhu/models"
 	"gopkg.in/mgo.v2/bson"
 	"log"
+	"strings"
 	"time"
 )
 
-type TargetUrlHandler interface {
-	HandleTargetUrl(string) error
+type TargetKarhuHandler interface {
+	HandleTargetKarhu() error
+}
+
+type TargetNodeHandler interface {
+	HandleTargetNode(*models.Node) error
 }
 
 func Run() {
@@ -25,7 +30,15 @@ func Run() {
 		log.Println("Policies:", len(policies))
 
 		for _, policy := range policies {
-			check(policy)
+			func() {
+				defer func() {
+					if err := recover(); err != nil {
+						log.Println("alerts.Run:", err)
+					}
+				}()
+
+				check(policy)
+			}()
 		}
 	}
 }
@@ -36,32 +49,55 @@ func check(policy *models.AlertPolicy) {
 
 	var err error
 	var chk interface{}
-	switch policy.CondType {
-	case "cond-http":
-		chk, err = NewCheckHTTP(policy)
-	}
+	// switch policy.CondType {
+	// case "cond-http":
+	// 	chk, err = NewCheckHTTP(policy)
+	// }
+	chk, err = NewCheckNagios(policy)
 
 	if err != nil {
 		log.Println("alerts.check:", err)
 		return
 	}
 
-	var checkResult error
 	switch policy.TargetType {
-	case "target-url":
-		host := policy.Target.(bson.M)["host"].(string)
-		handler, ok := chk.(TargetUrlHandler)
+	case "target-karhu":
+		handler, ok := chk.(TargetKarhuHandler)
 		if !ok {
-			log.Println("Check status, TargetUrlHandler isn't supported by", policy.CondType)
+			log.Println("Check status, TargetKarhuHandler isn't supported")
 			return
 		}
-		checkResult = handler.HandleTargetUrl(host)
+		err := handler.HandleTargetKarhu()
+		updateAlert(policy, nil, err)
+
+	case "target-tag":
+		handler, ok := chk.(TargetNodeHandler)
+		if !ok {
+			log.Println("Check status, TargetNodeHandler isn't supported")
+			return
+		}
+
+		var tags []string
+		for _, t := range policy.Target.(bson.M)["tags"].([]interface{}) {
+			tags = append(tags, t.(string))
+		}
+
+		nodes, err := models.NodeMapper.FetchAllTags(tags)
+		if err != nil {
+			log.Println("Check status, FetchAllTags:", err)
+			return
+		}
+
+		for _, n := range nodes {
+
+			err := handler.HandleTargetNode(n)
+			updateAlert(policy, n, err)
+		}
+
 	default:
 		log.Println("Check status, unsupported TargetType:", policy.TargetType)
 		return
 	}
-
-	log.Println("Check status:", checkResult)
 
 	policy.NextAt = time.Now().Add(policy.Interval)
 	log.Println("Next", policy.Name, "at", policy.NextAt)
@@ -69,20 +105,33 @@ func check(policy *models.AlertPolicy) {
 		log.Println("Check status, AlertPolicyMapper.Update:", err)
 		// no return
 	}
+}
+
+func updateAlert(policy *models.AlertPolicy, node *models.Node, checkResult error) {
+
+	if checkResult != nil && strings.Contains(checkResult.Error(), "ssh: connect to host") &&
+		strings.Contains(checkResult.Error(), "Operation timed out") {
+		// Ignore in case of ssh fail
+		return
+	}
 
 	if checkResult != nil { // Check to open issue
 
-		alert, err := models.AlertMapper.FetchOneByPolicy(policy.Id.Hex(), []string{models.STATUS_OPEN, models.STATUS_ACKNOWLEDGE})
+		alert, err := models.AlertMapper.FetchOneByPolicy(policy.Id.Hex(), []string{models.STATUS_OPEN, models.STATUS_ACKNOWLEDGE}, node)
 		if err != nil {
 			log.Println("Check status, FetchOneByPolicy:", err)
 			return
 		}
 
 		if alert != nil { // We already have an alert
+			log.Println("Alert:", *alert.Node)
 			return
 		}
 
 		alert = models.AlertMapper.Create(policy, checkResult)
+		if node != nil {
+			alert.Node = node
+		}
 
 		if err := models.AlertMapper.Save(alert); err != nil {
 			log.Println("Check status, AlertMapper.Save:", err)
@@ -90,7 +139,7 @@ func check(policy *models.AlertPolicy) {
 		}
 	} else {
 
-		alert, err := models.AlertMapper.FetchOneByPolicy(policy.Id.Hex(), []string{models.STATUS_OPEN, models.STATUS_ACKNOWLEDGE})
+		alert, err := models.AlertMapper.FetchOneByPolicy(policy.Id.Hex(), []string{models.STATUS_OPEN, models.STATUS_ACKNOWLEDGE}, node)
 		if err != nil {
 			log.Println("Check status, FetchOneByPolicy:", err)
 			return
@@ -106,4 +155,6 @@ func check(policy *models.AlertPolicy) {
 			return
 		}
 	}
+
+	Notify(policy, node, checkResult)
 }

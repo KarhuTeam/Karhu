@@ -221,7 +221,11 @@ func (pm *nodeMapper) CheckSsh(n *Node) error {
 	return ssh.CheckSsh(n.SshUser, n.IP, n.SshPort)
 }
 
-func (nm *nodeMapper) AnsibleHostsForTags(tags []string) (ansible.Hosts, error) {
+func (n *Node) ExecSsh(command string) ([]byte, error) {
+	return ssh.Exec(n.SshUser, n.IP, n.SshPort, command)
+}
+
+func (nm *nodeMapper) FetchAllTags(tags []string) (Nodes, error) {
 
 	if len(tags) == 0 {
 		return nil, goerrors.New("No tags on app")
@@ -234,6 +238,16 @@ func (nm *nodeMapper) AnsibleHostsForTags(tags []string) (ansible.Hosts, error) 
 
 	var nodes Nodes
 	if err := col.Find(bson.M{"tags": bson.M{"$all": tags}}).All(&nodes); err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
+}
+
+func (nm *nodeMapper) AnsibleHostsForTags(tags []string) (ansible.Hosts, error) {
+
+	nodes, err := nm.FetchAllTags(tags)
+	if err != nil {
 		return nil, err
 	}
 

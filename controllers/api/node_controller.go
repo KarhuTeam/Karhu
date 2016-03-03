@@ -142,6 +142,10 @@ if [ "$SETUP_MONITORING" = "1" ]; then
 
 	$SUDO service filebeat restart || exit 1
 fi
+
+# Alerts
+$SUDO apt-get install -y nagios-plugins
+
 echo "Done."`, karhuHost, logstashIP, publicKey, ssh.SSH_AUTHORIZED_KEYS_DIR, ssh.AuthorizedKeysPath(), clientIP, c.DefaultQuery("ssh_port", "22") /*, c.DefaultQuery("ssh_user", "root") */, basicAuth, c.DefaultQuery("monit", "1"), env.Get("INFLUXDB_COLLECTD_HOST"), env.Get("INFLUXDB_COLLECTD_PORT"), collectdUser, collectdPassword, c.DefaultQuery("noreg", "0")))
 }
 

@@ -25,6 +25,7 @@ type Alert struct {
 	Name     string         `json:"name" bson:"name"`
 	Status   string         `json:"status" bson:"status"`
 	PolicyId bson.ObjectId  `json:"policy_id" bson:"policy_id"`
+	Node     *Node          `json:"node" bson:"node"`
 	Messages []AlertMessage `json:"messages" bson:"messages"`
 
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
@@ -117,7 +118,7 @@ func (am *alertMapper) FetchAllStatus(status string) (Alerts, error) {
 	return alerts, nil
 }
 
-func (am *alertMapper) FetchOneByPolicy(policyId string, status []string) (*Alert, error) {
+func (am *alertMapper) FetchOneByPolicy(policyId string, status []string, node *Node) (*Alert, error) {
 
 	if !bson.IsObjectIdHex(policyId) {
 		return nil, errors.New("Invalid object Id Hex")
@@ -126,8 +127,13 @@ func (am *alertMapper) FetchOneByPolicy(policyId string, status []string) (*Aler
 	col := C(alertCollection)
 	defer col.Database.Session.Close()
 
+	query := bson.M{"policy_id": bson.ObjectIdHex(policyId), "status": bson.M{"$in": status}}
+	if node != nil {
+		query["node._id"] = node.Id
+	}
+
 	a := new(Alert)
-	if err := col.Find(bson.M{"policy_id": bson.ObjectIdHex(policyId), "status": bson.M{"$in": status}}).One(a); err != nil {
+	if err := col.Find(query).One(a); err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, nil
 		}

@@ -1,6 +1,6 @@
 {{template "header" "alerts"}}
   <div class="breadcrumb">
-    All alerts policies
+        <a href="/alerts">All alerts</a> &gt; All alerts policies
   </div>
 </header>
 <main>
@@ -16,7 +16,7 @@
       </h2>
       <p class="box-text">{{ .Description }}</p>
       <ul class=box-list>
-          <li><span class="box-list-label">Condition:</span>{{ .CondType }}</li>
+          <li><span class="box-list-label">Check:</span>{{ .NagiosPlugin }} {{ .NagiosParams }}</li>
           <li><span class="box-list-label">Target:</span>{{ .TargetType }}</li>
           <li><span class="box-list-label">Interval:</span>{{ .Interval.String }}</li>
       </ul>
