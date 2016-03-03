@@ -13,20 +13,15 @@ ENV LOGSTASH_TLS_CRT=/etc/logstash/certs/logstash.crt
 ENV LOGSTASH_AUTHFILE=/etc/logstash/certs/authfile
 ENV LOGSTASH_TAGS_FILTERS=/etc/logstash/conf.d/10-tags-filters.conf
 ENV LOGSTASH_APPS_FILTERS=/etc/logstash/conf.d/11-apps-filters.conf
-ENV GRAFANA_URL http://localhost:3000
 
 # custom ppa for ansible
 RUN apt-get update
 RUN apt-get install -y software-properties-common wget apt-transport-https nagios-plugins
 RUN apt-add-repository ppa:ansible/ansible
 
-# Grafana deps
-RUN echo "deb https://packagecloud.io/grafana/stable/debian/ wheezy main" > /etc/apt/sources.list.d/grafana.list
-RUN wget -qO - https://packagecloud.io/gpg.key | apt-key add -
-
 # Install ansible && deps
 RUN apt-get update && \
-    apt-get install -y ansible git grafana && \
+    apt-get install -y ansible git && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Golang
@@ -42,10 +37,6 @@ WORKDIR ${WORKDIR}
 RUN go get -v && \
     go build
 
-# Install Grafana
-ADD grafana/grafana.ini /etc/grafana/grafana.ini
-ADD grafana/karhu.js /usr/share/grafana/public/dashboards/karhu.js
-
 # Setup Logstash
 # Default logstash cert path
 RUN mkdir -p /logstash
@@ -56,6 +47,5 @@ VOLUME /data
 VOLUME /logstash
 
 EXPOSE 8080
-EXPOSE 3000
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

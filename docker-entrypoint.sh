@@ -24,6 +24,4 @@ mkdir -p $STORAGE_PATH
 #
 # cat .env; echo
 
-service grafana-server start
-
 ./karhu
