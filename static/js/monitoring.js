@@ -39,11 +39,11 @@
       if (data.stacked === true) {
          graph.plotOptions = {
             area: {
-               stacking: 'normal';
+               stacking: 'normal'
             }
          }
       }
-      if (data.type === 'percent') {
+      if (data.data_type === 'percent') {
          graph.plotOptions = {
             area: {
                stacking: 'percent'
@@ -51,7 +51,10 @@
          };
       }
 
-		for (var k in data.data) {
+	  console.log("data.title:", data.title, " - type:", data.data_type, " - plot:", graph.plotOptions);
+
+		for (var i = 0; i < data.data_order.length; i++) {
+			var k = data.data_order[i];
 			graph.series.push({
 				name: k,
 				data: data.data[k]

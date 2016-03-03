@@ -9,11 +9,12 @@ import (
 )
 
 type Graph struct {
-	Title    string                   `json:"title"`
-	Type     string                   `json:"type"`
-	Stacked  bool                     `json:"stacked"`
-	DataType string                   `json:"data_type"`
-	Data     map[string][]interface{} `json:"data"`
+	Title     string                   `json:"title"`
+	Type      string                   `json:"type"`
+	Stacked   bool                     `json:"stacked"`
+	DataType  string                   `json:"data_type"`
+	DataOrder []string                 `json:"data_order"`
+	Data      map[string][]interface{} `json:"data"`
 }
 type Graphs []*Graph
 
@@ -142,11 +143,12 @@ func (gm *graphMapper) FetchOne(stat, host string, tm time.Time) (*Graph, error)
 	}
 
 	return &Graph{
-		Title:    fmt.Sprintf("%s %s", host, stat),
-		Type:     template.Type,
-		Stacked:  template.Stacked,
-		DataType: template.DataType,
-		Data:     data,
+		Title:     fmt.Sprintf("%s %s", host, stat),
+		Type:      template.Type,
+		Stacked:   template.Stacked,
+		DataType:  template.DataType,
+		DataOrder: template.TypeInstances,
+		Data:      data,
 	}, nil
 }
 
