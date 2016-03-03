@@ -26,7 +26,7 @@ func LogstashRefreshTagsFilters() error {
 			continue
 		}
 
-		var tags []string
+		var tags = []string{`"karhu"`}
 		for _, t := range n.Tags {
 			tags = append(tags, strconv.Quote(t))
 
