@@ -84,8 +84,16 @@ func notifySlack(policy *models.AlertPolicy, node *models.Node, problem error, s
 		subject += " - " + node.Hostname
 	}
 
+	channel := ""
+
+	// Check for custom chan
+	if index := strings.LastIndex(slackURL, "#"); index > -1 {
+		channel = slackURL[index:]
+		log.Println("channel:", channel)
+	}
+
 	values := url.Values{}
-	values.Set("payload", fmt.Sprintf(`{"text":"%s","username":"Karhu", "icon_emoji":":bear:"}`, subject))
+	values.Set("payload", fmt.Sprintf(`{"text":"%s","username":"Karhu", "icon_emoji":":bear:", "channel":"%s"}`, subject, channel))
 
 	resp, err := http.PostForm(slackURL, values)
 	if err != nil {
