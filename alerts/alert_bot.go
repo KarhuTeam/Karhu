@@ -93,7 +93,44 @@ func check(policy *models.AlertPolicy) {
 			err := handler.HandleTargetNode(n)
 			updateAlert(policy, n, err)
 		}
+	case "target-node":
+		handler, ok := chk.(TargetNodeHandler)
+		if !ok {
+			log.Println("Check status, TargetNodeHandler isn't supported")
+			return
+		}
 
+		for _, n := range policy.Target.(bson.M)["nodes"].([]interface{}) {
+			node, err := models.NodeMapper.FetchOne(n.(string))
+			if err != nil {
+				log.Println("Check status, NodeMapper.FetchOne:", err)
+				continue
+			}
+
+			if node == nil {
+				continue
+			}
+
+			err = handler.HandleTargetNode(node)
+			updateAlert(policy, node, err)
+		}
+	case "target-all":
+		handler, ok := chk.(TargetNodeHandler)
+		if !ok {
+			log.Println("Check status, TargetNodeHandler isn't supported")
+			return
+		}
+
+		nodes, err := models.NodeMapper.FetchAll()
+		if err != nil {
+			log.Println("Check status, NodeMapper.FetchAll:", err)
+			return
+		}
+
+		for _, node := range nodes {
+			err = handler.HandleTargetNode(node)
+			updateAlert(policy, node, err)
+		}
 	default:
 		log.Println("Check status, unsupported TargetType:", policy.TargetType)
 		return
