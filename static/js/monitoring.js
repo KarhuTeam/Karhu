@@ -20,9 +20,9 @@
 			series: []
 		};
 
-		if (data.type === 'line') {
+		// if (data.type === 'line') {
 			new Highcharts.Chart(build_stack_area(data, chart_base));
-		}
+		// }
 	}
 
 	function extract_data(node) {
@@ -35,26 +35,29 @@
       graph.title = {
          text: data.title
       };
-      graph.chart.type = 'area';
-      if (data.stacked === true) {
-         graph.plotOptions = {
-            area: {
-               stacking: 'normal'
-            }
-         }
-      }
-      if (data.data_type === 'percent') {
-         graph.plotOptions = {
-            area: {
-               stacking: 'percent'
-            }
-         };
-      }
+      graph.chart.type = data.type;
+	  if (graph.chart.type === 'area') {
+		  if (data.stacked === true) {
+			  graph.plotOptions = {
+				  area: {
+					  stacking: 'normal'
+				  }
+			  }
+		  }
+		  if (data.data_type === 'percent') {
+			  graph.plotOptions = {
+				  area: {
+					  stacking: 'percent'
+				  }
+			  };
+		  }
+	  }
 
 	  console.log("data.title:", data.title, " - type:", data.data_type, " - plot:", graph.plotOptions);
 
-		for (var i = 0; i < data.data_order.length; i++) {
-			var k = data.data_order[i];
+		// for (var i = 0; i < data.data_order.length; i++) {
+			// var k = data.data_order[i];
+		for (var k in data.data) {
 			graph.series.push({
 				name: k,
 				data: data.data[k]

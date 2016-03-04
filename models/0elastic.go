@@ -7,7 +7,7 @@ import (
 	"github.com/gotoolz/env"
 	"io"
 	"io/ioutil"
-	"log"
+	// "log"
 	"net/http"
 	"strings"
 )
@@ -51,7 +51,7 @@ func Elastic(method, index, queryPath, body string, obj interface{}) error {
 	}
 
 	url := fmt.Sprintf("%s/%s%s", esHost, index, queryPath)
-	log.Printf("url: %s\n", url)
+	// log.Printf("url: %s\n", url)
 
 	req, err := http.NewRequest(method, url, reader)
 	if err != nil {
@@ -76,7 +76,7 @@ func Elastic(method, index, queryPath, body string, obj interface{}) error {
 	if resp.StatusCode != http.StatusOK {
 		return errors.New(resp.Status + " - " + string(data))
 	}
-	log.Println("data:", string(data))
+	// log.Println("data:", string(data))
 
 	if obj != nil {
 		if err := json.Unmarshal(data, obj); err != nil {

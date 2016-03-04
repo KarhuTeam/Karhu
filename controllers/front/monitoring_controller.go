@@ -41,16 +41,14 @@ func (pc *MonitoringController) getMonitoringAction(c *gin.Context) {
 		}
 	}
 
-	if host != "" || stat != "all" {
-
-		if graphs, err = models.GraphMapper.FetchAll(target, stat, t); err != nil {
-			panic(err)
-		}
+	if graphs, err = models.GraphMapper.FetchAll(target, stat, t); err != nil {
+		panic(err)
 	}
 
 	c.HTML(http.StatusOK, "monitoring_show.html", map[string]interface{}{
 		"host":   host,
 		"stat":   stat,
+		"time":   t,
 		"hosts":  hosts,
 		"stats":  models.GraphStats,
 		"graphs": graphs,

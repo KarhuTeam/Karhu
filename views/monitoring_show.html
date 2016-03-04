@@ -22,10 +22,10 @@
 			</div>
 			<div class="text-right">
 				<select name="time">
-					<option value="last900" selected="selected">Last 15 minutes</option>
-					<option value="last1800">Last 30 minutes</option>
-					<option value="last3600">Last hour</option>
-					<option value="last86400">Last 24 hours</option>
+					<option value="last900" {{ if eq $.time "last900" }}selected="selected"{{ end }}>Last 15 minutes</option>
+					<option value="last1800" {{ if eq $.time "last1800" }}selected="selected"{{ end }}>Last 30 minutes</option>
+					<option value="last3600" {{ if eq $.time "last3600" }}selected="selected"{{ end }}>Last hour</option>
+					<option value="last86400" {{ if eq $.time "last86400" }}selected="selected"{{ end }}>Last 24 hours</option>
 				</select>
 			</div>
 		</form>
