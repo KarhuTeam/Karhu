@@ -5,6 +5,8 @@ import (
 	"github.com/gotoolz/mail"
 	"github.com/karhuteam/karhu/models"
 	"log"
+	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -30,6 +32,8 @@ func Notify(policy *models.AlertPolicy, node *models.Node, problem error) {
 			switch method.Type {
 			case "email":
 				notifyEmail(policy, node, problem, method.Value)
+			case "slack":
+				notifySlack(policy, node, problem, method.Value)
 			}
 		}
 	}
@@ -61,4 +65,32 @@ func notifyEmail(policy *models.AlertPolicy, node *models.Node, problem error, e
 	}); err != nil {
 		log.Println("alerts.notifyEmail:", err)
 	}
+}
+
+func notifySlack(policy *models.AlertPolicy, node *models.Node, problem error, slackURL string) {
+
+	level := "OK"
+	if problem != nil {
+		for _, l := range []string{"CRITICAL", "WARNING"} {
+			if strings.Contains(problem.Error(), l) {
+				level = l
+				break
+			}
+		}
+	}
+
+	subject := fmt.Sprintf("%s - %s", level, policy.Name)
+	if node != nil {
+		subject += " - " + node.Hostname
+	}
+
+	values := url.Values{}
+	values.Set("payload", fmt.Sprintf(`{"text":"%s","username":"Karhu", "icon_emoji":":bear:"}`, subject))
+
+	resp, err := http.PostForm(slackURL, values)
+	if err != nil {
+		log.Println("alerts.notifySlack:", err)
+		return
+	}
+	defer resp.Body.Close()
 }
