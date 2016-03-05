@@ -187,8 +187,7 @@ curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | sudo -i -u admin bash`, 
 		panic(err)
 	}
 
-	c.Redirect(http.StatusFound, c.Request.Referer())
-
+	c.Redirect(http.StatusFound, "/nodes")
 }
 
 func (pc *NodeController) getNodeAddDOAction(c *gin.Context) {

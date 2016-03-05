@@ -34,6 +34,11 @@ func setupConfigsRole(role *ansible.Role, d *Deployment, configs Configs) *ansib
 		}
 		hash := fmt.Sprintf("%x", sha1.Sum([]byte(conf.Path)))
 
+		role.AddTask(ansible.Task{
+			"name": "Create Directory",
+			"file": fmt.Sprintf(`path=%s state=directory`),
+		})
+
 		task := ansible.Task{
 			`name`:        `Copy ` + conf.Path,
 			`sudo`:        `no`,
