@@ -36,7 +36,7 @@ func setupConfigsRole(role *ansible.Role, d *Deployment, configs Configs) *ansib
 
 		role.AddTask(ansible.Task{
 			"name": "Create Directory",
-			"file": fmt.Sprintf(`path=%s state=directory`),
+			"file": fmt.Sprintf(`path=%s state=directory`, path.Dir(destPath)),
 		})
 
 		task := ansible.Task{
