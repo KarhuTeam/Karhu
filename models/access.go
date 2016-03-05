@@ -52,7 +52,7 @@ type Accesses []*Access
 type AccessCreateForm struct {
 	Type       string `json:"type" form:"type" valid:"access_provider,required"`
 	AccessKey  string `json:"access_key" form:"access_key" valid:"required"`
-	PrivateKey string `json:"private_key" form:"private_key" valid:"required"`
+	PrivateKey string `json:"private_key" form:"private_key" valid:"-"`
 }
 
 // Validator for application creation

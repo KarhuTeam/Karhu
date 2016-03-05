@@ -2,15 +2,18 @@ package front
 
 import (
 	"fmt"
+	"github.com/digitalocean/godo"
 	"github.com/gin-gonic/gin"
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/ec2"
 	"github.com/gotoolz/env"
 	"github.com/karhuteam/karhu/models"
-	// "github.com/karhuteam/karhu/ressources/ssh"
+	"github.com/karhuteam/karhu/ressources/ssh"
 	"github.com/karhuteam/karhu/web"
+	"golang.org/x/oauth2"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -28,6 +31,7 @@ func NewNodeController(s *web.Server) *NodeController {
 	s.GET("/node/add/ec2", ctl.getNodeAddEc2Action)
 	s.POST("/node/add/ec2", ctl.postNodeAddEc2Action)
 	s.GET("/node/add/do", ctl.getNodeAddDOAction)
+	s.POST("/node/add/do", ctl.postNodeAddDOAction)
 	s.POST("/node/access/add", ctl.postAddAccessAction)
 	s.POST("/node/access/delete/:type", ctl.postDeleteAccessAction)
 	s.POST("/node/delete/:id", ctl.postDeleteNodeAction)
@@ -190,19 +194,129 @@ curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | sudo -i -u admin bash`, 
 	c.Redirect(http.StatusFound, "/nodes")
 }
 
+type DOTokenSource struct {
+	AccessToken string
+}
+
+func (t *DOTokenSource) Token() (*oauth2.Token, error) {
+	token := &oauth2.Token{
+		AccessToken: t.AccessToken,
+	}
+	return token, nil
+}
+
 func (pc *NodeController) getNodeAddDOAction(c *gin.Context) {
+
+	a, err := models.AccessMapper.FetchOne("do")
+	if err != nil {
+		panic(err)
+	}
+
+	if a == nil {
+
+		c.HTML(http.StatusOK, "node_add_do.html", map[string]interface{}{})
+		return
+	}
+
+	oauthClient := oauth2.NewClient(oauth2.NoContext, &DOTokenSource{
+		AccessToken: a.AccessKey,
+	})
+	client := godo.NewClient(oauthClient)
+
+	regions, _, err := client.Regions.List(&godo.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	sizes, _, err := client.Sizes.List(&godo.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	c.HTML(http.StatusOK, "node_add_do.html", map[string]interface{}{
+		"AccessKey": true,
+		"DORegions": regions,
+		"DOSizes":   sizes,
+	})
+}
+
+func (pc *NodeController) postNodeAddDOAction(c *gin.Context) {
+
+	var form models.DONodeCreateForm
+	if err := c.Bind(&form); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if err := form.Validate(); err != nil {
+		log.Println("invalid", err)
+		c.Redirect(http.StatusFound, c.Request.Referer())
+		return
+	}
+
+	a, err := models.AccessMapper.FetchOne("do")
+	if err != nil {
+		panic(err)
+	}
+
+	if a == nil {
+		c.Redirect(http.StatusFound, c.Request.Referer())
+		return
+	}
+
 	basicAuth := env.Get("BASIC_AUTH")
 	if auth := env.Get("BASIC_AUTH"); auth != "" {
 		basicAuth = "-u " + auth + " "
 	}
 
-	c.HTML(http.StatusOK, "node_add_ec2.html", map[string]interface{}{
-		"PublicHost": c.DefaultQuery("karhu_url", env.Get("PUBLIC_HOST")),
-		"SshUser":    c.DefaultQuery("ssh_user", "root"),
-		"SshPort":    c.DefaultQuery("ssh_port", "22"),
-		"Monit":      c.DefaultQuery("monit", "1"),
-		"BasicAuth":  basicAuth,
+	keyFingerprint, err := ssh.GetFingerprint()
+	if err != nil {
+		panic(err)
+	}
+
+	oauthClient := oauth2.NewClient(oauth2.NoContext, &DOTokenSource{
+		AccessToken: a.AccessKey,
 	})
+	client := godo.NewClient(oauthClient)
+
+	// Register key
+	key, _, err := client.Keys.GetByFingerprint(keyFingerprint)
+	if err != nil && !strings.Contains(err.Error(), "404 The resource you were accessing could not be found") {
+		panic(err)
+	}
+
+	if key == nil {
+		publicKey, err := ssh.GetPublicKey()
+		if err != nil {
+			panic(err)
+		}
+		key, _, err = client.Keys.Create(&godo.KeyCreateRequest{
+			Name:      "karhu",
+			PublicKey: string(publicKey),
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if _, _, err := client.Droplets.Create(&godo.DropletCreateRequest{
+		Name:              form.Hostname,
+		Region:            form.Region,
+		Size:              form.InstanceType,
+		Image:             godo.DropletCreateImage{Slug: "debian-8-x64"},
+		SSHKeys:           []godo.DropletCreateSSHKey{{Fingerprint: key.Fingerprint}},
+		Backups:           form.Backups == "on",
+		IPv6:              form.IpV6 == "on",
+		PrivateNetworking: form.PrivateNetwork == "on",
+		UserData: fmt.Sprintf(`#!/bin/bash
+sudo apt-get update && \
+sudo apt-get install -y curl && \
+curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | sudo -i -u admin bash`, basicAuth, env.Get("PUBLIC_HOST")),
+	}); err != nil {
+		panic(err)
+	}
+
+	c.Redirect(http.StatusFound, "/nodes")
 }
 
 func (nc *NodeController) postAddAccessAction(c *gin.Context) {

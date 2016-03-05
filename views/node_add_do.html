@@ -1,0 +1,86 @@
+{{template "header" "infrastructure"}}
+<div class="breadcrumb">
+    <a href="/nodes">All nodes</a> &gt; Generate script to register a node
+</div>
+</header>
+<main>
+    {{ template "node_add_menu" }}
+    <div class="box">
+        <h2 class="box-title">Account Access</h2>
+        {{ if .AccessKey }}
+        <ul class="box-list">
+            <li>
+                <form class="right" action="/node/access/delete/do" method="POST">
+                    <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">delete</button>
+                </form>
+                XXXXXXX
+            </li>
+        </ul>
+        {{ else }}
+        <form method="POST" action="/node/access/add">
+            <input type="hidden" name="type" value="do" />
+            <div class="form-group">
+                <label for="access_key">Access Key :</label>
+                <input class="form-control" type="text" id="access_key" name="access_key" placeholder="Your AWS access key"/>
+            </div>
+            <div class="text-center">
+                <button class="btn">ADD</button>
+            </div>
+        </form>
+        {{ end }}
+    </div>
+    {{ if .AccessKey }}
+    <form method="POST" action="">
+        <div class="box">
+            <h2 class="box-title">Region</h2>
+            <div class="form-group">
+                <label for="region">Region:</label>
+                <select id="region" name="region">
+                    {{ range .DORegions }}
+                    <option value="{{ .Slug }}">{{ .Name }}</option>
+                    {{ end }}
+                </select>
+            </div>
+        </div>
+        <div class="box">
+            <h2 class="box-title">Instance</h2>
+            <div class="form-group">
+                <label for="hostname">Name:</label>
+                <input class="form-control" type="text" id="hostname" name="hostname" placeholder="Instance name" {{ if .form }}value="{{.form.Hostname}}"{{ end }} />
+            </div>
+            <div class="form-group">
+              <label for="description">Description :</label>
+              <textarea class="form-control" id="description" name="description" placeholder="Description...">{{ if .form }}{{.form.Description}}{{ end }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="image">Image:</label>
+                <input class="form-control" type="text" id="image" value="Debian 8.3 x64" readonly />
+            </div>
+            <div class="form-group">
+              <label for="instance_type">Instance Type :</label>
+              <select id="instance_type" name="instance_type">
+                  {{ range .DOSizes }}
+                  <option value="{{ .Slug }}">{{ .Slug }}</option>
+                  {{ end }}
+              </select>
+          </div>
+          <div class="form-group">
+              <label>Options:</label>
+
+              <label for="backups">Backups</label>
+              <input class="form-control" type="checkbox" id="backups" name="backups" {{ if .form }}{{ if eq .form.Backups "on" }}checked="checked"{{ end }}{{ end }} />
+
+              <label for="ipv6">IpV6</label>
+              <input class="form-control" type="checkbox" id="ipv6" name="ipv6" {{ if .form }}{{ if eq .form.IpV6 "on" }}checked="checked"{{ end }}{{ end }} />
+
+              <label for="private_network">Private Network</label>
+              <input class="form-control" type="checkbox" id="private_network" name="private_network" {{ if .form }}{{ if eq .form.PrivateNetwork "on" }}checked="checked"{{ end }}{{ end }} />
+          </div>
+          <div class="text-center">
+            <button class="btn" type="submit">Create</button>
+          </div>
+        </div>
+    </form>
+    {{ end }}
+</main>
+{{template "footer"}}
