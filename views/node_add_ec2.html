@@ -1,43 +1,188 @@
 {{template "header" "infrastructure"}}
-  <div class="breadcrumb">
+<div class="breadcrumb">
     <a href="/nodes">All nodes</a> &gt; Generate script to register a node
-  </div>
+</div>
 </header>
 <main>
-  <div class="box">
-    <h2 class="box-title">Account Access</h2>
-    <div class="alert alert-info">
-        <h3 class="alert-title">Lorem ipsum</h3>
-        <p>Coucou</p>
+    {{ template "node_add_menu" }}
+    <div class="box">
+        <h2 class="box-title">Account Access</h2>
+        {{ if .AccessKey }}
+        <ul class="box-list">
+            <li>
+                <form class="right" action="/node/access/delete/ec2" method="POST">
+                    <button class="btn btn-small btn-danger" data-text="Are you sure ?" type="submit">delete</button>
+                </form>
+                {{ .AccessKey }}
+            </li>
+        </ul>
+        {{ else }}
+        <form method="POST" action="/node/access/add">
+            <input type="hidden" name="type" value="ec2" />
+            <div class="form-group">
+                <label for="access_key">Access Key :</label>
+                <input class="form-control" type="text" id="access_key" name="access_key" placeholder="Your AWS access key"/>
+            </div>
+            <div class="form-group">
+                <label for="private_key">Secret Key :</label>
+                <input class="form-control" type="text" id="private_key" name="private_key" placeholder="Your AWS secret key"/>
+            </div>
+            <div class="text-center">
+                <button class="btn">ADD</button>
+            </div>
+        </form>
+        {{ end }}
     </div>
-    <form id="add_ec2_node" method="" action="">
-      <div class="form-group">
-        <label for="karhu_url">Access Key :</label>
-        <input class="form-control" type="text" id="access_key" name="access_key" placeholder="Your AWS access key"/>
-      </div>
-      <div class="form-group">
-        <label for="ssh_port">Secret Key :</label>
-        <input class="form-control" type="text" id="secret_key" name="secret_key" placeholder="Your AWS secret key"/>
-      </div>
-      <div class="text-center">
-        <a href="/nodes" class="btn">NEXT AUTHENTICATE AND SELECT A NETWORK</a>
-      </div>
+    {{ if .AccessKey }}
+    <form method="POST" action="">
+        <div class="box">
+            <h2 class="box-title">Availability zone & VPC</h2>
+            <div class="form-group">
+                <label for="availability_zone">Availability zone:</label>
+                <select class="submit-change" id="availability_zone" name="availability_zone">
+                    {{ range .AWSRegions }}
+                    <option value="{{ .Name }}" {{ if eq $.query.availability_zone .Name }}selected="selected"{{ end }}>{{ .Name }}</option>
+                    {{ end }}
+                </select>
+            </div>
+            {{ if .VPCs }}
+            <div class="form-group">
+                <label for="vpc">VPC:</label>
+                {{ range .VPCs }}
+                <input class="submit-change" type="radio" name="vpc" id="{{ .VpcId }}" value="{{ .VpcId }}" {{ if eq $.query.vpc .VpcId }}checked="checked"{{ end }}/>
+                <label for="{{ .VpcId }}">{{ .VpcId }} {{ range .Tags }}{{ if eq .Key "Name" }} ({{ .Value }}){{ end }}{{ end }}</label>
+                {{ end }}
+            </div>
+            {{ end }}
+        </div>
+        {{ if .SecurityGroups }}
+        <div class="box">
+            <h2 class="box-title">Security group</h2>
+            <div class="form-group">
+                {{ range .SecurityGroups }}
+                <input class="submit-change" type="radio" name="security_group" id="{{ .Id }}" value="{{ .Id }}" {{ if eq $.query.security_group .Id }}checked="checked"{{ end }}/>
+                <label for="{{ .Id }}">{{ .Id }} {{ .Name }}</label>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+        {{ if ne $.query.security_group "" }}
+        <div class="box">
+            <h2 class="box-title">Instance</h2>
+            <div class="form-group">
+                <label for="hostname">Name:</label>
+                <input class="form-control" type="text" id="hostname" name="hostname" placeholder="Instance name" {{ if .form }}value="{{.form.Hostname}}"{{ end }} />
+            </div>
+            <div class="form-group">
+              <label for="description">Description :</label>
+              <textarea class="form-control" id="description" name="description" placeholder="Description...">{{ if .form }}{{.form.Description}}{{ end }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="ami">AMI:</label>
+                <input class="form-control" type="text" id="ami" value="ami-e31a6594 (Debian 8)" readonly />
+            </div>
+            <div class="form-group">
+              <label for="instance_type">Instance Type :</label>
+              <select id="instance_type" name="instance_type">
+                  <option {{ if .form }}{{ if eq .form.InstanceType "t2.micro" }}selected="selected"{{ end }}{{ end }}value="t2.micro">t2.micro</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "t2.nano" }}selected="selected"{{ end }}{{ end }}value="t2.nano">t2.nano</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "t2.small" }}selected="selected"{{ end }}{{ end }}value="t2.small">t2.small</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "t2.medium" }}selected="selected"{{ end }}{{ end }}value="t2.medium">t2.medium</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "t2.large" }}selected="selected"{{ end }}{{ end }}value="t2.large">t2.large</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m3.medium" }}selected="selected"{{ end }}{{ end }}value="m3.medium">m3.medium</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m3.large" }}selected="selected"{{ end }}{{ end }}value="m3.large">m3.large</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m3.xlarge" }}selected="selected"{{ end }}{{ end }}value="m3.xlarge">m3.xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m3.2xlarge" }}selected="selected"{{ end }}{{ end }}value="m3.2xlarge">m3.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m4.large" }}selected="selected"{{ end }}{{ end }}value="m4.large">m4.large</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m4.xlarge" }}selected="selected"{{ end }}{{ end }}value="m4.xlarge">m4.xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m4.2xlarge" }}selected="selected"{{ end }}{{ end }}value="m4.2xlarge">m4.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m4.4xlarge" }}selected="selected"{{ end }}{{ end }}value="m4.4xlarge">m4.4xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "m4.10xlarge" }}selected="selected"{{ end }}{{ end }}value="m4.10xlarge">m4.10xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c4.large" }}selected="selected"{{ end }}{{ end }}value="c4.large">c4.large</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c4.xlarge" }}selected="selected"{{ end }}{{ end }}value="c4.xlarge">c4.xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c4.2xlarge" }}selected="selected"{{ end }}{{ end }}value="c4.2xlarge">c4.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c4.4xlarge" }}selected="selected"{{ end }}{{ end }}value="c4.4xlarge">c4.4xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c4.8xlarge" }}selected="selected"{{ end }}{{ end }}value="c4.8xlarge">c4.8xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c3.large" }}selected="selected"{{ end }}{{ end }}value="c3.large">c3.large</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c3.xlarge" }}selected="selected"{{ end }}{{ end }}value="c3.xlarge">c3.xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c3.2xlarge" }}selected="selected"{{ end }}{{ end }}value="c3.2xlarge">c3.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c3.4xlarge" }}selected="selected"{{ end }}{{ end }}value="c3.4xlarge">c3.4xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "c3.8xlarge" }}selected="selected"{{ end }}{{ end }}value="c3.8xlarge">c3.8xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "r3.large" }}selected="selected"{{ end }}{{ end }}value="r3.large">r3.large</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "r3.xlarge" }}selected="selected"{{ end }}{{ end }}value="r3.xlarge">r3.xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "r3.2xlarge" }}selected="selected"{{ end }}{{ end }}value="r3.2xlarge">r3.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "r3.4xlarge" }}selected="selected"{{ end }}{{ end }}value="r3.4xlarge">r3.4xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "r3.8xlarge" }}selected="selected"{{ end }}{{ end }}value="r3.8xlarge">r3.8xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "g2.2xlarge" }}selected="selected"{{ end }}{{ end }}value="g2.2xlarge">g2.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "g2.8xlarge" }}selected="selected"{{ end }}{{ end }}value="g2.8xlarge">g2.8xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "i2.xlarge" }}selected="selected"{{ end }}{{ end }}value="i2.xlarge">i2.xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "i2.2xlarge" }}selected="selected"{{ end }}{{ end }}value="i2.2xlarge">i2.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "i2.4xlarge" }}selected="selected"{{ end }}{{ end }}value="i2.4xlarge">i2.4xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "i2.8xlarge" }}selected="selected"{{ end }}{{ end }}value="i2.8xlarge">i2.8xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "d2.xlarge" }}selected="selected"{{ end }}{{ end }}value="d2.xlarge">d2.xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "d2.2xlarge" }}selected="selected"{{ end }}{{ end }}value="d2.2xlarge">d2.2xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "d2.4xlarge" }}selected="selected"{{ end }}{{ end }}value="d2.4xlarge">d2.4xlarge</option>
+                  <option {{ if .form }}{{ if eq .form.InstanceType "d2.8xlarge" }}selected="selected"{{ end }}{{ end }}value="d2.8xlarge">d2.8xlarge</option>
+              </select>
+          </div>
+          <div class="form-group">
+              <label for="monitoring">AWS Monitoring:</label>
+              <input class="form-control" type="checkbox" id="monitoring" name="monitoring" {{ if .form }}{{ if eq .form.Monitoring "on" }}checked="checked"{{ end }}{{ end }} />
+          </div>
+          <div class="text-center">
+            <button class="btn" type="submit">Create</button>
+          </div>
+        </div>
+        {{ end }}
     </form>
-  </div>
+    {{ end }}
 </main>
 <script>
-var inputs = document.getElementById("add_node").getElementsByTagName("input");
-for (i = 0; i < inputs.length; i++) {
-    inputs[i].oninput = function() {
-        karhuUrl = document.getElementById("karhu_url").value;
-        // sshUser = document.getElementById("ssh_user").value;
-        monit = document.getElementById("monit").checked ? "1" : "0";
-        sshPort = document.getElementById("ssh_port").value || "22";
-        basicAuth = document.getElementById("basic_auth").value;
+(function() {
+  'use strict';
 
-        document.getElementById("register_cmd").innerHTML = "curl "+basicAuth+"\"" + karhuUrl + "/api/nodes/register.sh?monit="+monit+"&ssh_port="+sshPort + "\" | bash";
-    };
-    inputs[i].onchange = inputs[i].oninput;
-}
+  document.addEventListener('DOMContentLoaded', function () {
+
+      var inputs = document.getElementsByClassName('submit-change');
+      for (var i = 0; i < inputs.length; i++) {
+
+          new SubmitChange(inputs[i])
+      }
+
+      function SubmitChange(element) {
+
+          var self = this;
+          self.input = element;
+
+          inputs[i].addEventListener('change', function(e) {
+
+              var search = buildURLSearch();
+              if (search !== "") {
+                  search = "?" + search
+              }
+              window.location.search = search;
+          });
+      }
+
+      function buildURLSearch() {
+
+          var search = "";
+
+          var inputs = document.getElementsByClassName('submit-change');
+          for (var i = 0; i < inputs.length; i++) {
+
+              if (inputs[i].type == "radio" && !inputs[i].checked) continue;
+
+              if (i > 0) search += "&";
+
+              search += inputs[i].name + "=" + inputs[i].value;
+
+          }
+          return search;
+      }
+
+
+  });
+})();
 </script>
 {{template "footer"}}
