@@ -170,7 +170,7 @@ func (pc *NodeController) postNodeAddEc2Action(c *gin.Context) {
 		UserData: []byte(fmt.Sprintf(`#!/bin/bash
 sudo apt-get update && \
 sudo apt-get install -y curl && \
-curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | bash`, basicAuth, env.Get("PUBLIC_HOST"))),
+curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | sudo -i -u admin bash`, basicAuth, env.Get("PUBLIC_HOST"))),
 		AvailabilityZone: "eu-west-1c", // Waiting for https://github.com/goamz/goamz/pull/112
 		// PlacementGroupName     :  string
 		Tenancy:    "default",
