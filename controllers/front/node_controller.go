@@ -294,7 +294,7 @@ func (pc *NodeController) postNodeAddDOAction(c *gin.Context) {
 			Name:      "karhu",
 			PublicKey: string(publicKey),
 		})
-		if err != nil && strings.Contains(err.Error(), "SSH Key is already in use on your account") {
+		if err != nil && !strings.Contains(err.Error(), "SSH Key is already in use on your account") {
 			panic(err)
 		}
 	}
