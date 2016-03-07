@@ -273,6 +273,7 @@ func (pc *NodeController) postNodeAddDOAction(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
+	log.Println("keyFingerprint:", keyFingerprint)
 
 	oauthClient := oauth2.NewClient(oauth2.NoContext, &DOTokenSource{
 		AccessToken: a.AccessKey,
@@ -304,7 +305,7 @@ func (pc *NodeController) postNodeAddDOAction(c *gin.Context) {
 		Region:            form.Region,
 		Size:              form.InstanceType,
 		Image:             godo.DropletCreateImage{Slug: "debian-8-x64"},
-		SSHKeys:           []godo.DropletCreateSSHKey{{Fingerprint: key.Fingerprint}},
+		SSHKeys:           []godo.DropletCreateSSHKey{{Fingerprint: keyFingerprint}},
 		Backups:           form.Backups == "on",
 		IPv6:              form.IpV6 == "on",
 		PrivateNetworking: form.PrivateNetwork == "on",
