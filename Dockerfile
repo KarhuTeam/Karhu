@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM ubuntu:wily
 MAINTAINER max@wayt.me
 
 # Golang path
