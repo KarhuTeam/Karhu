@@ -308,10 +308,19 @@ func (pc *NodeController) postNodeAddDOAction(c *gin.Context) {
 		Backups:           form.Backups == "on",
 		IPv6:              form.IpV6 == "on",
 		PrivateNetworking: form.PrivateNetwork == "on",
-		UserData: fmt.Sprintf(`#!/bin/bash
-sudo apt-get update && \
-sudo apt-get install -y curl && \
-curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | sudo -i -u admin bash`, basicAuth, env.Get("PUBLIC_HOST")),
+		// 		UserData: fmt.Sprintf(`#!/bin/bash
+		// sudo apt-get update && \
+		// sudo apt-get install -y curl && \
+		// curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | bash`, basicAuth, env.Get("PUBLIC_HOST")),
+		UserData: fmt.Sprintf(`#cloud-config
+repo_update: true
+repo_upgrade: all
+
+packages:
+ - curl
+
+runcmd:
+ - curl %s"%s/api/nodes/register.sh?monit=1&ssh_port=22" | bash`, basicAuth, env.Get("PUBLIC_HOST")),
 	}); err != nil {
 		panic(err)
 	}
