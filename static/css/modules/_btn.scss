@@ -42,3 +42,30 @@
     font-weight: bold;
   }
 }
+
+.btn-picture {
+    display:inline-block;
+    background: $blue;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 3px;
+
+    img {
+        width: 80px;
+    }
+
+    &:hover {
+        background-color: $dark-blue;
+    }
+
+    &.is-selected {
+        border: 2px solid #a0c745;
+        padding: 3px;
+    }
+}
+
+@media screen and (min-width: $large) {
+    .btn-picture img {
+        width: auto;
+    }
+}

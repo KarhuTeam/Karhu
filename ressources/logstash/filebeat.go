@@ -29,7 +29,7 @@ func GetFilebeatConfig() ([]byte, error) {
 
 func ReadAuthfile() (string, string, error) {
 
-	data, err := ioutil.ReadFile(env.GetDefault("LOGSTASH_AUTHFILE", "./logstash/authfile"))
+	data, err := ioutil.ReadFile(env.GetDefault("LOGSTASH_AUTHFILE", "./logstash/certs/authfile"))
 	if err != nil {
 		return "", "", err
 	}

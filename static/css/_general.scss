@@ -27,6 +27,20 @@ input[type=text], textarea {
     border-radius: 3px;
 }
 
+select {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    border: 0;
+    background-color: $gray;
+    color: $light-gray;
+    padding: 7px 38px 7px 8px;
+    border-radius: 3px;
+    appearance:none;
+    -moz-appearance:none; /* Firefox */
+    -webkit-appearance:none;
+    background: url(../img/arrow.png) $gray no-repeat right;
+}
+
 pre {
     padding: 20px;
     background: $gray;

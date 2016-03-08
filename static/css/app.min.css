@@ -28,6 +28,20 @@ input[type=text], textarea {
   padding: 8px;
   border-radius: 3px; }
 
+select {
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  border: 0;
+  background-color: #444;
+  color: #cdd0d2;
+  padding: 7px 38px 7px 8px;
+  border-radius: 3px;
+  appearance: none;
+  -moz-appearance: none;
+  /* Firefox */
+  -webkit-appearance: none;
+  background: url(../img/arrow.png) #444 no-repeat right; }
+
 pre {
   padding: 20px;
   background: #444;
@@ -217,6 +231,23 @@ pre {
   .btn:hover {
     cursor: pointer; }
 
+.btn-picture {
+  display: inline-block;
+  background: #305a83;
+  padding: 5px;
+  margin: 5px;
+  border-radius: 3px; }
+  .btn-picture img {
+    width: 80px; }
+  .btn-picture:hover {
+    background-color: #183b5f; }
+  .btn-picture.is-selected {
+    border: 2px solid #a0c745;
+    padding: 3px; }
+
+@media screen and (min-width: 850px) {
+  .btn-picture img {
+    width: auto; } }
 /* Form */
 .form-group {
   display: flex;

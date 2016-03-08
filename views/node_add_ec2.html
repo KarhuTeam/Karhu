@@ -1,10 +1,10 @@
 {{template "header" "infrastructure"}}
 <div class="breadcrumb">
-    <a href="/nodes">All nodes</a> &gt; Generate script to register a node
+    <a href="/nodes">All nodes</a> &gt; Create a node with Amazon EC2
 </div>
 </header>
 <main>
-    {{ template "node_add_menu" }}
+    {{ template "node_add_menu" "ec2" }}
     <div class="box">
         <h2 class="box-title">Account Access</h2>
         {{ if .AccessKey }}

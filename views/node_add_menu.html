@@ -2,14 +2,14 @@
 <div class="box">
   <h2 class="box-title">Provider</h2>
   <center>
-    <a href="/node/add" class="btn">
-        Custom
+    <a href="/node/add" class="btn-picture{{ if eq . "custom" }} is-selected{{ end }}">
+        <img src="/static/img/node/custom.png" />
     </a>
-    <a href="/node/add/ec2" class="btn">
-        AWS EC2
+    <a href="/node/add/ec2" class="btn-picture{{ if eq . "ec2" }} is-selected{{ end }}">
+        <img src="/static/img/node/ec2.png" />
     </a>
-    <a href="/node/add/do" class="btn">
-        DigitalOcean
+    <a href="/node/add/do" class="btn-picture{{ if eq . "digitalocean" }} is-selected{{ end }}">
+        <img src="/static/img/node/digitalocean.png" />
     </a>
 </center>
 </div>
