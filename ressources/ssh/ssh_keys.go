@@ -105,5 +105,5 @@ func GetPublicKey() ([]byte, error) {
 func GetFingerprint() (string, error) {
 	command := fmt.Sprintf("ssh-keygen -E md5 -lf %s | awk '{print $2}' | sed 's/MD5://'", publicKeyPath())
 	out, err := exec.Command("sh", "-c", command).CombinedOutput()
-	return string(out), err
+	return strings.Trim(string(out), "\r\n "), err
 }

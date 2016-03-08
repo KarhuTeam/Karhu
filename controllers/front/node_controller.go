@@ -273,7 +273,6 @@ func (pc *NodeController) postNodeAddDOAction(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	log.Println("keyFingerprint:", keyFingerprint)
 
 	oauthClient := oauth2.NewClient(oauth2.NoContext, &DOTokenSource{
 		AccessToken: a.AccessKey,
