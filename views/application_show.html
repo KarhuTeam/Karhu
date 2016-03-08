@@ -13,6 +13,9 @@
     <ul class="box-list">
         <li><span class="box-list-label">Tags :</span> {{range $tag := .application.Tags}}<span class="label">{{$tag}}</span> {{else}}n/a{{end}}</li>
         <li><span class="box-list-label">Dependencies :</span> {{range $dep := .application.Deps}}<a href="/application/show/{{$dep.Name}}"><span class="label">{{$dep.Name}}</span></a> {{else}}n/a{{end}}</li>
+        {{ if eq .application.Type "docker" }}
+        <li><span class="box-list-label">Image :</span> {{ (index $.builds 0).RuntimeCfg.Docker.Image }}</li>
+        {{ end }}
     </ul>
   </div>
   <div class="box-col">

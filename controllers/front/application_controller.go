@@ -25,6 +25,12 @@ func NewApplicationController(s *web.Server) *ApplicationController {
 	// 3 - Add an application
 	s.GET("/application/add", ctl.getAddApplicationAction)
 	s.POST("/application/add", ctl.postAddApplicationAction)
+	// Add an application - service
+	s.GET("/application/add/service", ctl.getAddApplicationServiceAction)
+	s.POST("/application/add/service", ctl.postAddApplicationServiceAction)
+	// Add an application - docker
+	s.GET("/application/add/docker", ctl.getAddApplicationDockerAction)
+	s.POST("/application/add/docker", ctl.postAddApplicationDockerAction)
 	// 4 - Edit an application
 	s.GET("/application/edit/:id", ctl.getEditApplicationAction)
 	s.POST("/application/edit/:id", ctl.postEditApplicationAction)
@@ -160,6 +166,104 @@ func (ctl *ApplicationController) getApplicationAction(c *gin.Context) {
 	})
 }
 
+func (ctl *ApplicationController) getAddApplicationServiceAction(c *gin.Context) {
+
+	c.HTML(http.StatusOK, "application_add_service.html", nil)
+}
+
+func (ctl *ApplicationController) postAddApplicationServiceAction(c *gin.Context) {
+
+	var form models.ApplicationCreateForm
+	if err := c.Bind(&form); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if err := form.Validate(); err != nil {
+		fmt.Println(err.Errors)
+		c.HTML(http.StatusOK, "application_add_service.html", map[string]interface{}{
+			"errors": err.Errors,
+			"form":   form,
+		})
+		return
+	}
+
+	application := models.ApplicationMapper.Create(&form)
+
+	if application.Type != models.APPLICATION_TYPE_SERVICE {
+		c.HTML(http.StatusOK, "application_add_service.html", map[string]interface{}{
+			"errors": errors.New(errors.Error{
+				Label: "invalid_type",
+				Field: "type",
+				Text:  "Invalid application type",
+			}).Errors,
+			"form": form,
+		})
+		return
+	}
+
+	build := models.BuildMapper.CreateService(application, form.Packages)
+
+	if err := models.BuildMapper.Save(build); err != nil {
+		panic(err)
+	}
+
+	if err := models.ApplicationMapper.Save(application); err != nil {
+		panic(err)
+	}
+
+	c.Redirect(http.StatusFound, "/")
+}
+
+func (ctl *ApplicationController) getAddApplicationDockerAction(c *gin.Context) {
+
+	c.HTML(http.StatusOK, "application_add_docker.html", nil)
+}
+
+func (ctl *ApplicationController) postAddApplicationDockerAction(c *gin.Context) {
+
+	var form models.ApplicationCreateForm
+	if err := c.Bind(&form); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if err := form.Validate(); err != nil {
+		fmt.Println(err.Errors)
+		c.HTML(http.StatusOK, "application_add_docker.html", map[string]interface{}{
+			"errors": err.Errors,
+			"form":   form,
+		})
+		return
+	}
+
+	application := models.ApplicationMapper.Create(&form)
+
+	if application.Type != models.APPLICATION_TYPE_DOCKER {
+		c.HTML(http.StatusOK, "application_add_docker.html", map[string]interface{}{
+			"errors": errors.New(errors.Error{
+				Label: "invalid_type",
+				Field: "type",
+				Text:  "Invalid application type",
+			}).Errors,
+			"form": form,
+		})
+		return
+	}
+
+	build := models.BuildMapper.CreateDocker(application, &form.ApplicationDockerForm)
+
+	if err := models.BuildMapper.Save(build); err != nil {
+		panic(err)
+	}
+
+	if err := models.ApplicationMapper.Save(application); err != nil {
+		panic(err)
+	}
+
+	c.Redirect(http.StatusFound, "/")
+}
+
 /**
  * 3 - Add an application
  */
@@ -187,14 +291,16 @@ func (ctl *ApplicationController) postAddApplicationAction(c *gin.Context) {
 
 	application := models.ApplicationMapper.Create(&form)
 
-	if application.Type == models.APPLICATION_TYPE_SERVICE {
-
-		build := models.BuildMapper.CreateService(application, form.Packages)
-
-		if err := models.BuildMapper.Save(build); err != nil {
-			panic(err)
-		}
-
+	if application.Type != models.APPLICATION_TYPE_APP {
+		c.HTML(http.StatusOK, "application_add_service.html", map[string]interface{}{
+			"errors": errors.New(errors.Error{
+				Label: "invalid_type",
+				Field: "type",
+				Text:  "Invalid application type",
+			}).Errors,
+			"form": form,
+		})
+		return
 	}
 
 	if err := models.ApplicationMapper.Save(application); err != nil {
@@ -223,7 +329,8 @@ func (ctl *ApplicationController) getEditApplicationAction(c *gin.Context) {
 	form.Hydrate(application)
 
 	c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
-		"form": form,
+		"form":        form,
+		"application": application,
 	})
 }
 
@@ -248,8 +355,9 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 	if err := form.Validate(application); err != nil {
 		fmt.Println(err.Errors)
 		c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
-			"errors": err.Errors,
-			"form":   form,
+			"errors":      err.Errors,
+			"form":        form,
+			"application": application,
 		})
 		return
 	}
@@ -266,7 +374,8 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 					Field: "packages",
 					Text:  "Invalid packages count, min 1",
 				}).Errors,
-				"form": form,
+				"form":        form,
+				"application": application,
 			})
 			return
 		}
@@ -281,6 +390,35 @@ func (ctl *ApplicationController) postEditApplicationAction(c *gin.Context) {
 		}
 
 		build.RuntimeCfg.Dependencies = build.RuntimeCfg.Dependencies.FromString(form.Packages)
+
+		if err := models.BuildMapper.Update(build); err != nil {
+			panic(err)
+		}
+	} else if application.Type == models.APPLICATION_TYPE_DOCKER {
+		if len(form.Image) == 0 {
+			c.HTML(http.StatusOK, "application_edit.html", map[string]interface{}{
+				"errors": errors.New(errors.Error{
+					Label: "invalid_image",
+					Field: "image",
+					Text:  "Invalid image",
+				}).Errors,
+				"form":        form,
+				"application": application,
+			})
+			return
+		}
+
+		build, err := models.BuildMapper.FetchLast(application)
+		if err != nil {
+			panic(err)
+		}
+
+		if build == nil {
+			panic("No last build for service: " + application.Name)
+		}
+
+		tmpBuild := models.BuildMapper.CreateDocker(application, &form.ApplicationDockerForm)
+		build.RuntimeCfg.Docker = tmpBuild.RuntimeCfg.Docker
 
 		if err := models.BuildMapper.Update(build); err != nil {
 			panic(err)

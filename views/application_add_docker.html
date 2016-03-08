@@ -1,9 +1,10 @@
 {{template "header" "applications"}}
 <div class="breadcrumb">
-    <a href="/">All applications</a> &gt; Edit application {{.form.Name}}
+    <a href="/">All applications</a> &gt; Add an application
 </div>
 </header>
 <main>
+    {{ template "application_add_menu" }}
     <form method="POST" action="">
         <div class="box">
             <h2 class="box-title">Add an application</h2>
@@ -25,10 +26,8 @@
             <div class="form-group">
                 <label for="app-tags">Tags :</label>
                 <div class="form-control form-tag">
-                    <div class="form-control form-tag">
-                        <div class="form-tag-list">
-                            {{range $tag := .form.Tags}}<span class="form-tag-item"><input type="text" name="tags[]" readonly="" value="{{$tag}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="tags" type="text" placeholder="Add a tag..." />
-                        </div>
+                    <div class="form-tag-list">
+                        {{range $tag := .form.Tags}}<span class="form-tag-item"><input type="text" name="tags[]" readonly="" value="{{$tag}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="tags" type="text" placeholder="Add a tag..." />
                     </div>
                 </div>
             </div>
@@ -42,28 +41,12 @@
                     </div>
                 </div>
             </div>
-            {{ if eq $.application.Type "service" }}
-            <div class="form-group">
-                <label for="app-packages">Packages :</label>
-                <div class="form-control form-tag">
-                    <div class="form-tag-list">
-                        {{range $pkg := .form.Packages}}<span class="form-tag-item"><input type="text" name="packages[]" readonly="" value="{{$pkg}}" /><button>x</button></span>{{end}}<input class="form-control form-tag-add" data-name="packages" type="text" placeholder="Add a package..." />
-                    </div>
-                </div>
-            </div>
-            {{ end }}
-            {{ if ne $.application.Type "docker" }}
-            <div class="text-center">
-                <button class="btn" type="submit">Add application</button>
-            </div>
-            {{ end }}
         </div>
-        {{ if eq $.application.Type "docker" }}
         <div class="box">
             <h2 class="box-title">Container</h2>
             <div class="form-group">
                 <label for="image">Image :</label>
-                <input class="form-control" id="image" name="image" type="text" placeholder="ubuntu:latest..." {{ if .form }} value="{{ .form.Image }}" {{ end }} />
+                <input class="form-control" id="image" name="image" type="text" placeholder="ubuntu:latest..." {{ if .form }} value="{{.form.Image}}" {{ end }} />
             </div>
             <div class="form-group">
                 <label for="pull">Always Pull :</label>
@@ -82,17 +65,6 @@
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
                     <button type="button" class="btn form-var-add">ADD</button>
-                    {{ range $i, $osef := .form.PortsHost }}
-                    <div class="">
-                        <input name="ports-host[]" type="text" placeholder="Public (on Host)" value="{{ index $.form.PortsHost $i}}"/>
-                        <input name="ports-container[]" type="text" placeholder="Private (in Container)" value="{{ index $.form.PortsContainer $i}}"/>
-                        <select name="ports-proto[]">
-                            <option value="tcp" {{ if eq (index $.form.PortsProto $i) "tcp"}}selected="selected"{{ end }}>tcp</option>
-                            <option value="udp" {{ if eq (index $.form.PortsProto $i) "udp"}}selected="selected"{{ end }}>udp</option>
-                        </select>
-                        <button type="button" class="btn form-var-remove">X</button>
-                    </div>
-                    {{ end }}
                 </div>
             </div>
             <div class="form-group">
@@ -104,14 +76,6 @@
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
                     <button type="button" class="btn form-var-add">ADD</button>
-                    {{ range $i, $osef := .form.VolumesContainer }}
-                    <div class="">
-                        <input data-name="volumes-host[]" type="text" placeholder="On Host" value="{{ index $.form.VolumesHost $i}}"/>
-                        <input data-name="volumes-container[]" type="text" placeholder="In Container" value="{{ index $.form.VolumesContainer $i}}"/>
-                        <button type="button" class="btn form-var-remove">X</button>
-                    </div>
-                    <button type="button" class="btn form-var-add">ADD</button>
-                    {{ end }}
                 </div>
             </div>
             <div class="form-group">
@@ -123,13 +87,6 @@
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
                     <button type="button" class="btn form-var-add">ADD</button>
-                    {{ range $i, $osef := .form.VolumesContainer }}
-                    <div class="">
-                        <input data-name="links-container[]" type="text" placeholder="Container"/ value="{{ index $.form.LinksContainer $i}}">
-                        <input data-name="links-alias[]" type="text" placeholder="Alias" value="{{ index $.form.LinksAlias $i }}"/>
-                        <button type="button" class="btn form-var-remove">X</button>
-                    </div>
-                    {{ end }}
                 </div>
             </div>
             <div class="form-group">
@@ -141,29 +98,21 @@
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
                     <button type="button" class="btn form-var-add">ADD</button>
-                    {{ range $i, $osef := .form.EnvKey }}
-                    <div class="form-var-template is-hidden">
-                        <input data-name="env-key[]" type="text" placeholder="KEY" value="{{ index $.form.EnvKey $i}}"/>
-                        <input data-name="env-value[]" type="text" placeholder="value" value="{{ index $.form.EnvValue $i}}"/>
-                        <button type="button" class="btn form-var-remove">X</button>
-                    </div>
-                    {{ end }}
                 </div>
             </div>
             <div class="form-group">
                 <label for="restart">Auto Restart :</label>
                 <select id="restart" name="restart">
-                    <option value="no" {{ if eq .form.AutoRestart "no" }}selected="selected"{{ end }}>no</option>
-                    <option value="on-failure" {{ if eq .form.AutoRestart "on-failure" }}selected="selected"{{ end }}>on-failure</option>
-                    <option value="always" {{ if eq .form.AutoRestart "always" }}selected="selected"{{ end }}>always</option>
-                    <option value="unless-stopped" {{ if eq .form.AutoRestart "unless-stopped" }}selected="selected"{{ end }}>unless-stopped</option>
+                    <option value="no">no</option>
+                    <option value="on-failure">on-failure</option>
+                    <option value="always">always</option>
+                    <option value="unless-stopped">unless-stopped</option>
                 </select>
             </div>
             <div class="text-center">
                 <button class="btn" type="submit">Add Docker</button>
             </div>
         </div>
-        {{ end }}
     </form>
 </main>
 {{template "footer"}}

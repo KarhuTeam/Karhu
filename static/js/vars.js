@@ -18,7 +18,7 @@
         self.template = self.form.getElementsByClassName('form-var-template')[0];
 
         // Add button
-        var actionButton = document.getElementsByClassName('form-var-add')[0];
+        var actionButton = self.form.getElementsByClassName('form-var-add')[0];
         if (actionButton !== null)
           //Append new group of inputs when "+" button is clicked
           actionButton.addEventListener('click', function(e) {
@@ -34,7 +34,7 @@
                 inputs[i].setAttribute('name', inputs[i].getAttribute('data-name'));
             }
             var selects = node.getElementsByTagName('select');
-            for (var i = 0; i < inputs.length; i++) {
+            for (var i = 0; i < selects.length; i++) {
                 selects[i].setAttribute('name', selects[i].getAttribute('data-name'));
             }
 

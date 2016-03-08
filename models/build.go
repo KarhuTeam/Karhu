@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/gotoolz/errors"
 	"github.com/karhuteam/karhu/ressources/file"
 	"gopkg.in/mgo.v2"
@@ -172,6 +173,53 @@ func (bm *buildMapper) CreateService(app *Application, packages []string) *Build
 
 	rtmcfg := new(RuntimeConfiguration)
 	rtmcfg.Dependencies = rtmcfg.Dependencies.FromString(packages)
+
+	return &Build{
+		Id:            bson.NewObjectId(),
+		ApplicationId: app.Id,
+		CreatedAt:     time.Now(),
+		RuntimeCfg:    rtmcfg,
+	}
+}
+
+func (bm *buildMapper) CreateDocker(app *Application, form *ApplicationDockerForm) *Build {
+
+	pull := "missing"
+	if form.Pull == "on" {
+		pull = "always"
+	}
+
+	var ports []string
+	for i := range form.PortsHost {
+		ports = append(ports, fmt.Sprintf("%s:%s/%s", form.PortsHost[i], form.PortsContainer[i], form.PortsProto[i]))
+	}
+
+	var volumes []string
+	for i := range form.VolumesContainer {
+		volumes = append(volumes, fmt.Sprintf("%s:%s", form.VolumesHost[i], form.VolumesContainer[i]))
+	}
+
+	var links []string
+	for i := range form.LinksContainer {
+		links = append(links, fmt.Sprintf("%s:%s", form.LinksContainer[i], form.LinksAlias[i]))
+	}
+
+	var env []string
+	for i := range form.EnvKey {
+		env = append(env, fmt.Sprintf("%s: %s", form.EnvKey[i], form.EnvValue[i]))
+	}
+
+	rtmcfg := new(RuntimeConfiguration)
+	rtmcfg.Docker = DockerConfiguration{
+		Name:    app.Name,
+		Image:   form.Image,
+		Pull:    pull,
+		Ports:   ports,
+		Volumes: volumes,
+		Links:   links,
+		Env:     env,
+		Restart: form.AutoRestart,
+	}
 
 	return &Build{
 		Id:            bson.NewObjectId(),

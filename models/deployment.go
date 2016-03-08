@@ -224,7 +224,7 @@ func (d *Deployment) Run() {
 
 func (d *Deployment) extractArchive(workdir string) error {
 
-	if d.Application.Type == APPLICATION_TYPE_SERVICE {
+	if d.Application.Type != APPLICATION_TYPE_APP {
 		return nil
 	}
 
@@ -282,6 +282,9 @@ func (d *Deployment) Playbook() (*ansible.Playbook, error) {
 	}
 	if len(d.Build.RuntimeCfg.Dependencies) > 0 {
 		setupDependenciesRole(role, d)
+	}
+	if len(d.Build.RuntimeCfg.Docker.Image) > 0 {
+		setupDockerRole(role, d)
 	}
 
 	// Check for application configs

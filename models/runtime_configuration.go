@@ -10,6 +10,17 @@ const (
 	KARHU_DEFAULT_RUNTIME_USER         = "root"
 )
 
+type DockerConfiguration struct {
+	Name    string   `yml:"name" bson:"name"`
+	Image   string   `yml:"image" bson:"image"`
+	Pull    string   `yml:"pull" bson:"pull"`
+	Ports   []string `yml:"ports" bson:"ports"`
+	Volumes []string `yml:"volumes" bson:"volumes"`
+	Links   []string `yml:"links" bson:"links"`
+	Env     []string `yml:"env" bson:"env"`
+	Restart string   `yml:"restart" bson:"restart"`
+}
+
 type BinaryConfiguration struct {
 	User string `yml:"user" bson:"user"`
 	Bin  string `yml:"bin" bson:"bin"`
@@ -56,6 +67,7 @@ type RuntimeConfiguration struct {
 	Binary       *BinaryConfiguration       `yml:"binary" bson:"binary"`
 	Static       []*StaticConfiguration     `yml:"static" bson:"static"`
 	Dependencies DependenciesConfigurations `yml:"dependencies" bson:"dependencies"`
+	Docker       DockerConfiguration        `yml:"docker" bson:"docker"`
 }
 
 func (c *RuntimeConfiguration) isValid() error {

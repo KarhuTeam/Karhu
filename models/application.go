@@ -19,10 +19,11 @@ const applicationCollection = "application"
 const (
 	APPLICATION_TYPE_APP     string = "app"
 	APPLICATION_TYPE_SERVICE        = "service"
+	APPLICATION_TYPE_DOCKER         = "docker"
 )
 
 var slugRegexp = regexp.MustCompile(`^[0-9a-z\-]+$`)
-var appTypes = []string{APPLICATION_TYPE_APP, APPLICATION_TYPE_SERVICE}
+var appTypes = []string{APPLICATION_TYPE_APP, APPLICATION_TYPE_SERVICE, APPLICATION_TYPE_DOCKER}
 
 // Slug name validator
 func init() {
@@ -109,6 +110,7 @@ func (tf TagsFilter) Query(key string) string {
 
 // Application creation form
 type ApplicationCreateForm struct {
+	ApplicationDockerForm
 	Name        string   `form:"name" json:"name" valid:"slug,required"`
 	Description string   `form:"description" json:"description" valid:"ascii"`
 	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
@@ -155,8 +157,25 @@ func (f ApplicationCreateForm) Validate() *errors.Errors {
 	return nil
 }
 
+type ApplicationDockerForm struct {
+	// Docker
+	Image            string   `form:"image" json:"image" valid:"-"`
+	Pull             string   `form:"pull" json:"pull" valid:"-"`
+	PortsHost        []string `form:"ports-host[]" json:"ports-host" valid:"-"`
+	PortsContainer   []string `form:"ports-container[]" json:"ports-container" valid:"-"`
+	PortsProto       []string `form:"ports-proto[]" json:"ports-proto" valid:"-"`
+	VolumesHost      []string `form:"volumes-host[]" json:"volumes-host" valid:"-"`
+	VolumesContainer []string `form:"volumes-container[]" json:"volumes-container" valid:"-"`
+	LinksContainer   []string `form:"links-container[]" json:"links-container" valid:"-"`
+	LinksAlias       []string `form:"links-alias[]" json:"links-alias" valid:"-"`
+	EnvKey           []string `form:"env-key[]" json:"env-key" valid:"-"`
+	EnvValue         []string `form:"env-value[]" json:"env-value" valid:"-"`
+	AutoRestart      string   `form:"restart" json:"restart" valid:"-"`
+}
+
 // Application update form
 type ApplicationUpdateForm struct {
+	ApplicationDockerForm
 	Name        string   `form:"name" json:"name" valid:"slug,required"`
 	Description string   `form:"description" json:"description" valid:"ascii"`
 	Tags        []string `form:"tags[]" json:"tags" valid:"-"`
@@ -187,6 +206,47 @@ func (f *ApplicationUpdateForm) Hydrate(a *Application) {
 		}
 
 		f.Packages = build.RuntimeCfg.Dependencies.ToString()
+	} else if a.Type == APPLICATION_TYPE_DOCKER {
+
+		build, err := BuildMapper.FetchLast(a)
+		if err != nil {
+			panic(err)
+		}
+
+		if build == nil {
+			panic("no build for application: " + a.Name)
+		}
+
+		f.Image = build.RuntimeCfg.Docker.Image
+		f.Pull = ""
+		if build.RuntimeCfg.Docker.Pull == "always" {
+			f.Pull = "on"
+		}
+		for _, port := range build.RuntimeCfg.Docker.Ports {
+			cfg := strings.SplitN(port, ":", 2)
+			f.PortsHost = append(f.PortsHost, cfg[0])
+			p := strings.SplitN(cfg[1], "/", 2)
+			f.PortsContainer = append(f.PortsContainer, p[0])
+			f.PortsProto = append(f.PortsProto, p[1])
+		}
+
+		for _, volume := range build.RuntimeCfg.Docker.Volumes {
+			cfg := strings.SplitN(volume, ":", 2)
+			f.VolumesHost = append(f.VolumesHost, cfg[0])
+			f.VolumesContainer = append(f.VolumesContainer, cfg[1])
+		}
+		for _, link := range build.RuntimeCfg.Docker.Links {
+			cfg := strings.SplitN(link, ":", 2)
+			f.LinksContainer = append(f.LinksContainer, cfg[0])
+			f.LinksAlias = append(f.LinksAlias, cfg[1])
+		}
+		for _, env := range build.RuntimeCfg.Docker.Env {
+			cfg := strings.SplitN(env, ":", 2)
+			f.EnvKey = append(f.EnvKey, cfg[0])
+			f.EnvValue = append(f.EnvValue, strings.TrimSpace(cfg[1]))
+		}
+
+		f.AutoRestart = build.RuntimeCfg.Docker.Restart
 	}
 }
 
@@ -245,6 +305,8 @@ func (am *applicationMapper) Create(f *ApplicationCreateForm) *Application {
 	typ := APPLICATION_TYPE_APP
 	if len(f.Packages) > 0 {
 		typ = APPLICATION_TYPE_SERVICE
+	} else if len(f.Image) > 0 {
+		typ = APPLICATION_TYPE_DOCKER
 	}
 
 	return &Application{
