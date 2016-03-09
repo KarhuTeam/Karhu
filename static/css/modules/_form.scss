@@ -20,6 +20,30 @@
     }
 }
 
+.form-radio {
+    margin-bottom: 10px;
+    label > span {
+        display: inline-block;
+        background: $gray;
+        padding: 0 8px;
+        border-radius: 3px;
+        &::before {
+            content: '❍ ';
+            font-size: 16px;
+        }
+    }
+    input[type=radio] {
+        display: none;
+    }
+    input[type=radio]:checked + span {
+        background: $blue;
+
+        &::before {
+            content: '✓ ';
+        }
+    }
+}
+
 .form-tag {
     &-item {
         input {
@@ -34,5 +58,12 @@
             margin: 0 4px 4px 0;
             color: #fff;
         }
+    }
+}
+
+.form-var {
+
+    &-item {
+        margin-bottom: 10px;
     }
 }

@@ -38,39 +38,50 @@
         </div>
       </div>
 
-      <div class="form-group tab">
-        <label for="cond-tab-menu">Check :</label>
-        <div class='tab-content'>
-            <label for="cond-nagios-plugin">Proto:</label>
+      <div class="form-group">
+        <label for="cond-tab-menu">Check type :</label>
+        <div class='form-control'>
             <select id="cond-nagios-plugin" name="cond-nagios-plugin">
                 <option value="">Choose a check</option>
                 {{ range .NagiosPlugins }}
                 <option value="{{ . }}" {{ if $.form }}{{ if eq $.form.NagiosPlugin .}}selected="selected"{{ end }}{{ end }}>{{ . }}</option>
                 {{ end }}
             </select>
-
-            <label for="cond-nagios-params">Params:</label>
-            <input class="form-control" type="text" id="cond-nagios-params" name="cond-nagios-params" {{ if .form }} value="{{ .form.NagiosParams }}"{{ end }} />
         </div>
+      </div>
+      <div class="form-group">
+        <label for="cond-nagios-params">Check params:</label>
+        <input class="form-control" type="text" id="cond-nagios-params" name="cond-nagios-params" {{ if .form }} value="{{ .form.NagiosParams }}"{{ end }} />
       </div>
 
       <div class="form-group tab">
           <label for="cond-target-menu">Target</label>
-          <div id="cond-target-menu" class="tab-menu">
-              <label for="target-karhu-radio">From Karhu</label>
-              <input type="radio" name="target-type" id="target-karhu-radio" value="target-karhu" {{ if .form }}{{ if eq .form.TargetType "target-karhu" }}checked="checked"{{ end }}{{ end }}/>
-              <label for="target-tags-radio">Tags</label>
-              <input type="radio" name="target-type" id="target-tags-radio" value="target-tag" {{ if .form }}{{ if eq .form.TargetType "target-tag" }}checked="checked"{{ end }}{{ end }}/>
-              <label for="target-node-radio">Node</label>
-              <input type="radio" name="target-type" id="target-node-radio" value="target-node" {{ if .form }}{{ if eq .form.TargetType "target-node" }}checked="checked"{{ end }}{{ end }}/>
-              <label for="target-all-radio">All</label>
-              <input type="radio" name="target-type" id="target-all-radio" value="target-all" {{ if .form }}{{ if eq .form.TargetType "target-all" }}checked="checked"{{ end }}{{ end }}/>
+          <div class="form-control">
+          <div id="cond-target-menu" class="tab-menu form-radio form-control">
+              <label for="target-karhu-radio">
+                  <input type="radio" name="target-type" id="target-karhu-radio" value="target-karhu" {{ if .form }}{{ if eq .form.TargetType "target-karhu" }}checked="checked"{{ end }}{{ end }}/>
+                  <span>From Karhu</span>
+              </label>
+              <label for="target-tags-radio">
+                  <input type="radio" name="target-type" id="target-tags-radio" value="target-tag" {{ if .form }}{{ if eq .form.TargetType "target-tag" }}checked="checked"{{ end }}{{ end }}/>
+                  <span>Tags</span>
+              </label>
+              <label for="target-node-radio">
+                  <input type="radio" name="target-type" id="target-node-radio" value="target-node" {{ if .form }}{{ if eq .form.TargetType "target-node" }}checked="checked"{{ end }}{{ end }}/>
+                  <span>Node</span>
+              </label>
+              <label for="target-all-radio">
+                  <input type="radio" name="target-type" id="target-all-radio" value="target-all" {{ if .form }}{{ if eq .form.TargetType "target-all" }}checked="checked"{{ end }}{{ end }}/>
+                  <span>All</span>
+              </label>
           </div>
           <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-karhu" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-karhu">
+              <div class="alert alert-info">
+                  No params needed
+              </div>
           </div>
           <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-tag" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-tag">
-              <label for="target-tag-tags">Tags :</label>
-              <div id="target-tag-tags" class="form-control form-tag">
+              <div id="target-tag-tags" class="form-tag">
                   <div class="form-control form-tag">
                     <div class="form-tag-list">
                         {{ if .form }}{{ range $tag := .form.TargetTagTags }}<span class="form-tag-item"><input type="text" name="target-tag-tags[]" readonly="" value="{{ $tag }}" /><button>x</button></span>{{end}}{{ end }}
@@ -80,7 +91,6 @@
               </div>
           </div>
           <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-node" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-node">
-              <label for="target-node-nodes">Nodes :</label>
               <div id="target-node-nodes" class="form-control form-tag">
                   <div class="form-control form-tag">
                     <div class="form-tag-list">
@@ -91,7 +101,11 @@
               </div>
           </div>
           <div class='tab-content {{ if .form }}{{ if ne .form.TargetType "target-all" }}is-hidden{{ end }}{{ else }}is-hidden{{ end }}' id="target-all">
+              <div class="alert alert-info">
+                  No params needed
+              </div>
           </div>
+      </div>
       </div>
 
       <div class="form-group">

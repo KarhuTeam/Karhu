@@ -17,6 +17,14 @@
         // Form template
         self.template = self.form.getElementsByClassName('form-var-template')[0];
 
+        // Form var-removefire
+        var varRemoves = self.form.getElementsByClassName('form-var-remove');
+        for (var i = 0; i < varRemoves.length; i++) {
+            varRemoves[i].addEventListener('click', function() {
+                this.parentNode.parentNode.removeChild(this.parentNode);
+            });
+        }
+
         // Add button
         var actionButton = self.form.getElementsByClassName('form-var-add')[0];
         if (actionButton !== null)
@@ -28,6 +36,7 @@
             var node = self.template.cloneNode(true);
             node.classList.remove('is-hidden');
             node.classList.remove('form-var-template');
+            node.classList.add('form-var-item');
 
             var inputs = node.getElementsByTagName('input');
             for (var i = 0; i < inputs.length; i++) {
@@ -43,12 +52,12 @@
             if (btn !== null ) {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    node.parentNode.removeChild(node);
+                    this.parentNode.parentNode.removeChild(this.parentNode);
                 });
             }
 
             // Add node
-            self.form.appendChild(node);
+            self.form.insertBefore(node, actionButton);
         });
     }
   });

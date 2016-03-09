@@ -38,7 +38,7 @@
         <div class="box">
             <h2 class="box-title">Availability zone & VPC</h2>
             <div class="form-group">
-                <label for="availability_zone">Availability zone:</label>
+                <label for="availability_zone">Availability zone :</label>
                 <select class="submit-change" id="availability_zone" name="availability_zone">
                     {{ range .AWSRegions }}
                     <option value="{{ .Name }}" {{ if eq $.query.availability_zone .Name }}selected="selected"{{ end }}>{{ .Name }}</option>
@@ -47,11 +47,15 @@
             </div>
             {{ if .VPCs }}
             <div class="form-group">
-                <label for="vpc">VPC:</label>
+                <label for="vpc">VPC :</label>
+                <div class="form-control form-radio">
                 {{ range .VPCs }}
-                <input class="submit-change" type="radio" name="vpc" id="{{ .VpcId }}" value="{{ .VpcId }}" {{ if eq $.query.vpc .VpcId }}checked="checked"{{ end }}/>
-                <label for="{{ .VpcId }}">{{ .VpcId }} {{ range .Tags }}{{ if eq .Key "Name" }} ({{ .Value }}){{ end }}{{ end }}</label>
+                <label for="{{ .VpcId }}">
+                    <input class="submit-change" type="radio" name="vpc" id="{{ .VpcId }}" value="{{ .VpcId }}" {{ if eq $.query.vpc .VpcId }}checked="checked"{{ end }}/>
+                    <span>{{ .VpcId }} {{ range .Tags }}{{ if eq .Key "Name" }} ({{ .Value }}){{ end }}{{ end }}</span>
+                </label>
                 {{ end }}
+                </div>
             </div>
             {{ end }}
         </div>
@@ -59,10 +63,15 @@
         <div class="box">
             <h2 class="box-title">Security group</h2>
             <div class="form-group">
+                <label for="vpc">Group :</label>
+                <div class="form-control form-radio">
                 {{ range .SecurityGroups }}
-                <input class="submit-change" type="radio" name="security_group" id="{{ .Id }}" value="{{ .Id }}" {{ if eq $.query.security_group .Id }}checked="checked"{{ end }}/>
-                <label for="{{ .Id }}">{{ .Id }} {{ .Name }}</label>
+                <label for="{{ .Id }}">
+                    <input class="submit-change" type="radio" name="security_group" id="{{ .Id }}" value="{{ .Id }}" {{ if eq $.query.security_group .Id }}checked="checked"{{ end }}/>
+                    <span>{{ .Id }} {{ .Name }}</span>
+                </label>
                 {{ end }}
+                </div>
             </div>
         </div>
         {{ end }}
@@ -127,7 +136,9 @@
           </div>
           <div class="form-group">
               <label for="monitoring">AWS Monitoring:</label>
-              <input class="form-control" type="checkbox" id="monitoring" name="monitoring" {{ if .form }}{{ if eq .form.Monitoring "on" }}checked="checked"{{ end }}{{ end }} />
+              <div class="form-control">
+                  <input type="checkbox" id="monitoring" name="monitoring" {{ if .form }}{{ if eq .form.Monitoring "on" }}checked="checked"{{ end }}{{ end }} />
+              </div>
           </div>
           <div class="text-center">
             <button class="btn" type="submit">Create</button>

@@ -36,11 +36,9 @@
                   <input data-name="method-value[]" type="text" />
                   <button type="button" class="btn form-var-remove">X</button>
               </div>
-              <button type="button" class="btn form-var-add">ADD</button>
-
               {{ if .form }}
               {{ range $i, $type := .form.MethodType }}
-              <div class="">
+              <div class="form-var-item">
                   <select name="method-type[]">
                       <option value="email" {{ if eq $type "email" }}selected="selected"{{ end }}>Email</option>
                       <option value="slack" {{ if eq $type "slack" }}selected="selected"{{ end }}>Slack</option>
@@ -50,6 +48,7 @@
               </div>
               {{ end }}
               {{ end }}
+              <button type="button" class="btn form-var-add">Add a method</button>
           </div>
       </div>
       <div class="text-center">

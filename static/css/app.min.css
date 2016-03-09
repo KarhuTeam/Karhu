@@ -263,6 +263,23 @@ pre {
       .form-group label {
         width: 140px; } }
 
+.form-radio {
+  margin-bottom: 10px; }
+  .form-radio label > span {
+    display: inline-block;
+    background: #444;
+    padding: 0 8px;
+    border-radius: 3px; }
+    .form-radio label > span::before {
+      content: '❍ ';
+      font-size: 16px; }
+  .form-radio input[type=radio] {
+    display: none; }
+  .form-radio input[type=radio]:checked + span {
+    background: #305a83; }
+    .form-radio input[type=radio]:checked + span::before {
+      content: '✓ '; }
+
 .form-tag-item input {
   border-radius: 3px 0 0 3px;
   background: #577c9f; }
@@ -274,8 +291,10 @@ pre {
   margin: 0 4px 4px 0;
   color: #fff; }
 
+.form-var-item {
+  margin-bottom: 10px; }
+
 .alert {
-  margin-bottom: 10px;
   padding: 8px;
   border-radius: 3px; }
   .alert-title {
