@@ -4,7 +4,7 @@
 </div>
 </header>
 <main>
-    {{ template "application_add_menu" }}
+    {{ template "application_add_menu" "docker" }}
     <form method="POST" action="">
         <div class="box">
             <h2 class="box-title">Add an application</h2>
@@ -50,7 +50,9 @@
             </div>
             <div class="form-group">
                 <label for="pull">Always Pull :</label>
-                <input class="form-control" id="pull" name="pull" type="checkbox" {{ if .form }}{{ if eq .form.Pull "on" }}checked="checked"{{ end }}{{ end }} />
+                <div class="form-control">
+                    <input id="pull" name="pull" type="checkbox" {{ if .form }}{{ if eq .form.Pull "on" }}checked="checked"{{ end }}{{ end }} />
+                </div>
             </div>
             <div class="form-group">
                 <label for="ports">Ports :</label>
@@ -64,7 +66,7 @@
                         </select>
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
-                    <button type="button" class="btn form-var-add">ADD</button>
+                    <button type="button" class="btn form-var-add">Add a port</button>
                 </div>
             </div>
             <div class="form-group">
@@ -75,7 +77,7 @@
                         <input data-name="volumes-container[]" type="text" placeholder="In Container" />
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
-                    <button type="button" class="btn form-var-add">ADD</button>
+                    <button type="button" class="btn form-var-add">Add a volume</button>
                 </div>
             </div>
             <div class="form-group">
@@ -86,7 +88,7 @@
                         <input data-name="links-alias[]" type="text" placeholder="Alias" />
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
-                    <button type="button" class="btn form-var-add">ADD</button>
+                    <button type="button" class="btn form-var-add">Add a link</button>
                 </div>
             </div>
             <div class="form-group">
@@ -97,7 +99,7 @@
                         <input data-name="env-value[]" type="text" placeholder="value" />
                         <button type="button" class="btn form-var-remove">X</button>
                     </div>
-                    <button type="button" class="btn form-var-add">ADD</button>
+                    <button type="button" class="btn form-var-add">Add an env</button>
                 </div>
             </div>
             <div class="form-group">

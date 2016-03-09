@@ -7,7 +7,6 @@
   <div class="box text-right">
     <a class="btn" href="/alerts-policies">Alerts Policies</a>
     <a class="btn" href="/alerts-groups">Alerts Groups</a>
-    <!-- <a class="btn" href="/application/add?type=service">New Service</a> -->
   </div>
   <div class="box text-right">
       Filters : <a class='filter-item {{ if eq .status_filter "all" }}is-selected{{ end }}' href="/alerts?status=all">all</a> -
@@ -19,40 +18,50 @@
     {{ range .alerts }}
     <div class="box">
       <h2 class="box-title">
+          {{ if eq .Status "closed"}}<span class="state state-done"></span>{{ end }}
+          {{ if eq .Status "acknowledge"}}<span class="state state-running"></span>{{ end }}
+          {{ if eq .Status "open"}}<span class="state state-error"></span>{{ end }}
           <span class="select">{{ .Name }}</span>
           {{ if .Node }}
           - <span class="select">{{ .Node.Hostname }}</span>
           {{ end }}
+          {{ if ne .Status "closed" }}
+          <form style="display:inline-block;" class="right" method="POST" action="/alerts/close/{{ .Id.Hex }}">
+              <button type="submit" class="btn btn-danger btn-small" data-text="Close Alert {{ .Name }} ?">Close</button>
+          </form>
+          {{ end }}
+          {{ if eq .Status "open" }}
+          <form style="display:inline-block;" class="right" method="POST" action="/alerts/acknowledge/{{ .Id.Hex }}">
+              <button type="submit" class="btn btn-small">Acknowledge</button>
+          </form>
+          {{ end }}
       </h2>
       <ul class="box-list">
-          <li><span class="box-list-label">Status:</span> {{ .Status }}
-              {{ if ne .Status "closed" }}
-              <form style="display:inline-block;" class="right" method="POST" action="/alerts/close/{{ .Id.Hex }}">
-                  <button type="submit" class="btn btn-danger btn-small" data-text="Close Alert {{ .Name }} ?">Close</button>
-              </form>
-              {{ end }}
-              {{ if eq .Status "open" }}
-              <form style="display:inline-block;" class="right" method="POST" action="/alerts/acknowledge/{{ .Id.Hex }}">
-                  <button type="submit" class="btn btn-small">Acknowledge</button>
-              </form>
-              {{ end }}
+          {{ range $index, $message := .Messages }}
+          {{ if eq $index 0}}
+          <li>
+              <span class="box-list-label">Date</span>
+              {{ .CreatedAt.Format "2006-01-02 15:04:05" }}
+          </li>
+          <li>
+              <div class="stream">{{ .Text }}</div>
           </li>
       </ul>
-      <ul class="box-list">
-          {{ range .Messages }}
+      <ul class="box-list" style="margin-top: 10px;">
+          {{ else }}
           <li>
-              <span class="box-list-label">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</span>
               {{ .Text }}
+              <div class="text-small">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</div>
           </li>
           {{ end }}
-          <li>
-              <span class="box-list-label">New Message</span>
-              <form style="display:inline-block;" method="POST" action="/alerts/message/{{ .Id.Hex }}">
-                  <textarea class="form-control" name="text" placeholder="Text..."></textarea>
-                    <button type="submit" class="btn btn-small">Send</button>
-              </form>
-          </li>
+          {{ end }}
       </ul>
+      <form style="margin-top: 10px;" method="POST" action="/alerts/message/{{ .Id.Hex }}">
+      <div class="form-group">
+        <input class="form-control" id="new-message" name="text" type="text" placeholder="Message..." />
+        <button class="btn" type="submit">Send</button>
+      </div>
+      </form>
     </div>
     {{ end }}
   </div>

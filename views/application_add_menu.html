@@ -2,14 +2,14 @@
 <div class="box">
   <h2 class="box-title">Type</h2>
   <center>
-    <a href="/application/add" class="btn">
-        Application
+    <a href="/application/add" class="btn-picture{{ if eq . "application" }} is-selected{{ end }}">
+        <img src="/static/img/node/application.png" />
     </a>
-    <a href="/application/add/service" class="btn">
-        Service
+    <a href="/application/add/service" class="btn-picture{{ if eq . "service" }} is-selected{{ end }}">
+        <img src="/static/img/node/service.png" />
     </a>
-    <a href="/application/add/docker" class="btn">
-        Docker
+    <a href="/application/add/docker" class="btn-picture{{ if eq . "docker" }} is-selected{{ end }}">
+        <img src="/static/img/node/docker.png" />
     </a>
 </center>
 </div>

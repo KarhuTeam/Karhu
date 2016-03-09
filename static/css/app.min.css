@@ -59,6 +59,10 @@ pre {
 .text-gray {
   color: #444; }
 
+.text-small {
+  font-size: 10px;
+  color: #444; }
+
 .right {
   float: right; }
 
