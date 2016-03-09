@@ -23,12 +23,13 @@ func setupDockerRole(role *ansible.Role, d *Deployment) *ansible.Role {
 		},
 		`when`: `deb_check.stderr.find('no packages found') != -1`,
 	}).AddTask(ansible.Task{
+		`name`:       `Setup python-pip`,
+		`apt`:        `name={{ item }} state=latest update_cache=yes cache_valid_time=86400`,
+		`with_items`: []string{"python-pip", "apt-transport-https"},
+	}).AddTask(ansible.Task{
 		`name`:    `Setup Docker`,
 		`command`: `sh /tmp/docker.sh`,
 		`when`:    `deb_check.stderr.find('no packages found') != -1`,
-	}).AddTask(ansible.Task{
-		`name`: `Setup python-pip`,
-		`apt`:  `name=python-pip state=latest update_cache=yes cache_valid_time=86400`,
 	}).AddTask(ansible.Task{
 		`name`: `Setup docker-py`,
 		`pip`:  `name=docker-py state=present`,
